@@ -1,0 +1,58 @@
+{
+  "kind": "collectionType",
+  "collectionName": "nomenclature_sets",
+  "info": {
+    "singularName": "nomenclature-set",
+    "pluralName": "nomenclature-sets",
+    "displayName": "Nomenklatur-Set",
+    "description": "Bildet interne, kanonische Muster-Codes (Wenderichtung, Löcher, Schärrichtung) auf ein Anzeige-Vokabular ab. Rein clientseitig zum Umschalten genutzt, ändert nie die Musterdaten."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "name",
+      "required": true
+    },
+    "description": {
+      "type": "text"
+    },
+    "isDefault": {
+      "type": "boolean",
+      "required": true,
+      "default": false
+    },
+    "magnitudeDisplay": {
+      "type": "enumeration",
+      "enum": ["suffix_number", "repeated_symbol", "superscript"],
+      "required": true,
+      "default": "suffix_number"
+    },
+    "turnLabels": {
+      "type": "component",
+      "component": "pattern.turn-label",
+      "repeatable": true,
+      "min": 3,
+      "max": 3
+    },
+    "holeLabels": {
+      "type": "component",
+      "component": "pattern.hole-label",
+      "repeatable": true
+    },
+    "orientationLabels": {
+      "type": "component",
+      "component": "pattern.orientation-label",
+      "repeatable": true,
+      "min": 2,
+      "max": 2
+    }
+  }
+}

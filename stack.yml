@@ -1,0 +1,65 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  strapi:
+    build:
+      context: ./cms
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      HOST: 0.0.0.0
+      PORT: 1337
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: ${POSTGRES_DB}
+      DATABASE_USERNAME: ${POSTGRES_USER}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASE_SSL: "false"
+      APP_KEYS: ${APP_KEYS}
+      API_TOKEN_SALT: ${API_TOKEN_SALT}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+      JWT_SECRET: ${JWT_SECRET}
+      TRANSFER_TOKEN_SALT: ${TRANSFER_TOKEN_SALT}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY}
+      # Läuft hinter HTTPS im Deploy (anders als lokal) - daher hier Default "true", nicht "false" wie in docker-compose.yml.
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-true}
+      # Muss die tatsächliche Frontend-URL sein (siehe cms/config/middlewares.ts) - sonst blockiert CORS den Login.
+      CLIENT_URL: ${CLIENT_URL}
+    volumes:
+      - strapi-uploads:/opt/app/public/uploads
+    ports:
+      - "1337:1337"
+
+  frontend:
+    build:
+      context: .
+      args:
+        # Vite-Build-Time-Variable - siehe Kommentar im Dockerfile. Muss die
+        # von außen erreichbare Strapi-URL sein (nicht "strapi:1337", das
+        # läuft nur im internen Compose-Netzwerk, nicht im Browser).
+        VITE_STRAPI_URL: ${VITE_STRAPI_URL}
+    restart: unless-stopped
+    depends_on:
+      - strapi
+    ports:
+      - "80:80"
+
+volumes:
+  postgres-data:
+  strapi-uploads:

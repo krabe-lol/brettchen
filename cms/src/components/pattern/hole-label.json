@@ -1,0 +1,19 @@
+{
+  "collectionName": "components_pattern_hole_labels",
+  "info": {
+    "displayName": "Hole Label",
+    "description": "Anzeige-Label für ein Lochsystem (A/B/C/D) in einem Nomenklatur-Set."
+  },
+  "options": {},
+  "attributes": {
+    "holeId": {
+      "type": "enumeration",
+      "enum": ["A", "B", "C", "D"],
+      "required": true
+    },
+    "label": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

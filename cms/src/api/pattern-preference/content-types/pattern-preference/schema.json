@@ -1,0 +1,55 @@
+{
+  "kind": "collectionType",
+  "collectionName": "pattern_preferences",
+  "info": {
+    "singularName": "pattern-preference",
+    "pluralName": "pattern-preferences",
+    "displayName": "Muster-Präferenz",
+    "description": "Pro Nutzer:in und Muster gespeicherte Hervorhebungs-/Untwist-Einstellungen – nur wenn die Person das Speichern für dieses Muster explizit aktiviert hat."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "required": true
+    },
+    "pattern": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::pattern.pattern",
+      "required": true
+    },
+    "highlightRow": {
+      "type": "boolean",
+      "required": true,
+      "default": false
+    },
+    "activeRow": {
+      "type": "integer",
+      "required": true,
+      "default": 1,
+      "min": 1
+    },
+    "highlightTablet": {
+      "type": "boolean",
+      "required": true,
+      "default": false
+    },
+    "activeTablet": {
+      "type": "integer",
+      "required": true,
+      "default": 1,
+      "min": 1
+    },
+    "untwistMode": {
+      "type": "boolean",
+      "required": true,
+      "default": false
+    }
+  }
+}

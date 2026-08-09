@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      // Setzt die Theme-Klasse synchron vor dem ersten Rendern (siehe
+      // ThemeContext.tsx getInitialTheme, dieselbe Logik) – verhindert einen
+      // kurzen Blitz des unbenutzten Standard-Themes aus global.css, bevor
+      // Reacts useEffect sonst erst nach dem ersten Paint die Klasse setzt.
+      (function () {
+        var stored = localStorage.getItem('theme')
+        var theme =
+          stored === 'light' || stored === 'dark'
+            ? stored
+            : window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light'
+        var root = document.documentElement
+        root.classList.add(theme)
+        root.setAttribute('data-theme', theme)
+      })()
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brettchen</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,108 @@
+import type { SVGProps } from 'react'
+import { DEFAULT_DISPLAY_SETTINGS, displayOrientation } from '../render/orientationDisplay'
+import type { DisplaySettings } from '../render/orientationDisplay'
+
+export interface TabletOrientationCardProps extends SVGProps<SVGSVGElement> {
+  /**
+   * Beschriftung der vier Löcher, fest in der Reihenfolge A,B,C,D (siehe
+   * Positionen im JSX unten, entspricht dem Original-Layout). Änderbar,
+   * damit später passend zu DisplaySettings.holeLabelDirection/-Facing
+   * andere Buchstaben/Notation eingesetzt werden können, siehe
+   * orientationDisplay.ts.
+   */
+  labels?: [string, string, string, string]
+  /**
+   * Steuert, wie die große S/Z-Kennzeichnung auf der Karte dargestellt wird
+   * (S/Z-Kartenstellung, S/Z-Fadenzwirn oder \/-Notation) – dieselben
+   * Einstellungen wie bei der Schärpatrone, siehe orientationDisplay.ts.
+   * Die tatsächliche Kartenstellung (S für *Scard, Z für *Zcard) ist dabei
+   * fest, nur ihre Darstellung ändert sich.
+   */
+  displaySettings?: DisplaySettings
+}
+
+const SvgLeftfacingScard = ({
+  labels = ['A', 'B', 'C', 'D'],
+  displaySettings = DEFAULT_DISPLAY_SETTINGS,
+  ...props
+}: TabletOrientationCardProps) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 156.621 496.333" {...props}>
+    <rect x={0} y={0} width={156.621} height={496.333} fill="var(--theme)" />
+    <>
+      <path
+        fill="none"
+        stroke="var(--foreground)"
+        strokeMiterlimit={10}
+        strokeWidth={2}
+        d="M150.865 268.486v-66.222"
+      />
+      <path fill="var(--foreground)" d="m156.676 206.227-5.807-21.682-5.814 21.682z" />
+      <path fill="none" stroke="var(--foreground)" strokeMiterlimit={10} strokeWidth={2} d="M5.811 94.539v66.222" />
+      <path fill="var(--foreground)" d="M0 156.798 5.807 178.48l5.814-21.682z" />
+      <path
+        fill="none"
+        stroke="var(--primary)"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={4}
+        d="M111.835 286.542 78.311 0M111.782 131.542 78.311 0M40.504 221.833 78.31 0M40.504 73.437 78.311 0"
+      />
+      <path
+        fill="var(--card)"
+        d="M128.269 347.348c-3.586 0-7.683-2.308-11.849-6.674l-79.429-83.245c-11.471-12.022-20.803-40.165-20.803-62.734V50.882c0-16.149 4.765-26.584 12.139-26.584 2.551 0 5.291 1.239 8.145 3.682l79.429 67.982c13.527 11.577 24.532 41.307 24.532 66.273v159.099c0 8.11-1.188 14.813-3.436 19.383-2.134 4.338-5.151 6.632-8.729 6.632Zm-15.292-65.342c-.648 0-1.241.223-1.762.662-2.722 2.295-2.771 10.066-.113 17.692 2.167 6.219 5.496 10.397 8.283 10.397.631 0 1.211-.212 1.724-.63 2.784-2.271 2.835-10.101.117-17.825-2.166-6.158-5.481-10.296-8.249-10.296m-78.913-79.42c-.644 0-1.227.248-1.733.737-2.393 2.31-2.435 9.601-.096 16.599 1.86 5.565 4.75 9.304 7.191 9.304.63 0 1.202-.238 1.702-.707 2.443-2.293 2.487-9.636.1-16.716-1.859-5.513-4.738-9.217-7.164-9.217m79.219-76.294c-.778 0-1.48.297-2.088.883-2.708 2.616-2.749 10.381-.093 17.68 2.088 5.735 5.219 9.441 7.975 9.441.762 0 1.451-.285 2.051-.848 2.725-2.556 2.768-10.547.096-17.812-2.087-5.677-5.203-9.345-7.94-9.345ZM34.328 56.525c-.757 0-1.434.319-2.013.949-2.383 2.592-2.417 9.877-.078 16.587 1.795 5.151 4.514 8.479 6.927 8.479.742 0 1.408-.308 1.981-.916 2.393-2.538 2.429-10.032.081-16.705-1.794-5.1-4.502-8.396-6.898-8.396Z"
+      />
+      <path
+        fill="var(--foreground)"
+        d="M28.327 24.676c2.458 0 5.115 1.208 7.899 3.591l79.429 67.982c13.454 11.515 24.4 41.116 24.4 65.986v159.099c0 15.813-4.516 25.637-11.786 25.637-3.479 0-7.482-2.267-11.575-6.557L37.265 257.17c-11.413-11.961-20.698-39.987-20.698-62.473V50.882c0-15.92 4.616-26.206 11.761-26.206Zm10.837 58.242c.838 0 1.618-.358 2.256-1.034 2.522-2.675 2.593-10.181.163-17.089-1.877-5.335-4.657-8.649-7.255-8.648-.854 0-1.647.37-2.291 1.071-2.468 2.685-2.537 10.138-.157 16.968 1.849 5.305 4.708 8.733 7.284 8.733Zm79.914 71.757c.848 0 1.647-.328 2.309-.95 2.873-2.696 2.957-10.698.192-18.219-2.142-5.827-5.398-9.593-8.295-9.592-.867 0-1.68.342-2.35.99-2.808 2.711-2.889 10.653-.185 18.081 2.143 5.887 5.412 9.69 8.329 9.69m-79.651 74.928c.718 0 1.396-.28 1.96-.809 2.543-2.387 2.631-9.903.199-17.112-1.942-5.755-4.894-9.474-7.522-9.474-.734 0-1.424.292-1.996.843-2.489 2.403-2.573 9.866-.192 16.991 1.942 5.809 4.905 9.562 7.55 9.562Zm79.958 81.532a3.04 3.04 0 0 0 1.962-.715c2.899-2.366 3.002-10.379.235-18.243-2.255-6.409-5.633-10.549-8.606-10.549-.74 0-1.414.253-2.005.751-2.833 2.389-2.932 10.341-.226 18.105 2.22 6.37 5.692 10.651 8.64 10.651M28.327 23.92c-7.401 0-12.517 10.107-12.517 26.962v143.813c0 22.69 9.269 50.798 20.907 62.995l79.429 83.244c4.389 4.6 8.531 6.791 12.122 6.791 7.458 0 12.542-9.449 12.542-26.393V162.233c0-25.102-11.159-55.002-24.664-66.56L36.718 27.692c-2.993-2.561-5.828-3.772-8.391-3.772m10.837 58.242c-2.165 0-4.801-3.149-6.57-8.226-2.265-6.501-2.265-13.743 0-16.207.516-.561 1.105-.827 1.734-.827 2.148 0 4.766 3.095 6.542 8.143 2.306 6.554 2.306 13.874 0 16.32-.51.541-1.089.797-1.706.797m79.914 71.757c-2.489 0-5.567-3.555-7.619-9.193-2.575-7.073-2.575-14.793 0-17.279.546-.527 1.165-.777 1.825-.778 2.468 0 5.525 3.491 7.586 9.097 2.623 7.136 2.623 14.945 0 17.407-.539.505-1.146.745-1.792.745Zm-79.651 74.929c-2.211 0-4.991-3.535-6.833-9.045-2.265-6.778-2.265-14.02 0-16.207.443-.428.94-.631 1.471-.631 2.193 0 4.956 3.477 6.806 8.96 2.306 6.835 2.306 14.156 0 16.32-.437.41-.924.604-1.443.604Zm79.958 81.532c-2.539 0-5.789-4.011-7.927-10.144-2.575-7.388-2.575-15.108 0-17.279.46-.388.973-.573 1.518-.573 2.517 0 5.746 3.94 7.893 10.044 2.623 7.457 2.623 15.266 0 17.407a2.3 2.3 0 0 1-1.485.545Z"
+      />
+      <g fontFamily="ArialRoundedMTBold, 'Arial Rounded MT Bold'" fontSize={20} fill="var(--foreground)">
+        <text transform="translate(110.69 176.414)">
+          <tspan x={0} y={0}>
+            {labels[0]}
+          </tspan>
+        </text>
+        <text transform="translate(110.69 272.858)">
+          <tspan x={0} y={0}>
+            {labels[1]}
+          </tspan>
+        </text>
+        <text transform="translate(26.074 193.969)">
+          <tspan x={0} y={0}>
+            {labels[2]}
+          </tspan>
+        </text>
+        <text transform="translate(26.074 104.858)">
+          <tspan x={0} y={0}>
+            {labels[3]}
+          </tspan>
+        </text>
+      </g>
+      <text
+        transform="translate(115.83 52.512)"
+        fontFamily="ArialRoundedMTBold, 'Arial Rounded MT Bold'"
+        fontSize={35}
+        fill="var(--foreground)"
+      >
+        <tspan x={0} y={0}>
+          {displayOrientation('S', displaySettings)}
+        </tspan>
+      </text>
+      <path
+        fill="var(--card)"
+        stroke="var(--foreground)"
+        strokeMiterlimit={10}
+        strokeWidth={0.67}
+        d="M44.813 496.333v-11.166c0-12.333 9.998-22.331 22.331-22.331h22.331c12.333 0 22.331 9.998 22.331 22.331v11.166M78.31 413.187c-11.608 0-21.018 9.41-21.018 21.018s9.41 21.018 21.018 21.018 21.018-9.41 21.018-21.018-9.41-21.018-21.018-21.018Z"
+      />
+      <path
+        fill="none"
+        stroke="var(--primary)"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={4}
+        d="m40.504 221.833 37.807 176.611M111.835 286.542 78.311 398.444M40.504 73.437l37.807 325.007M111.782 131.542 78.311 398.444"
+      />
+    </>
+  </svg>
+)
+export default SvgLeftfacingScard

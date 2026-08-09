@@ -1,0 +1,135 @@
+{
+  "kind": "collectionType",
+  "collectionName": "patterns",
+  "info": {
+    "singularName": "pattern",
+    "pluralName": "patterns",
+    "displayName": "Muster",
+    "description": "Ein Brettchenweb-Muster: kanonische Schär- und Wendedaten, unabhängig von Farbwahl und Notation."
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "slug": {
+      "type": "uid",
+      "targetField": "title",
+      "required": true
+    },
+    "summary": {
+      "type": "text"
+    },
+    "description": {
+      "type": "richtext"
+    },
+    "moderationStatus": {
+      "type": "enumeration",
+      "enum": ["draft", "in_review", "published", "rejected"],
+      "required": true,
+      "default": "draft"
+    },
+    "license": {
+      "type": "enumeration",
+      "enum": ["CC0", "CC-BY-4.0", "CC-BY-SA-4.0", "all-rights-reserved"],
+      "required": true,
+      "default": "CC-BY-4.0"
+    },
+    "source": {
+      "type": "string"
+    },
+    "numTablets": {
+      "type": "integer",
+      "required": true,
+      "min": 1
+    },
+    "holesPerTablet": {
+      "type": "integer",
+      "required": true,
+      "default": 4,
+      "min": 2
+    },
+    "numRows": {
+      "type": "integer",
+      "required": true,
+      "min": 1
+    },
+    "threading": {
+      "type": "json",
+      "required": true
+    },
+    "turningSequence": {
+      "type": "json",
+      "required": true
+    },
+    "isTwistNeutral": {
+      "type": "boolean",
+      "required": true,
+      "default": false
+    },
+    "repeatFromRow": {
+      "type": "integer",
+      "min": 1
+    },
+    "weftColorSlot": {
+      "type": "string"
+    },
+    "style": {
+      "type": "json"
+    },
+    "notes": {
+      "type": "text"
+    },
+    "remixOf": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::pattern.pattern"
+    },
+    "remixSourceThreading": {
+      "type": "json",
+      "private": true
+    },
+    "remixSourceTurningSequence": {
+      "type": "json",
+      "private": true
+    },
+    "defaultPalette": {
+      "type": "component",
+      "component": "pattern.palette-slot",
+      "repeatable": true
+    },
+    "technique": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::technique.technique"
+    },
+    "defaultNomenclature": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::nomenclature-set.nomenclature-set"
+    },
+    "tags": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::tag.tag"
+    },
+    "author": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user"
+    },
+    "images": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": ["images"]
+    },
+    "moderationComment": {
+      "type": "text",
+      "private": true
+    }
+  }
+}

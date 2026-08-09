@@ -1,0 +1,28 @@
+{
+  "collectionName": "components_pattern_palette_slots",
+  "info": {
+    "displayName": "Palette Slot",
+    "description": "Ein Farb-Slot, auf den die Schär-Daten eines Musters referenzieren."
+  },
+  "options": {},
+  "attributes": {
+    "slotId": {
+      "type": "string",
+      "required": true
+    },
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "hex": {
+      "type": "string",
+      "required": true,
+      "regex": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$"
+    },
+    "order": {
+      "type": "integer",
+      "required": true,
+      "default": 0
+    }
+  }
+}

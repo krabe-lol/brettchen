@@ -1,0 +1,9 @@
+export const CELL = 24
+export const GAP = 1
+export const STEP = CELL + GAP
+export const ROW_LABEL_WIDTH = 20
+export const COL_LABEL_HEIGHT = 16
+export const ORIENTATION_ROW_HEIGHT = 16
+export const DELETE_ROW_HEIGHT = 18
+export const LABEL_FONT_SIZE = 11
+export const FALLBACK_COLOR = '#cccccc'

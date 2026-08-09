@@ -1,0 +1,23 @@
+{
+  "collectionName": "components_pattern_turn_labels",
+  "info": {
+    "displayName": "Turn Label",
+    "description": "Anzeige-Label/-Symbol für eine Wenderichtungs-Kategorie in einem Nomenklatur-Set."
+  },
+  "options": {},
+  "attributes": {
+    "category": {
+      "type": "enumeration",
+      "enum": ["forward", "backward", "idle"],
+      "required": true
+    },
+    "label": {
+      "type": "string",
+      "required": true
+    },
+    "symbol": {
+      "type": "string",
+      "required": true
+    }
+  }
+}

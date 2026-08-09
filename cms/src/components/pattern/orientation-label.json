@@ -1,0 +1,23 @@
+{
+  "collectionName": "components_pattern_orientation_labels",
+  "info": {
+    "displayName": "Orientation Label",
+    "description": "Anzeige-Label/-Symbol für die Schärrichtung S/Z in einem Nomenklatur-Set."
+  },
+  "options": {},
+  "attributes": {
+    "orientation": {
+      "type": "enumeration",
+      "enum": ["S", "Z"],
+      "required": true
+    },
+    "label": {
+      "type": "string",
+      "required": true
+    },
+    "symbol": {
+      "type": "string",
+      "required": true
+    }
+  }
+}
