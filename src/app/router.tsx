@@ -16,9 +16,9 @@ import { PatternNewPage } from '@/pages/pattern/PatternNewPage'
 import { PatternDetailPage } from '@/pages/pattern/PatternDetailPage'
 import { NutzungsbedingungenPage } from '@/pages/NutzungsbedingungenPage'
 import { ImpressumPage } from '@/pages/ImpressumPage'
-import { CollectionListPage } from '@/pages/CollectionListPage'
-import { MyCollectionListPage } from '@/pages/MyCollectionListPage'
-import { CollectionDetailPage } from '@/pages/CollectionDetailPage'
+import { CollectionListPage } from '@/pages/collection/CollectionListPage'
+import { MyCollectionListPage } from '@/pages/collection/MyCollectionListPage'
+import { CollectionDetailPage } from '@/pages/collection/CollectionDetailPage'
 import { SearchResultsPage } from '@/pages/SearchResultsPage'
 
 export const router = createBrowserRouter([

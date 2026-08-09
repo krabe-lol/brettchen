@@ -5,14 +5,10 @@ import { translateQuery } from './translate'
 const DEBOUNCE_MS = 400
 
 /**
- * Liefert den Suchbegriff plus seine live übersetzten Varianten in allen
- * unterstützten Sprachen (siehe translateQuery), damit die Suche
- * sprachübergreifend funktioniert – z. B. findet "Diamonds" auch ein
- * Muster mit dem Titel "Einfache Diamanten". Übersetzt wird debounced
- * (nicht bei jedem Tastenanschlag) und in ALLE Sprachen, nicht nur die
- * aktuelle UI-Sprache → die andere: der Suchbegriff kann in einer anderen
- * Sprache getippt sein als die UI gerade eingestellt ist (siehe
- * translateQuery, das die Quellsprache selbst erkennt).
+ * Returns the search term plus its live-translated variants in all
+ * supported languages (see translateQuery), so search works across
+ * languages. Debounced, and translated into ALL languages (not just the
+ * current UI language) since the query itself may be typed in another one.
  */
 export function useTranslatedSearchTerms(query: string): string[] {
   const trimmed = query.trim()

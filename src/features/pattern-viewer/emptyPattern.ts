@@ -5,7 +5,7 @@ const NUM_TABLETS = 8
 const NUM_ROWS = 24
 const HOLES_PER_TABLET = 4
 
-/** Leeres Startmuster für die Mustererstellung: 8 Brettchen, 24 Reihen, eine Farbe, alle vorwärts. */
+/** Blank starting pattern for creating a new one: 8 tablets, 24 rows, one color, all turning forward. */
 export function createEmptyPattern(createdBy: string, title: string): Pattern {
   const threadingGrid = Array.from({ length: HOLES_PER_TABLET }, () =>
     Array.from({ length: NUM_TABLETS }, () => 'A'),

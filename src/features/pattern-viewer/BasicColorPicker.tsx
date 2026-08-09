@@ -7,20 +7,19 @@ import { isSimilarColor, localizedBasicColors } from './render/colorNames'
 
 interface BasicColorPickerProps {
   onSelect: (hex: string) => void
-  /** Hex-Werte der bereits in der Palette vorhandenen Farben – gleiche/sehr ähnliche Farben werden hier gar nicht erst angeboten. */
+  /** Hex values of colors already in the palette - identical/very similar colors aren't offered here. */
   existingHexes?: string[]
 }
 
 /**
- * ~8 benannte Grundfarben zur schnellen Auswahl über dem großen Farbfeld:
- * ein Klick übernimmt die Farbe nur als Vorauswahl im Farbfeld darunter,
- * angewendet wird sie – wie eine frei gewählte Farbe auch – erst per
- * "Übernehmen"-Klick. Der eingebettete Farbverlauf-Picker (react-colorful)
- * feuert beim Ziehen laufend onChange-Events, ein sofortiges Anwenden bei
- * jeder Vorauswahl wäre also ohnehin unpraktisch. Grundfarben, die bereits
- * (oder sehr ähnlich) in der Palette sind, werden aus der Liste entfernt;
- * "Übernehmen" bleibt deaktiviert, solange die aktuelle Vorauswahl einer
- * bestehenden Farbe zu ähnlich ist.
+ * ~8 named basic colors for quick picking above the large color field: a
+ * click just sets it as a preselection in the field below, applied - like
+ * a freely picked color - only via the "apply" click. The embedded
+ * gradient picker (react-colorful) fires onChange continuously while
+ * dragging, so applying immediately on every preselection would be
+ * impractical anyway. Basic colors already (or very similarly) in the
+ * palette are removed from the list; "apply" stays disabled while the
+ * current preselection is too similar to an existing color.
  */
 export function BasicColorPicker({ onSelect, existingHexes = [] }: BasicColorPickerProps) {
   const { t, language } = useLanguage()

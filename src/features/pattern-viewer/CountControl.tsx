@@ -11,7 +11,7 @@ interface CountControlProps {
   min: number
   max: number
   onChange: (value: number) => void
-  /** Rein dekoratives Icon hinter dem Label (z. B. Pfeile als Hinweis auf Pfeiltasten-Navigation) – fließt NICHT in die a11y-Beschriftung der +/- Buttons ein, dafür bleibt `label` ein reiner String. */
+  /** Purely decorative icon after the label (e.g. arrows hinting at arrow-key navigation) - does NOT feed into the a11y label of the +/- buttons, which is why `label` stays a plain string. */
   labelIcon?: ReactNode
 }
 

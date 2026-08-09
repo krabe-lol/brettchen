@@ -1,17 +1,16 @@
 export type Language = 'de' | 'en'
 
-/** Liste der wählbaren Sprachen; für weitere Sprachen hier + unten in `de`/`en` ergänzen. */
+/** Selectable languages; add new ones here plus a matching block below. */
 export const SUPPORTED_LANGUAGES: { code: Language; label: string }[] = [
   { code: 'de', label: 'DE' },
   { code: 'en', label: 'EN' },
 ]
 
 /**
- * Nur Interface-Texte (Navigation, Buttons, Labels, Fehlermeldungen) – nie
- * bereits erfasste Musterinhalte (Titel/Notizen eines konkreten Musters,
- * bereits vergebene Farbnamen), die bleiben in der Sprache, in der sie
- * erfasst wurden. Neu generierte Farbnamen (siehe render/colorNames.ts)
- * folgen dagegen der aktuellen Sprache.
+ * Interface text only (nav, buttons, labels, errors) - never pattern
+ * content already entered by a user (titles, notes, color names), which
+ * stays in whatever language it was entered in. Newly generated color names
+ * (see render/colorNames.ts) do follow the current UI language though.
  */
 const de = {
   languageSwitcherLabel: 'Sprache',
@@ -28,6 +27,7 @@ const de = {
   headerMenu: 'Menü',
   headerSearchOpen: 'Suche öffnen',
   headerSearchClose: 'Suche schließen',
+  closeLabel: 'Schließen',
 
   headerSearchPlaceholder: 'Muster, Sammlungen, Stiltags durchsuchen…',
   headerSearchResultsPatterns: 'Muster',
@@ -314,6 +314,7 @@ const en: Record<keyof typeof de, string> = {
   headerMenu: 'Menu',
   headerSearchOpen: 'Open search',
   headerSearchClose: 'Close search',
+  closeLabel: 'Close',
 
   headerSearchPlaceholder: 'Search patterns, collections, style tags…',
   headerSearchResultsPatterns: 'Patterns',

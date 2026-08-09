@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
 import { X } from 'lucide-react'
+import { useLanguage } from '@/features/i18n/LanguageContext'
 import { cn } from '@/lib/utils'
 
 interface ToastItem {
@@ -22,8 +23,9 @@ const TOAST_DURATION_MS = 4000
 
 let nextId = 0
 
-/** Kurzlebige Bestätigungs-/Fehler-Meldungen oben mittig, z. B. nach erfolgreichem Speichern. */
+/** Short-lived success/error messages, centered at the top of the screen. */
 export function ToastProvider({ children }: { children: ReactNode }) {
+  const { t } = useLanguage()
   const [toasts, setToasts] = useState<ToastItem[]>([])
 
   const dismiss = useCallback((id: number) => {
@@ -58,7 +60,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             <button
               type="button"
               onClick={() => dismiss(item.id)}
-              aria-label="Schließen"
+              aria-label={t('closeLabel')}
               className="opacity-70 hover:opacity-100"
             >
               <X className="size-4" />
@@ -72,6 +74,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
 export function useToast() {
   const context = useContext(ToastContext)
-  if (!context) throw new Error('useToast muss innerhalb von ToastProvider verwendet werden')
+  if (!context) throw new Error('useToast must be used within ToastProvider')
   return context
 }

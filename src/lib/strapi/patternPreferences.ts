@@ -24,7 +24,7 @@ async function readJsonOrThrow(response: Response): Promise<any> {
   return data
 }
 
-/** Lädt die für dieses Muster gespeicherte Hervorhebungs-/Untwist-Präferenz, oder `null`, wenn (noch) keine gespeichert ist. */
+/** Loads the saved highlight/untwist preference for this pattern, or `null` if none is saved yet. */
 export async function fetchPatternHighlightSettings(
   patternDocumentId: string,
   token: string,
@@ -38,7 +38,7 @@ export async function fetchPatternHighlightSettings(
   return { highlightRow, activeRow, highlightTablet, activeTablet, untwistMode }
 }
 
-/** Legt die Präferenz an oder aktualisiert sie (upsert) – nur solange "Für dieses Muster speichern" aktiviert ist. */
+/** Creates or updates the preference (upsert) - only while "save for this pattern" is enabled. */
 export async function savePatternHighlightSettings(
   patternDocumentId: string,
   settings: PatternHighlightSettings,
@@ -52,7 +52,7 @@ export async function savePatternHighlightSettings(
   await readJsonOrThrow(response)
 }
 
-/** Entfernt die gespeicherte Präferenz wieder – wird aufgerufen, sobald "Für dieses Muster speichern" deaktiviert wird. */
+/** Removes the saved preference - called once "save for this pattern" is disabled again. */
 export async function deletePatternHighlightSettings(patternDocumentId: string, token: string): Promise<void> {
   const response = await fetch(`${strapiConfig.baseUrl}/api/pattern-preferences/${patternDocumentId}`, {
     method: 'DELETE',

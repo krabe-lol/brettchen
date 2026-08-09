@@ -16,15 +16,14 @@ const ORIENTATIONS = ['S', 'Z'] as const
 const BASE_LETTERS = ['A', 'B', 'C', 'D'] as const
 
 /**
- * Legende neben der Schärpatrone: zeigt, wie ein S- bzw. Z-Brettchen gefädelt
- * ist (Kartenstellung, Fadenverlauf, Lochbeschriftung) – passend zur
- * aktuellen Beschriftungsrichtung (siehe DisplaySettings.holeLabelFacing),
- * damit die Buchstaben in der Grafik zu denen in der Schärpatrone passen.
- * Klein als Vorschau, vergrößert sich per Klick in einem Dialog. Als
- * Inline-SVG-Komponenten (nicht `<img>`) eingebunden, damit `var(--background)`/
- * `var(--foreground)` in den Grafiken den aktuellen Hell-/Dunkel-Modus der
- * Seite übernehmen – ein extern per `<img>` geladenes SVG bekäme diese
- * CSS-Variablen nicht mit.
+ * Legend next to the threading chart: shows how an S or Z tablet is
+ * threaded (card orientation, thread path, hole labels) - matching the
+ * current label facing (see DisplaySettings.holeLabelFacing), so the
+ * letters in the graphic match those in the threading chart. Small as a
+ * preview, enlarges in a dialog on click. Embedded as inline SVG
+ * components (not `<img>`) so `var(--background)`/`var(--foreground)` in
+ * the graphics pick up the page's current light/dark mode - an SVG loaded
+ * externally via `<img>` wouldn't see those CSS variables.
  */
 export function TabletOrientationLegend() {
   const { t } = useLanguage()

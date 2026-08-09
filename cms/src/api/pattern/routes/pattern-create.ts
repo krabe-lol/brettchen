@@ -1,10 +1,10 @@
 /**
- * Eigene Routen für "Muster anlegen", "meine Muster laden" und "Muster
- * remixen", siehe Kommentar in pattern.ts: sowohl die auto-generierte
- * Create- als auch die Find-Route validieren Body/Query gegen ein Schema,
- * das author (Relation auf das User-Model) grundsätzlich ablehnt – als
- * Body-Feld beim Anlegen genauso wie als Filter beim Suchen. Remix braucht
- * ohnehin eine eigene Route (kein Standard-CRUD-Verb).
+ * Custom routes for "create pattern", "load my patterns" and "remix
+ * pattern", see the comment in pattern.ts: both the auto-generated create
+ * and find routes validate body/query against a schema that generally
+ * rejects author (a relation to the User model) - as a body field on
+ * create just as much as a filter on find. Remix needs its own route
+ * anyway (not a standard CRUD verb).
  */
 export default {
   type: 'content-api',

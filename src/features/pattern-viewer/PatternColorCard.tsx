@@ -12,7 +12,7 @@ interface PatternColorCardProps {
   onReset: () => void
 }
 
-/** Spalte "Farben": Farbwahl pro Palettenslot, rein clientseitig. Zeigt zusätzlich, wie viele Fäden insgesamt und pro Farbe gebraucht werden (siehe render/threadCounts.ts). */
+/** "Colors" column: color pick per palette slot, client-only. Also shows how many threads are needed in total and per color (see render/threadCounts.ts). */
 export function PatternColorCard({ pattern, palette, onSlotColorChange, onReset }: PatternColorCardProps) {
   const { t } = useLanguage()
   const threadCounts = computeThreadCounts(pattern)

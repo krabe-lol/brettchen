@@ -6,10 +6,9 @@ export interface ThreadCounts {
 }
 
 /**
- * Zählt, wie viele Fäden (= Löcher in der Schärung) insgesamt und pro
- * Farb-Slot gebraucht werden. Löcher ohne Farbe (leerer colorSlotId, im
- * Muster als X gezeigt) zählen nirgends mit – sie sind noch keiner Farbe
- * zugeordnet.
+ * Counts how many threads (= holes in the threading) are needed in total
+ * and per color slot. Holes without a color (empty colorSlotId, shown as X
+ * in the pattern) aren't counted anywhere - they're not assigned yet.
  */
 export function computeThreadCounts(pattern: Pick<Pattern, 'threading'>): ThreadCounts {
   const bySlot: Record<string, number> = {}

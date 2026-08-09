@@ -10,20 +10,19 @@ import type { StrapiPatternRecord } from '@/lib/strapi/patterns'
 interface PatternCardProps {
   pattern: StrapiPatternRecord
   /**
-   * Wenn zusammen mit `token` gesetzt, erscheint das Lesezeichen-Icon zum
-   * Sammeln (eingeloggte Nutzer:innen) – die Liste wird einmal von der
-   * aufrufenden Seite geladen, nicht pro Karte.
+   * If set together with `token`, shows the bookmark icon for collecting
+   * (logged-in users) - the list is loaded once by the calling page, not per card.
    */
   collections?: StrapiCollectionRecord[]
   token?: string | null
   onCollectionsChanged?: () => void
   noStyleLabel: string
-  /** Eingeloggte Person; stimmt sie mit dem Ersteller des Musters überein, erscheint ein Bearbeiten-Icon auf dem Thumbnail. */
+  /** Logged-in user; if it matches the pattern's creator, shows an edit icon on the thumbnail. */
   currentUsername?: string
   className?: string
 }
 
-/** Musterkarte, siehe ThumbnailCard für den gemeinsamen Aufbau mit CollectionCard. */
+/** Pattern card, see ThumbnailCard for the shared layout with CollectionCard. */
 export function PatternCard({
   pattern,
   collections,

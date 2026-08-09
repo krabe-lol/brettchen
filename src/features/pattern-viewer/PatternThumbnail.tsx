@@ -9,10 +9,10 @@ interface PatternThumbnailProps {
 }
 
 /**
- * Eckpunkte einer Zelle als Parallelogramm (gerade, senkrechte Seiten,
- * schräge 45°/135° Ober-/Unterkanten, zwei Reihen hoch) bzw. an einem
- * Richtungswechsel als Dreieck (stumpfe obere Ecke fällt weg) – dieselbe
- * Geometrie wie im WovenBandDiagram, siehe dort für die Herleitung.
+ * Cell corner points as a parallelogram (straight vertical sides, slanted
+ * 45°/135° top/bottom edges, two rows tall), or a triangle at a direction
+ * change (the blunt top corner drops out) - same geometry as
+ * WovenBandDiagram, see there for the derivation.
  */
 function cellPoints(cell: WeaveCell, previousTurn: number | undefined, cx: number, cy: number): string {
   const xLeft = cx - CELL / 2
@@ -45,19 +45,19 @@ function cellPoints(cell: WeaveCell, previousTurn: number | undefined, cx: numbe
   return `${xLeft},${topLeft} ${xRight},${topRight} ${xRight},${bottomRight} ${xLeft},${bottomLeft}`
 }
 
-/** Ziel-Seitenverhältnis der Vorschau (Breite:Höhe der Card) – bestimmt, wie viele Reihen mindestens nötig sind, damit "slice" nie leeren Rand zeigt. */
+/** Target aspect ratio of the preview (card width:height) - determines how many rows are needed at minimum so "slice" never shows an empty edge. */
 const TARGET_ASPECT = 3
 
 /**
- * Kompaktes Vorschaubild des Webmusters (nicht der Schärpatrone) – exakt
- * dasselbe berechnete Band wie im WovenBandDiagram (inklusive Wiederholung
- * ab `repeatFromRow`, siehe computeDisplayWeaveGrid), nur ohne
- * Beschriftungen/Hintergrundflächen/Klickbarkeit. Um -90° gedreht (Muster
- * sind meist schmal/lang – wenige Brettchen, viele Reihen –, gedreht füllen
- * sie die breite Card besser). Die Breite des Musters (Brettchenzahl, in
- * Originalausrichtung) füllt dabei immer exakt die volle Höhe der Vorschau
- * – nie beschnitten; ist das Muster (in Reihen) zu kurz, um die Vorschau
- * horizontal zu füllen, wiederholt es sich wie im WovenBandDiagram.
+ * Compact preview of the woven pattern (not the threading chart) - the
+ * exact same computed band as WovenBandDiagram (including repetition from
+ * `repeatFromRow`, see computeDisplayWeaveGrid), just without
+ * labels/background areas/clickability. Rotated -90° (patterns are
+ * usually narrow/long - few tablets, many rows - rotating fills the wide
+ * card better). The pattern's width (tablet count, in its original
+ * orientation) always fills the preview's full height exactly - never
+ * cropped; if the pattern (in rows) is too short to fill the preview
+ * horizontally, it repeats like in WovenBandDiagram.
  */
 export function PatternThumbnail({ pattern, palette, className }: PatternThumbnailProps) {
   const colorBySlot = new Map(palette.map((slot) => [slot.slotId, slot.hex]))

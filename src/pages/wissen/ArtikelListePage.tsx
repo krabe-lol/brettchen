@@ -1,9 +1,6 @@
 import { useLanguage } from '@/features/i18n/LanguageContext'
 
-/**
- * TODO: Artikel via strapiClient.findMany('articles') laden, sobald das
- * Strapi-Backend steht.
- */
+// TODO: load articles via strapiClient.findMany('articles') once that content type exists
 export function ArtikelListePage() {
   const { t } = useLanguage()
 

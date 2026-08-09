@@ -19,14 +19,13 @@ interface PatternColorEditorCardProps {
 }
 
 /**
- * Spalte "Farben" im Editor: Klick auf eine Farbe wählt sie als aktive
- * Malfarbe (zum Anwenden in der Schärpatrone), der native Farbwähler daneben
- * ändert den Hex-Wert, der ×-Button entfernt die Farbe wieder (betroffene
- * Zellen im Muster werden dann als leer/× dargestellt). Unten: ein
- * "+"-Eintrag im selben Stil wie die Farbliste öffnet ein Overlay mit den
- * Grundfarben und der freien Farbwahl (BasicColorPicker) – bleibt so lange
- * offen, bis daneben geklickt wird, damit sich mehrere Farben nacheinander
- * hinzufügen lassen.
+ * "Colors" column in the editor: clicking a color selects it as the active
+ * paint color (to apply in the threading chart), the native color picker
+ * next to it changes the hex value, the x button removes the color again
+ * (affected cells in the pattern then show as empty/x). Below: a "+" entry
+ * in the same style as the color list opens an overlay with the basic
+ * colors and free color picking (BasicColorPicker) - stays open until
+ * clicked elsewhere, so several colors can be added in a row.
  */
 export function PatternColorEditorCard({
   pattern,

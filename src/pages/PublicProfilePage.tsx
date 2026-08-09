@@ -8,12 +8,11 @@ import { fetchPublishedPatterns, type StrapiPatternRecord } from '@/lib/strapi/p
 import { fetchMyCollections, fetchPublicCollections, type StrapiCollectionRecord } from '@/lib/strapi/collections'
 
 /**
- * Öffentliches Profil einer beliebigen Person (auch ohne eigenen Login
- * einsehbar): zeigt nur, was ohnehin öffentlich ist – veröffentlichte
- * Muster und öffentliche Sammlungen dieser Person, gefiltert aus denselben
- * öffentlichen Endpunkten wie die Musterdatenbank/Sammlungsübersicht. Im
- * Gegensatz zu ProfilPage (das eigene Profil) keine Kontoeinstellungen,
- * keine Entwürfe/privaten Sammlungen, keine Abo-Liste.
+ * Public profile of any user (viewable without being logged in): shows
+ * only what's already public - this user's published patterns and public
+ * collections, filtered from the same public endpoints as the pattern/
+ * collection overview pages. Unlike ProfilPage (the user's own profile),
+ * no account settings, no drafts/private collections, no subscription list.
  */
 export function PublicProfilePage() {
   const { username } = useParams<{ username: string }>()

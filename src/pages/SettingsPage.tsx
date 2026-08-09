@@ -11,7 +11,7 @@ import { useLanguage } from '@/features/i18n/LanguageContext'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-/** Zufälliges Element, das sich von `excludeIndex` unterscheidet, sofern die Liste mehr als einen Eintrag hat. */
+/** Random index different from `excludeIndex`, as long as the list has more than one entry. */
 function pickRandomIndex(length: number, excludeIndex: number | null): number {
   if (length <= 1) return 0
   let index = Math.floor(Math.random() * length)

@@ -1,6 +1,6 @@
 import { factories } from '@strapi/strapi';
 
-/** Wie bei Mustern/Sammlungen: pro anfragender Person unterschiedliche Antworten für dieselbe URL, daher kein Caching. */
+/** Same as for patterns/collections: different responses per requesting user for the same URL, hence no caching. */
 function noStore(ctx: any) {
   ctx.set('Cache-Control', 'no-store');
 }
@@ -24,17 +24,17 @@ async function findExisting(strapi: any, userId: number, patternDocumentId: stri
 }
 
 /**
- * Eigener Content-Type statt Erweiterung des globalen `displaySettings`-Felds
- * am User (siehe users-permissions-Erweiterung, cms/src/extensions): diese
- * Werte gelten pro Muster, nicht global – Hervorhebung/Untwist-Modus eines
- * Musters soll nicht automatisch für ein anderes gelten. Nur wenn die
- * Person das Speichern für ein Muster explizit aktiviert (siehe Frontend
- * DisplaySettingsCard-Nachbar-Card), existiert überhaupt ein Datensatz; ohne
- * einen solchen gelten die eingebauten Standardwerte (alles aus, Reihe/
- * Brettchen 1).
+ * Its own content type instead of extending the user's global
+ * `displaySettings` field (see the users-permissions extension,
+ * cms/src/extensions): these values apply per pattern, not globally -
+ * highlighting/untwist mode for one pattern shouldn't automatically apply
+ * to another. A record only exists at all once the user explicitly
+ * enables saving for a pattern (see the frontend DisplaySettingsCard's
+ * neighboring card); without one, the built-in defaults apply (everything
+ * off, row/tablet 1).
  */
 export default factories.createCoreController('api::pattern-preference.pattern-preference', ({ strapi }) => ({
-  /** Liefert die gespeicherte Präferenz für das aktuelle Muster, oder `data: null`, wenn keine existiert. */
+  /** Returns the saved preference for the current pattern, or `data: null` if none exists. */
   async get(ctx) {
     noStore(ctx);
     if (!ctx.state.user) return ctx.unauthorized();
@@ -52,7 +52,7 @@ export default factories.createCoreController('api::pattern-preference.pattern-p
     ctx.body = { data: sanitized, meta: {} };
   },
 
-  /** Legt die Präferenz an oder aktualisiert sie (upsert) – wird aufgerufen, solange "Speichern" für dieses Muster aktiviert ist. */
+  /** Creates or updates the preference (upsert) - called as long as "save" is enabled for this pattern. */
   async set(ctx) {
     if (!ctx.state.user) return ctx.unauthorized();
 
@@ -78,7 +78,7 @@ export default factories.createCoreController('api::pattern-preference.pattern-p
     ctx.body = { data: sanitized, meta: {} };
   },
 
-  /** Entfernt die Präferenz wieder – wird aufgerufen, sobald "Speichern" für dieses Muster deaktiviert wird. */
+  /** Removes the preference again - called once "save" is disabled for this pattern. */
   async unset(ctx) {
     if (!ctx.state.user) return ctx.unauthorized();
 

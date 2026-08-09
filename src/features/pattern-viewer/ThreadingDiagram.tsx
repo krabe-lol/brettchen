@@ -19,29 +19,29 @@ import type { Pattern, PaletteSlot } from './types'
 interface ThreadingDiagramProps {
   pattern: Pick<Pattern, 'title' | 'threading' | 'holesPerTablet' | 'numTablets'>
   palette: PaletteSlot[]
-  /** Wenn gesetzt, werden die Zellen klickbar (Farbe anwenden). */
+  /** If set, cells become clickable (apply color). */
   onCellClick?: (tabletIndex: number, holeIndex: number) => void
-  /** Wenn gesetzt, wird die S/Z-Kartenstellung unter jedem Brettchen klickbar. */
+  /** If set, the S/Z card orientation below each tablet becomes clickable. */
   onOrientationClick?: (tabletIndex: number) => void
-  /** Wenn gesetzt, lässt sich ein Brettchen per Drag & Drop an der Spaltenüberschrift an eine andere Position ziehen. */
+  /** If set, a tablet can be dragged to another position via its column header. */
   onMoveTablet?: (fromIndex: number, toIndex: number) => void
-  /** Wenn gesetzt, erscheint unter jeder Spalte ein kleines "×" zum Löschen genau dieses Brettchens. */
+  /** If set, a small "x" appears below each column to delete that tablet. */
   onRemoveTablet?: (tabletIndex: number) => void
-  /** Rein anzeigeseitig, ändert nie den gespeicherten Wert. Siehe render/orientationDisplay.ts. */
+  /** Display-only, never changes the saved value. See render/orientationDisplay.ts. */
   displaySettings?: DisplaySettings
-  /** Wenn gesetzt (0-basiert), wird dieses Brettchen als Spalte hervorgehoben und bei Änderung in den Viewport gescrollt – siehe PatternDiagrams-Navigation. */
+  /** If set (0-based), this tablet's column is highlighted and scrolled into view on change - see PatternDiagrams navigation. */
   activeTablet?: number | null
 }
 
 const GRIP_SIZE = 12
 
 /**
- * Schärpatrone: zeigt, wie die Brettchen geschärt sind. Reihen
- * von oben nach unten mit D,C,B,A beschriftet, Spalten von links mit 1..n.
- * Ist `onMoveTablet` gesetzt, zeigt ein Grip-Icon in der Spaltenüberschrift
- * die Ziehbarkeit an; beim Ziehen folgt die ganze Spalte (Zellen +
- * Kartenstellung) sichtbar dem Zeiger und wird über den Nachbarspalten
- * gezeichnet, das Ziel wird farblich hervorgehoben.
+ * Threading chart: shows how the tablets are threaded. Rows labeled
+ * D,C,B,A from top to bottom, columns labeled 1..n from the left. If
+ * `onMoveTablet` is set, a grip icon in the column header signals it's
+ * draggable; while dragging, the whole column (cells + card orientation)
+ * visibly follows the pointer and is drawn above neighboring columns, with
+ * the drop target highlighted.
  */
 export function ThreadingDiagram({
   pattern,
@@ -74,7 +74,7 @@ export function ThreadingDiagram({
   const [dropIndex, setDropIndex] = useState<number | null>(null)
   const [dragOffsetX, setDragOffsetX] = useState(0)
 
-  /** Bildschirm-X-Koordinate in SVG-Nutzereinheiten. */
+  /** Screen X coordinate converted to SVG user units. */
   function svgXAtClientX(clientX: number): number {
     const svg = svgRef.current
     if (!svg) return 0
@@ -82,7 +82,7 @@ export function ThreadingDiagram({
     return ((clientX - rect.left) / rect.width) * totalWidth
   }
 
-  /** Wandelt eine Bildschirm-X-Koordinate in den Brettchen-Index unter dem Zeiger um. */
+  /** Converts a screen X coordinate to the tablet index under the pointer. */
   function tabletIndexAtClientX(clientX: number): number {
     const index = Math.floor((svgXAtClientX(clientX) - ROW_LABEL_WIDTH) / STEP)
     return Math.max(0, Math.min(pattern.numTablets - 1, index))
@@ -116,7 +116,7 @@ export function ThreadingDiagram({
     window.addEventListener('pointerup', handlePointerUp)
   }
 
-  // Die gezogene Spalte zuletzt rendern, damit sie beim Verschieben über den Nachbarspalten liegt.
+  // Render the dragged column last so it stays above neighboring columns while moving.
   const tabletOrder = pattern.threading.map((_, index) => index)
   if (draggedIndex !== null) {
     tabletOrder.splice(tabletOrder.indexOf(draggedIndex), 1)
@@ -124,9 +124,9 @@ export function ThreadingDiagram({
   }
 
   /**
-   * Rückt die Nachbarspalten so weit auf, wie es dem tatsächlichen
-   * `moveTablet(from, to)`-Ergebnis entspricht – dadurch öffnet sich genau
-   * an der Stelle, über der gerade gezogen wird, eine Lücke.
+   * Shifts neighboring columns by however much the actual
+   * `moveTablet(from, to)` result would - this opens a gap exactly where
+   * the pointer is currently dragging over.
    */
   function columnShift(tabletIndex: number): number {
     if (draggedIndex === null || dropIndex === null || tabletIndex === draggedIndex) return 0

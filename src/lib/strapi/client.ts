@@ -1,6 +1,6 @@
 import { strapiConfig } from './config'
 
-/** Strapi v5 REST response shapes (flat entities, kein data/attributes-Nesting mehr). */
+/** Strapi v5 REST response shapes (flat entities, no data/attributes nesting). */
 export interface StrapiListResponse<T> {
   data: T[]
   meta: {
@@ -39,8 +39,7 @@ function buildQueryString(query?: StrapiQuery): string {
   if (query.pagination?.pageSize) params.set('pagination[pageSize]', String(query.pagination.pageSize))
 
   if (query.filters) {
-    // Für einfache Fälle ausreichend. Bei tief verschachtelten Filtern später
-    // auf die "qs"-Bibliothek wechseln (gleiche Serialisierung wie Strapi intern nutzt).
+    // Fine for flat filters; switch to the "qs" library if we ever need deeply nested ones.
     for (const [key, value] of Object.entries(query.filters)) {
       params.set(`filters[${key}]`, String(value))
     }

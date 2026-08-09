@@ -26,7 +26,7 @@ function interpolate(template: string, params?: Record<string, string | number>)
   return template.replace(/\{\{(\w+)\}\}/g, (match, key) => (key in params ? String(params[key]) : match))
 }
 
-/** Rein clientseitige UI-Sprache, in localStorage gemerkt. Übersetzt nur Interface-Texte, nie Musterinhalte. */
+/** Client-only UI language, remembered in localStorage. Translates interface text only, never pattern content. */
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => readStoredLanguage())
 
@@ -44,6 +44,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
 export function useLanguage() {
   const context = useContext(LanguageContext)
-  if (!context) throw new Error('useLanguage muss innerhalb von LanguageProvider verwendet werden')
+  if (!context) throw new Error('useLanguage must be used within LanguageProvider')
   return context
 }

@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react'
 import type { Pattern, PaletteOverride } from './types'
 
 /**
- * Rein clientseitiger Anzeige-State für ein Muster: Farb-Overrides. Wird nie
- * persistiert oder an den Server geschickt.
+ * Client-only display state for a pattern: color overrides. Never
+ * persisted or sent to the server.
  */
 export function useDisplayState(pattern: Pattern) {
   const [paletteOverride, setPaletteOverride] = useState<PaletteOverride>({})

@@ -13,20 +13,20 @@ import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 
 interface CollectionBookmarkButtonProps {
-  /** Eigene Sammlungen der eingeloggten Person, einmal von der aufrufenden Seite geladen (nicht pro Karte). */
+  /** The logged-in user's own collections, loaded once by the calling page (not per card). */
   collections: StrapiCollectionRecord[]
   patternId: string
   token: string
-  /** Wird nach Hinzufügen/Anlegen aufgerufen, damit die aufrufende Seite die Sammlungen neu lädt. */
+  /** Called after adding to/creating a collection, so the calling page reloads them. */
   onChanged: () => void
   className?: string
 }
 
 /**
- * Einziger Einstiegspunkt für Sammlungen an einem Musterthumbnail: Klick auf
- * das Lesezeichen-Icon öffnet ein kleines Panel zum Auswählen einer
- * bestehenden Sammlung oder Anlegen einer neuen (immer privat – volle
- * Beschreibung/Sichtbarkeit lassen sich im Profil einstellen).
+ * Single entry point for collections on a pattern thumbnail: clicking the
+ * bookmark icon opens a small panel to pick an existing collection or
+ * create a new one (always private - full description/visibility can be
+ * set on the profile page).
  */
 export function CollectionBookmarkButton({
   collections,

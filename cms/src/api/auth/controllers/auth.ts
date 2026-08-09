@@ -1,14 +1,14 @@
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
- * Eigener Registrierungs-Endpoint für Username + Passwort, E-Mail optional
- * (nur fürs spätere Passwort-zurücksetzen, keine Bestätigungspflicht/2FA).
- * Strapis eingebautes /api/auth/local/register bleibt unverändert (E-Mail-Pflicht,
- * für Nutzer:innen, die sich per E-Mail registrieren). Login funktioniert für beide
- * Fälle über das eingebaute /api/auth/local (Identifier = Username ODER E-Mail).
- * Passwort-zurücksetzen läuft über Strapis eingebaute /auth/forgot-password und
- * /auth/reset-password – dafür muss aber ein E-Mail-Provider konfiguriert sein
- * (siehe cms/config/plugins.ts), was hier noch nicht der Fall ist.
+ * Custom registration endpoint for username + password, email optional
+ * (only used for later password reset, no confirmation requirement/2FA).
+ * Strapi's built-in /api/auth/local/register stays untouched (requires
+ * email, for users who register via email). Login works for both cases
+ * via the built-in /api/auth/local (identifier = username OR email).
+ * Password reset uses Strapi's built-in /auth/forgot-password and
+ * /auth/reset-password - but that requires a configured email provider
+ * (see cms/config/plugins.ts), which isn't set up yet.
  */
 export default {
   async registerUsernameOnly(ctx: any) {
@@ -68,7 +68,7 @@ export default {
       email: normalizedEmail || null,
       provider: 'local',
       role: role.id,
-      // Ohne Bestätigungspflicht (keine 2FA/E-Mail-Verifizierung gewünscht).
+      // No confirmation requirement (2FA/email verification not wanted here).
       confirmed: true,
     });
 
@@ -85,7 +85,7 @@ export default {
     });
   },
 
-  /** Prüft, ob ein Username noch frei ist – für die Live-Prüfung im Registrierungsformular. */
+  /** Checks whether a username is still free - for live validation in the registration form. */
   async usernameAvailable(ctx: any) {
     const username = typeof ctx.query.username === 'string' ? ctx.query.username.trim() : '';
 
@@ -98,11 +98,11 @@ export default {
   },
 
   /**
-   * Ändert Username/Passwort/E-Mail auf der Profilseite ("Zugangsdaten
-   * bearbeiten") – verlangt jeweils das aktuelle Passwort, damit ein
-   * gestohlener, kurzlebiger Access-Token allein nicht reicht, um das
-   * Konto zu übernehmen (z. B. E-Mail auf eine fremde Adresse umzustellen
-   * und darüber das Passwort zurückzusetzen).
+   * Changes username/password/email on the profile page ("edit account
+   * credentials") - each requires the current password, so a stolen,
+   * short-lived access token alone isn't enough to take over the account
+   * (e.g. by changing the email to one the attacker controls and resetting
+   * the password through it).
    */
   async updateUsername(ctx: any) {
     if (!ctx.state.user) return ctx.unauthorized();
@@ -189,7 +189,7 @@ export default {
     ctx.send({ id: updated!.id, documentId: updated!.documentId, username: updated!.username, email: updated!.email });
   },
 
-  /** Löscht das eigene Konto unwiderruflich. Muster/Sammlungen bleiben erhalten, verlieren aber die Zuordnung. */
+  /** Deletes the account permanently. Patterns/collections are kept but lose their author/owner. */
   async deleteAccount(ctx: any) {
     if (!ctx.state.user) return ctx.unauthorized();
 

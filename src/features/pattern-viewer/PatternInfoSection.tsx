@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { TagInput } from '@/components/TagInput'
 
-/** Immer dd.mm.yyyy, unabhängig von der UI-Sprache. */
+/** Always dd.mm.yyyy, regardless of UI language. */
 function formatCreatedAt(iso: string): string {
   const date = new Date(iso)
   const day = String(date.getDate()).padStart(2, '0')
@@ -19,13 +19,13 @@ interface PatternInfoSectionProps {
   style: string[]
   notes: string
   sourceUrl: string
-  /** Gesetzt, solange dieses Muster ein Remix ist und der Link zum Original noch nicht gebrochen ist. */
+  /** Set as long as this pattern is a remix and the link to the original hasn't broken yet. */
   remixOf?: { title: string; slug: string } | null
-  /** ISO-Zeitstempel; fehlt bei einem noch nicht gespeicherten neuen Muster. */
+  /** ISO timestamp; absent for a new, not-yet-saved pattern. */
   createdAt?: string
-  /** Live aus der aktuellen (auch ungespeicherten) Wendefolge berechnet, siehe render/twist.ts. */
+  /** Computed live from the current (even unsaved) turning sequence, see render/twist.ts. */
   isTwistNeutral: boolean
-  /** Bereits anderswo verwendete Stil-Tags, als Autocomplete-Vorschläge. */
+  /** Style tags already used elsewhere, as autocomplete suggestions. */
   styleSuggestions?: string[]
   editable?: boolean
   onTitleChange?: (title: string) => void
@@ -35,10 +35,10 @@ interface PatternInfoSectionProps {
 }
 
 /**
- * Informationen zum Muster (Titel, Ersteller, Stil, Freitext, Quelle,
- * Remix-Herkunft), bewusst ohne Card – nur eine schlichte Textliste unter
- * der Farbwahl. Im Editor sind Titel, Stil, Freitext und Quelle bearbeitbar,
- * der Ersteller und die Remix-Herkunft sind immer nur Anzeige.
+ * Pattern info (title, creator, style, notes, source, remix origin),
+ * deliberately without a Card - just a plain text list below the color
+ * picker. In the editor, title/style/notes/source are editable; creator
+ * and remix origin are always read-only.
  */
 export function PatternInfoSection({
   title,

@@ -4,19 +4,18 @@ import type { DisplaySettings } from '../render/orientationDisplay'
 
 export interface TabletOrientationCardProps extends SVGProps<SVGSVGElement> {
   /**
-   * Beschriftung der vier Löcher, fest in der Reihenfolge A,B,C,D (siehe
-   * Positionen im JSX unten, entspricht dem Original-Layout). Änderbar,
-   * damit später passend zu DisplaySettings.holeLabelDirection/-Facing
-   * andere Buchstaben/Notation eingesetzt werden können, siehe
-   * orientationDisplay.ts.
+   * Labels for the four holes, fixed in the order A,B,C,D (see the
+   * positions in the JSX below, matches the original layout). Overridable
+   * so DisplaySettings.holeLabelDirection/-Facing can later substitute
+   * other letters/notation, see orientationDisplay.ts.
    */
   labels?: [string, string, string, string]
   /**
-   * Steuert, wie die große S/Z-Kennzeichnung auf der Karte dargestellt wird
-   * (S/Z-Kartenstellung, S/Z-Fadenzwirn oder \/-Notation) – dieselben
-   * Einstellungen wie bei der Schärpatrone, siehe orientationDisplay.ts.
-   * Die tatsächliche Kartenstellung (S für *Scard, Z für *Zcard) ist dabei
-   * fest, nur ihre Darstellung ändert sich.
+   * Controls how the large S/Z marker on the card is displayed (S/Z card
+   * orientation, S/Z thread twist, or \/-notation) - same settings as the
+   * threading chart, see orientationDisplay.ts. The actual card
+   * orientation (S for *Scard, Z for *Zcard) is fixed; only its display
+   * changes.
    */
   displaySettings?: DisplaySettings
 }

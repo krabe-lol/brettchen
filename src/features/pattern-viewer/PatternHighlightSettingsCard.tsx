@@ -13,20 +13,19 @@ interface PatternHighlightSettingsCardProps {
   onChange: (settings: PatternHighlightSettings) => void
   saveEnabled: boolean
   onSaveEnabledChange: (enabled: boolean) => void
-  /** Ohne Login oder ohne bereits gespeichertes Muster ist der Speichern-Schalter deaktiviert (siehe usePatternHighlightSettings). */
+  /** Without login or a saved pattern, the save toggle is disabled (see usePatternHighlightSettings). */
   canSave: boolean
   numRows?: number
   numTablets?: number
 }
 
 /**
- * Eigene Card unterhalb der Anzeigeoptionen: Reihen-/Brettchen-Hervorhebung
- * und Untwist-Modus (siehe PatternDiagrams-Navigation). Anders als die
- * Anzeigeoptionen gelten diese Werte pro Muster UND Nutzer:in – "Als
- * Standard festlegen" in den Anzeigeoptionen betrifft diese Card bewusst
- * NICHT. Der "Für dieses Muster speichern"-Schalter unten (Standard: aus)
- * entscheidet, ob Änderungen hier überhaupt persistiert werden, siehe
- * usePatternHighlightSettings.
+ * Separate card below the display options: row/tablet highlighting and
+ * untwist mode (see PatternDiagrams navigation). Unlike the display
+ * options, these values apply per pattern AND user - "set as default" in
+ * the display options deliberately does NOT cover this card. The "save
+ * for this pattern" toggle below (default: off) decides whether changes
+ * here get persisted at all, see usePatternHighlightSettings.
  */
 export function PatternHighlightSettingsCard({
   settings,
@@ -118,8 +117,7 @@ export function PatternHighlightSettingsCard({
         </div>
       </CardContent>
       <CardFooter>
-        {/* Browser unterdrücken das native title-Tooltip auf disabled-Elementen selbst –
-            daher hier auf einem umschließenden, nicht-deaktivierten span. */}
+        {/* Browsers suppress the native title tooltip on disabled elements themselves, hence the wrapping, non-disabled span. */}
         <span title={canSave ? undefined : t('highlightSettingsSaveUnavailable')} className="inline-block">
           <div className="flex items-center gap-2">
             <Switch

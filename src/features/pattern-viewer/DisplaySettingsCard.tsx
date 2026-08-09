@@ -19,22 +19,21 @@ import type {
 interface DisplaySettingsCardProps {
   settings: DisplaySettings
   onChange: (settings: DisplaySettings) => void
-  /** Wenn gesetzt, erscheint unten in der Card ein "Als Standard festlegen"-Button. */
+  /** If set, shows a "set as default" button at the bottom of the card. */
   onSaveAsDefault?: () => void
   isSavingDefault?: boolean
-  /** Ohne Login (false) ist der Button deaktiviert und zeigt einen erklärenden Tooltip statt zu speichern. */
+  /** Without login (false), the button is disabled and shows an explanatory tooltip instead of saving. */
   canSaveAsDefault?: boolean
 }
 
 /**
- * Rein anzeigeseitige Einstellungen für die Schärpatrone (siehe
- * render/orientationDisplay.ts): ändern nie das gespeicherte Muster,
- * sondern nur, wie Kartenstellung und Lochbeschriftung dargestellt
- * werden. Reihen-/Brettchen-Hervorhebung und Untwist-Modus sind bewusst
- * NICHT hier, sondern in der eigenen PatternHighlightSettingsCard darunter –
- * die gelten pro Muster UND Nutzer:in, nicht global wie diese Card (siehe
- * usePatternHighlightSettings). "Als Standard festlegen" unten betrifft
- * entsprechend nur die Einstellungen in dieser Card.
+ * Purely display-side settings for the threading chart (see
+ * render/orientationDisplay.ts): never change the saved pattern, only how
+ * card orientation and hole labels are displayed. Row/tablet highlighting
+ * and untwist mode are deliberately NOT here but in the separate
+ * PatternHighlightSettingsCard below - those apply per pattern AND user,
+ * not globally like this card (see usePatternHighlightSettings). "Set as
+ * default" below accordingly only covers this card's settings.
  */
 export function DisplaySettingsCard({
   settings,
@@ -155,8 +154,7 @@ export function DisplaySettingsCard({
         </div>
       </CardContent>
       <CardFooter>
-        {/* Browser unterdrücken das native title-Tooltip auf disabled-Elementen selbst –
-            daher hier auf einem umschließenden, nicht-deaktivierten span. */}
+        {/* Browsers suppress the native title tooltip on disabled elements themselves, hence the wrapping, non-disabled span. */}
         <span title={canSaveAsDefault ? undefined : t('displaySettingsSaveRequiresLogin')} className="inline-block">
           <Button type="button" onClick={onSaveAsDefault} disabled={isSavingDefault || !canSaveAsDefault}>
             {isSavingDefault ? t('editorSaving') : t('displaySettingsSaveAsDefault')}

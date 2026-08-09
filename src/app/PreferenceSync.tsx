@@ -6,12 +6,10 @@ import { useDisplaySettings } from '@/features/pattern-viewer/DisplaySettingsCon
 import { DEFAULT_DISPLAY_SETTINGS } from '@/features/pattern-viewer/render/orientationDisplay'
 
 /**
- * Wendet die serverseitig gespeicherten Präferenzen (Dark/Light-Mode,
- * Sprache, Anzeigeoptionen) einmalig an, sobald eine Person eingeloggt ist –
- * z. B. beim ersten Laden nach einem Login auf einem neuen Gerät. Das
- * eigentliche Speichern passiert direkt dort, wo die Änderung ausgelöst
- * wird (Header.tsx bzw. die Einstellungsseite), nicht hier – so entsteht
- * keine Rückkopplungsschleife.
+ * Applies the server-saved preferences (dark/light mode, language, display
+ * options) once a user is logged in - e.g. on first load after logging in
+ * on a new device. Saving happens where the change is triggered (Header.tsx
+ * or the settings page), not here, to avoid a feedback loop.
  */
 export function PreferenceSync() {
   const { user } = useAuth()
@@ -30,8 +28,7 @@ export function PreferenceSync() {
 
     if (user.themePreference) setTheme(user.themePreference)
     if (user.languagePreference) setLanguage(user.languagePreference)
-    // Merge statt Ersetzen: ältere gespeicherte Präferenzen können neuere
-    // Felder (z. B. backwardContrast) noch nicht enthalten.
+    // Merge, don't replace: older saved preferences may not have newer fields yet (e.g. backwardContrast).
     if (user.displaySettings) setSettings({ ...DEFAULT_DISPLAY_SETTINGS, ...user.displaySettings })
   }, [user, setTheme, setLanguage, setSettings])
 

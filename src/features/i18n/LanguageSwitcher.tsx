@@ -1,7 +1,7 @@
 import { useLanguage } from './LanguageContext'
 import { SUPPORTED_LANGUAGES, type Language } from './translations'
 
-/** Sprachumschalter als Dropdown (DE/EN, offen für weitere Sprachen über SUPPORTED_LANGUAGES). */
+/** Language switcher dropdown (DE/EN, extendable via SUPPORTED_LANGUAGES). */
 export function LanguageSwitcher() {
   const { language, setLanguage, t } = useLanguage()
 

@@ -1,4 +1,4 @@
-/** Klassische Editierdistanz (Levenshtein) zwischen zwei kurzen Wörtern. */
+/** Levenshtein edit distance between two short words. */
 function levenshtein(a: string, b: string): number {
   const m = a.length
   const n = b.length
@@ -19,7 +19,7 @@ function levenshtein(a: string, b: string): number {
   return prev[n]
 }
 
-/** Erlaubte Editierdistanz für "ähnliche Schreibweise", proportional zur (kürzeren) Wortlänge. */
+/** Allowed edit distance for a "similar spelling" match, scaled to word length. */
 function maxAllowedDistance(length: number): number {
   if (length <= 4) return 0
   if (length <= 7) return 1
@@ -28,12 +28,7 @@ function maxAllowedDistance(length: number): number {
 
 const NO_MATCH = -Infinity
 
-/**
- * Bewertet, wie gut ein einzelnes Wort zu `term` passt: exakt > Präfix >
- * Teilstring > schreibweisenähnlich (Editierdistanz, z. B. "Herzen" vs.
- * "Herzchen") > kein Treffer (`NO_MATCH`). Höher ist besser, damit
- * exakte/nahe Treffer beim Sortieren vor bloß ähnlichen landen.
- */
+/** Scores a word against `term`: exact > prefix > substring > similar spelling > no match. Higher is better. */
 function wordScore(word: string, term: string): number {
   if (!term) return NO_MATCH
   if (word === term) return 100
@@ -45,7 +40,7 @@ function wordScore(word: string, term: string): number {
   return NO_MATCH
 }
 
-/** Bester Wort-Treffer für `term` irgendwo in `text` (siehe wordScore), oder NO_MATCH. */
+/** Best word match for `term` anywhere in `text`, or NO_MATCH. */
 function fuzzyScore(text: string, term: string): number {
   const lowerTerm = term.toLowerCase().trim()
   if (!lowerTerm) return NO_MATCH
@@ -61,11 +56,7 @@ function fuzzyScore(text: string, term: string): number {
   return best
 }
 
-/**
- * Bester Treffer-Score von `text` gegen mehrere Suchbegriffe (z. B. Original
- * + Übersetzungen, siehe useTranslatedSearchTerms) – `NO_MATCH`, wenn kein
- * Begriff auch nur ähnlich passt.
- */
+/** Best score of `text` against several search terms (e.g. original + translations, see useTranslatedSearchTerms). */
 export function bestScore(text: string, terms: string[]): number {
   let best = NO_MATCH
   for (const term of terms) {
@@ -79,12 +70,7 @@ export function isMatch(score: number): boolean {
   return score > NO_MATCH
 }
 
-/**
- * Filtert und sortiert `items` nach Relevanz gegen `terms` (bester Score
- * zuerst) – Treffer mit `NO_MATCH` fallen raus. `getSearchableText` liefert
- * pro Item eine oder mehrere zu durchsuchende Texte (z. B. Titel + Stiltags);
- * gewertet wird jeweils der beste Score über alle davon.
- */
+/** Filters and sorts `items` by relevance against `terms`. `getSearchableText` returns the texts to match per item (e.g. title + style tags). */
 export function rankBySearchRelevance<T>(items: T[], terms: string[], getSearchableText: (item: T) => string[]): T[] {
   return items
     .map((item) => ({

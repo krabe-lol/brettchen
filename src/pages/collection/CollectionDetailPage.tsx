@@ -71,7 +71,7 @@ export function CollectionDetailPage() {
     }
   }, [id, token, isAuthLoading, t])
 
-  /** Für das Bookmark-Icon auf jeder Musterkarte (siehe CollectionBookmarkButton) – die eigenen Sammlungen der eingeloggten Person. */
+  /** For the bookmark icon on each pattern card (see CollectionBookmarkButton) - the logged-in user's own collections. */
   const loadMyCollections = useCallback(() => {
     if (!token) return
     fetchMyCollections(token)
@@ -83,7 +83,7 @@ export function CollectionDetailPage() {
     loadMyCollections()
   }, [loadMyCollections])
 
-  /** Lädt die gerade angezeigte Sammlung neu, z. B. nachdem das Bookmark-Icon ein Muster entfernt/hinzugefügt hat. */
+  /** Reloads the currently shown collection, e.g. after the bookmark icon added/removed a pattern. */
   function reloadCollection() {
     if (!id) return
     fetchCollectionById(id, token ?? undefined)
@@ -92,10 +92,10 @@ export function CollectionDetailPage() {
   }
 
   /**
-   * Für die Vorschläge unten (siehe `suggestions`): nur für die Besitzer-
-   * Person, einmal geladen sobald sie feststeht (nicht bei jeder Änderung
-   * der Sammlung selbst neu, das würde bei jedem Hinzufügen/Entfernen einen
-   * unnötigen weiteren Request auslösen).
+   * For the suggestions below (see `suggestions`): owner only, loaded once
+   * as soon as it's known (not re-fetched on every change to the
+   * collection itself, which would trigger an unnecessary extra request on
+   * every add/remove).
    */
   useEffect(() => {
     if (!user || !collection || collection.owner?.id !== user.id) return
@@ -130,12 +130,12 @@ export function CollectionDetailPage() {
   const isSubscribed = Boolean(user && collection.subscribers.some((s) => s.id === user.id))
 
   /**
-   * Veröffentlichte Muster, die noch nicht in der Sammlung sind, bevorzugt
-   * mit mindestens einem Stil-Tag, das auch ein bereits enthaltenes Muster
-   * hat – bewusst simple Heuristik statt echter Ähnlichkeitssuche. Gibt es
-   * dafür nichts (leere Sammlung oder Muster ganz ohne Stil-Tags), zeigen
-   * wir stattdessen einfach die neuesten veröffentlichten Muster, statt gar
-   * nichts vorzuschlagen.
+   * Published patterns not yet in the collection, preferring ones that
+   * share at least one style tag with an already-included pattern -
+   * deliberately a simple heuristic rather than real similarity search. If
+   * that yields nothing (empty collection, or patterns without style
+   * tags), we just show the newest published patterns instead of
+   * suggesting nothing at all.
    */
   const existingPatternIds = new Set(collection.patterns.map((p) => p.documentId))
   const existingStyles = new Set(collection.patterns.flatMap((p) => p.style ?? []))
@@ -186,7 +186,7 @@ export function CollectionDetailPage() {
     }
   }
 
-  /** Nach Hinzufügen/Entfernen über das Bookmark-Icon einer Musterkarte (siehe CollectionBookmarkButton). */
+  /** After adding/removing via the bookmark icon on a pattern card (see CollectionBookmarkButton). */
   function handleCollectionsChanged() {
     reloadCollection()
     loadMyCollections()
@@ -318,7 +318,7 @@ export function CollectionDetailPage() {
 
       {suggestions.length > 0 && (
         <>
-          <h2 className="mt-80 text-xl font-semibold">{t('collectionSuggestionsHeading')}</h2>
+          <h2 className="mt-10 text-xl font-semibold">{t('collectionSuggestionsHeading')}</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {suggestions.map((pattern) => (
               <div key={pattern.documentId} className="flex flex-col gap-2">

@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
-/** Zugangsdaten bearbeiten: Username, Passwort, optionale E-Mail, Konto löschen. */
+/** Edit account credentials: username, password, optional email, delete account. */
 export function AccountSettingsCard() {
   const { user, token, logout, setSession } = useAuth()
   const { t } = useLanguage()
@@ -31,6 +31,7 @@ export function AccountSettingsCard() {
 
   if (!user || !token) return null
 
+  // `user`/`token` are narrowed above but TS doesn't carry that into these nested handlers, hence the `!`.
   async function handleUsernameSubmit(e: FormEvent) {
     e.preventDefault()
     setIsSavingUsername(true)
@@ -143,7 +144,7 @@ export function AccountSettingsCard() {
         </form>
 
         <form onSubmit={handleDeleteSubmit} className="flex flex-col gap-3">
-          {/* TODO: in einen Dialog auslagern */}
+          {/* TODO: move into a dialog */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="flex flex-1 flex-col gap-1.5">
               <Label htmlFor="account-delete-username">{t('accountSettingsDeleteUsernameLabel')}</Label>

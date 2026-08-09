@@ -20,10 +20,9 @@ import type { Pattern } from './types'
 import { LoaderCircle, Trash } from 'lucide-react'
 
 /**
- * Entfernt Palette-Einträge, die kein Loch mehr referenziert – wird nur beim
- * Speichern angewendet, nicht während des Bearbeitens. Die Schussfadenfarbe
- * (weftColorSlotId) gilt dabei immer als benutzt, auch ohne Referenz durch
- * ein Loch der Schärung.
+ * Removes palette entries no hole references anymore - only applied on
+ * save, not while editing. The weft color (weftColorSlotId) always counts
+ * as used, even without a threading hole referencing it.
  */
 function pruneUnusedColors(pattern: Pattern): Pattern {
   const usedSlotIds = new Set(pattern.threading.flatMap((tablet) => tablet.holes.map((hole) => hole.colorSlotId)))
@@ -33,33 +32,32 @@ function pruneUnusedColors(pattern: Pattern): Pattern {
 
 interface PatternEditorProps {
   initialPattern: Pattern
-  /** Seitenüberschrift; steht in derselben Zeile wie der Speichern-Button. */
+  /** Page heading; sits on the same line as the save button. */
   heading: string
-  /** Wenn gesetzt, erscheinen der Öffentlich/Privat-Schalter und der Speichern-Button, die das aktuelle Muster übergeben. */
+  /** If set, shows the public/private toggle and the save button, which receive the current pattern. */
   onSave?: (pattern: Pattern, status: 'draft' | 'published') => void
-  /** Wenn gesetzt, erscheint zusätzlich ein "Speichern & Schließen"-Button, der nach dem Speichern in den View-Modus wechselt. */
+  /** If set, also shows a "save & close" button that switches to view mode after saving. */
   onSaveAndClose?: (pattern: Pattern, status: 'draft' | 'published') => void
-  /** Deaktiviert die Speichern-Buttons und zeigt einen Ladehinweis, während onSave/onSaveAndClose läuft. */
+  /** Disables the save buttons and shows a loading state while onSave/onSaveAndClose runs. */
   isSaving?: boolean
-  /** Wenn gesetzt, erscheint ein "Löschen"-Button (nur für bereits existierende Muster, nicht bei der Neuanlage). */
+  /** If set, shows a "delete" button (only for existing patterns, not when creating a new one). */
   onDelete?: () => void
-  /** Deaktiviert den Löschen-Button und zeigt einen Ladehinweis, während onDelete läuft. */
+  /** Disables the delete button and shows a loading state while onDelete runs. */
   isDeleting?: boolean
   /**
-   * Nur für bereits existierende Muster gesetzt (nicht bei der Neuanlage):
-   * zeigt den aktuellen Sichtbarkeitsstatus neben der Überschrift, ändert
-   * den Speichern-Button zu "Änderungen speichern" und ist der Startwert
-   * des Öffentlich/Privat-Schalters.
+   * Only set for an existing pattern (not when creating a new one): shows
+   * the current visibility next to the heading, changes the save button to
+   * "save changes", and is the starting value of the public/private toggle.
    */
   moderationStatus?: 'draft' | 'published'
 }
 
 /**
- * Bearbeitbare Muster-Ansicht: Überschrift + Speichern-Buttons in einer
- * Kopfzeile, darunter Struktur-Einstellungen (Brettchen/Reihen), Schär- und
- * Drehmuster, Farbwahl sowie Musterinfos (Titel/Stil/Freitext bearbeitbar)
- * als vier Spalten. Eine Farbe wird in der Farbspalte als aktive Malfarbe
- * ausgewählt und dann in der Schärpatrone auf Zellen angewendet.
+ * Editable pattern view: heading + save buttons in a header row, below
+ * that structure settings (tablets/rows), threading and turning diagrams,
+ * color picker, and pattern info (title/style/notes editable) as four
+ * columns. A color is selected in the color column as the active paint
+ * color, then applied to cells in the threading chart.
  */
 export function PatternEditor({
   initialPattern,
@@ -150,11 +148,10 @@ export function PatternEditor({
   }
 
   /**
-   * Entfernt ungenutzte Farben lokal (damit `pattern` danach zum
-   * gespeicherten Stand passt und "Änderungen speichern" korrekt wieder
-   * deaktiviert wird) – ohne den lokalen Abgleich würde die entfernte Farbe
-   * erst nach einem Neuladen der Seite verschwinden, siehe `initialPattern`
-   * in `usePatternEditor`, das nur beim Mount übernommen wird.
+   * Removes unused colors locally too (so `pattern` matches the saved
+   * state afterward and "save changes" correctly disables again) - without
+   * this local sync, the removed color would only disappear after a page
+   * reload, since `initialPattern` in `usePatternEditor` is only adopted on mount.
    */
   function pruneAndSyncColors(): Pattern {
     const pruned = pruneUnusedColors(pattern)
@@ -173,14 +170,12 @@ export function PatternEditor({
   }
 
   /**
-   * Bei einem bereits existierenden Muster ("Änderungen speichern") gibt es
-   * nichts zu tun, solange weder der Musterinhalt noch die Sichtbarkeit vom
-   * zuletzt geladenen/gespeicherten Stand abweichen – `initialPattern`
-   * spiegelt nach einem erfolgreichen Save automatisch den neuen Stand
-   * wider (siehe PatternDetailPage.handleSave), der Vergleich bleibt also
-   * auch nach dem Speichern korrekt. Bei einem neuen, noch nicht
-   * gespeicherten Muster ("Muster speichern") gibt es keinen gespeicherten
-   * Stand, mit dem verglichen werden könnte – dort immer aktiv.
+   * For an existing pattern ("save changes"), there's nothing to do as
+   * long as neither the content nor the visibility differs from the
+   * last-loaded/saved state - `initialPattern` automatically reflects the
+   * new state after a successful save (see PatternDetailPage.handleSave),
+   * so the comparison stays correct afterward too. For a new, not-yet-saved
+   * pattern ("save pattern"), there's no saved state to compare against - always active there.
    */
   const hasUnsavedChanges =
     moderationStatus === undefined ||
@@ -188,12 +183,12 @@ export function PatternEditor({
     visibility !== (moderationStatus === 'published' ? 'published' : 'draft')
 
   /**
-   * Warnt beim Verlassen, solange es an einem bereits existierenden Muster
-   * ungespeicherte Änderungen gibt (nicht bei der Neuanlage – dort ist
-   * `hasUnsavedChanges` immer true, auch ohne jede Eingabe, siehe oben).
-   * Zwei Fälle: `beforeunload` für Tab schließen/neu laden/URL eingeben
-   * (Browser zeigt dafür immer seinen eigenen, nicht anpassbaren Text),
-   * `useBlocker` für Navigation innerhalb der App (React-Router-Links).
+   * Warns when leaving as long as an existing pattern has unsaved changes
+   * (not when creating a new one - there `hasUnsavedChanges` is always
+   * true, even with no input, see above). Two cases: `beforeunload` for
+   * closing/reloading the tab or typing a URL (the browser always shows
+   * its own, non-customizable text), `useBlocker` for in-app navigation
+   * (React Router links).
    */
   const warnBeforeLeaving = Boolean(onSave) && moderationStatus !== undefined && hasUnsavedChanges
 
@@ -269,7 +264,7 @@ export function PatternEditor({
         </div>
       </div>
 
-      {/* Unter 'lg' (Tablet/Handy): Infos direkt unter dem Titel. Ab 'lg' (Desktop): stattdessen unter den Farben, siehe unten. */}
+      {/* Below 'lg' (tablet/phone): info directly below the title. From 'lg' (desktop) up: below the colors instead, see further down. */}
       <div className="mt-4 max-w-md lg:hidden">
         <PatternInfoSection
           title={title}
@@ -289,7 +284,7 @@ export function PatternEditor({
         />
       </div>
 
-      {/* Unter 'lg' (Tablet/Handy): Anzeigeoptionen hinter Button+Overlay, siehe DisplaySettingsDialog. */}
+      {/* Below 'lg' (tablet/phone): display options behind a button+overlay, see DisplaySettingsDialog. */}
       <div className="mt-4 lg:hidden">
         <DisplaySettingsDialog
           displaySettings={displaySettings}
@@ -337,7 +332,7 @@ export function PatternEditor({
             </CardContent>
           </Card>
 
-          {/* Ab 'lg' (Desktop): Anzeigeoptionen wieder als dauerhafte Seitenspalte statt Overlay. */}
+          {/* From 'lg' (desktop) up: display options as a permanent sidebar again instead of an overlay. */}
           <div className="hidden lg:block">
             <DisplaySettingsCard
               settings={displaySettings}
@@ -374,7 +369,7 @@ export function PatternEditor({
             onAddColor={handleAddColor}
             onRemoveColor={handleRemoveColor}
           />
-          {/* Ab 'lg' (Desktop): Infos wieder unter den Farben statt unter dem Titel. */}
+          {/* From 'lg' (desktop) up: info below the colors again instead of below the title. */}
           <div className="hidden lg:block">
             <PatternInfoSection
               title={title}

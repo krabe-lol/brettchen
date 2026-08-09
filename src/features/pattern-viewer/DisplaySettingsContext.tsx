@@ -14,14 +14,13 @@ interface DisplaySettingsContextValue {
 const DisplaySettingsContext = createContext<DisplaySettingsContextValue | null>(null)
 
 /**
- * Eine gemeinsame Anzeigeeinstellung für alle Schär-/Drehmuster-Diagramme
- * der App (PatternEditor, PatternViewer, Einstellungsseite) – so wirkt sich
- * eine Änderung überall sofort aus, egal wo sie ausgelöst wurde. Rein
- * clientseitiger State (ändert nie das gespeicherte Muster); für eingeloggte
- * Personen wird der zuletzt gespeicherte Stand einmalig nach dem Login
- * übernommen (siehe PreferenceSync), explizit gespeichert wird nur auf der
- * Einstellungsseite (kein automatisches Speichern bei jeder Änderung, um
- * keine unnötigen Schreibzugriffe bei bloßem Ausprobieren zu erzeugen).
+ * One shared display setting for all threading/turning diagrams in the app
+ * (PatternEditor, PatternViewer, settings page) - so a change takes effect
+ * everywhere immediately, no matter where it's triggered. Client-only
+ * state (never changes the saved pattern); for logged-in users, the
+ * last-saved state is applied once after login (see PreferenceSync).
+ * Explicit saving only happens on the settings page (no autosave on every
+ * change, to avoid unnecessary writes while just trying things out).
  */
 export function DisplaySettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<DisplaySettings>(DEFAULT_DISPLAY_SETTINGS)
@@ -30,17 +29,16 @@ export function DisplaySettingsProvider({ children }: { children: ReactNode }) {
 
 export function useDisplaySettings() {
   const context = useContext(DisplaySettingsContext)
-  if (!context) throw new Error('useDisplaySettings muss innerhalb von DisplaySettingsProvider verwendet werden')
+  if (!context) throw new Error('useDisplaySettings must be used within DisplaySettingsProvider')
   return context
 }
 
 /**
- * Speichert die aktuellen Anzeigeoptionen als Benutzerpräferenz – für den
- * "Als Standard festlegen"-Button in DisplaySettingsCard, überall dort
- * nutzbar, wo die Card eingebunden ist (Einstellungsseite, PatternEditor,
- * PatternViewer). Ohne Login gibt es keinen Server, bei dem gespeichert
- * werden könnte – `isAvailable` sagt der Card, den Button dafür deaktiviert
- * mit erklärendem Tooltip zu zeigen, statt ihn klickbar zu lassen.
+ * Saves the current display options as a user preference - for the "set
+ * as default" button in DisplaySettingsCard, usable wherever the card is
+ * embedded (settings page, PatternEditor, PatternViewer). Without login
+ * there's no server to save to - `isAvailable` tells the card to show the
+ * button disabled with an explanatory tooltip instead of clickable.
  */
 export function useSaveDisplaySettingsAsDefault() {
   const { token } = useAuth()

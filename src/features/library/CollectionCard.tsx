@@ -6,14 +6,14 @@ import type { StrapiCollectionRecord } from '@/lib/strapi/collections'
 
 interface CollectionCardProps {
   collection: StrapiCollectionRecord
-  /** Eingeloggte Person, um Besitz und Abo-Status zu bestimmen. */
+  /** Logged-in user, to determine ownership and subscription status. */
   currentUserId?: number | null
   token?: string | null
-  /** Wird nach erfolgreichem Abonnieren/Kündigen aufgerufen (z. B. um die Liste neu zu laden). */
+  /** Called after successfully subscribing/unsubscribing (e.g. to reload the list). */
   onChanged?: () => void
 }
 
-/** Sammlungskarte, siehe ThumbnailCard für den gemeinsamen Aufbau mit PatternCard. */
+/** Collection card, see ThumbnailCard for the shared layout with PatternCard. */
 export function CollectionCard({ collection, currentUserId, token, onChanged }: CollectionCardProps) {
   const { t } = useLanguage()
 

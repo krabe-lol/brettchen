@@ -45,8 +45,7 @@ export function PatternDetailPage() {
   }, [loadCollections])
 
   useEffect(() => {
-    // Warten, bis der Login-Status feststeht – sonst würde ein eigener
-    // Entwurf kurz als 404 aufblitzen, bevor der Token verfügbar ist.
+    // Wait until login status is settled - otherwise an own draft would briefly flash as 404 before the token is available.
     if (!slug || isAuthLoading) return
     let cancelled = false
     setIsLoading(true)
@@ -57,7 +56,7 @@ export function PatternDetailPage() {
       .then((data) => {
         if (cancelled) return
         setRecord(data)
-        /** Nach dem Remixen (siehe handleRemix) landet die Ersteller-Person direkt im Bearbeiten-Modus statt in der Ansicht. */
+        /** After remixing (see handleRemix), the creator lands directly in edit mode instead of view mode. */
         if ((location.state as { openInEdit?: boolean } | null)?.openInEdit && data.author?.username === user?.username) {
           setIsEditing(true)
           navigate(location.pathname, { replace: true })
@@ -72,9 +71,9 @@ export function PatternDetailPage() {
     return () => {
       cancelled = true
     }
-    // location/user/navigate bewusst nicht als Dependency: `openInEdit` soll nur einmalig beim
-    // Laden dieses Slugs konsumiert werden (danach per replace-Navigation sofort wieder gelöscht),
-    // nicht bei jeder späteren Änderung von location/user erneut das ganze Muster neu laden.
+    // location/user/navigate deliberately not in the deps: `openInEdit` should only be consumed once
+    // when this slug loads (then cleared right away via replace navigation), not reload the whole
+    // pattern again on every later change of location/user.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug, token, isAuthLoading, t])
 

@@ -1,13 +1,13 @@
 import type { Core } from '@strapi/strapi';
 
 /**
- * Berechtigungen, die eingeloggte Nutzer:innen ab Werk brauchen, um eigene
- * Muster anzulegen und zu sehen. Deklarativ statt manuell im Admin-Panel
- * gesetzt, damit sie bei jedem Start (auch nach einem frischen DB-Setup)
- * garantiert vorhanden sind. "create" und "mine" laufen zwar über eigene
- * Routen (siehe api/pattern/routes/pattern-create.ts), der übliche
- * Action-Permission-Check von users-permissions greift aber trotzdem, weil
- * er am Controller-Aktionsnamen hängt, nicht am Routen-Pfad.
+ * Permissions logged-in users need out of the box to create and see their
+ * own patterns. Set declaratively instead of manually in the admin panel,
+ * so they're guaranteed to exist on every start (even after a fresh DB
+ * setup). "create" and "mine" run via custom routes (see
+ * api/pattern/routes/pattern-create.ts), but users-permissions' usual
+ * action-permission check still applies, since it hangs off the
+ * controller action name, not the route path.
  */
 const AUTHENTICATED_ACTIONS = [
   'api::pattern.pattern.create',
@@ -25,7 +25,6 @@ const AUTHENTICATED_ACTIONS = [
   'api::collection.collection.delete',
   'api::collection.collection.addPattern',
   'api::collection.collection.removePattern',
-  'api::collection.collection.addToDefaultCollection',
   'api::collection.collection.subscribe',
   'api::collection.collection.unsubscribe',
   'api::collection.collection.mySubscriptions',
@@ -40,10 +39,9 @@ const AUTHENTICATED_ACTIONS = [
 ];
 
 /**
- * Veröffentlichte Muster dürfen auch nicht eingeloggte Besucher:innen
- * durchstöbern (Musterdatenbank), genauso öffentliche Sammlungen.
- * forgotPassword/resetPassword explizit gesetzt statt uns auf Strapis
- * Standard-Rolleneinstellungen zu verlassen.
+ * Published patterns can be browsed by logged-out visitors too (pattern
+ * database), same for public collections. forgotPassword/resetPassword
+ * set explicitly instead of relying on Strapi's default role settings.
  */
 const PUBLIC_ACTIONS = [
   'api::pattern.pattern.find',

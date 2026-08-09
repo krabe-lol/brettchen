@@ -3,7 +3,7 @@ import type { StrapiPatternRecord } from './patterns'
 
 export type CollectionVisibility = 'private' | 'public'
 
-/** Strapi-Repräsentation einer Sammlung (flach, Strapi v5, ohne data/attributes-Nesting). */
+/** Strapi representation of a collection (flat, Strapi v5, no data/attributes nesting). */
 export interface StrapiCollectionRecord {
   id: number
   documentId: string
@@ -11,11 +11,11 @@ export interface StrapiCollectionRecord {
   description: string | null
   visibility: CollectionVisibility
   isDefault: boolean
-  /** Nur `username` (findOne liefert zusätzlich `id`). */
+  /** Only `username` (findOne also returns `id`). */
   owner?: { id?: number; username: string } | null
-  /** Genug Felder für PatternThumbnail/PatternCard, siehe cms/src/api/collection/controllers/collection.ts. */
+  /** Enough fields for PatternThumbnail/PatternCard, see cms/src/api/collection/controllers/collection.ts. */
   patterns: StrapiPatternRecord[]
-  /** Nur `id`, um Anzahl/eigene Mitgliedschaft zu prüfen – keine Namen nötig. */
+  /** Only `id`, to check count/own membership - no names needed. */
   subscribers: { id: number }[]
 }
 
@@ -26,12 +26,12 @@ function authHeaders(token: string): HeadersInit {
 async function readJsonOrThrow(response: Response): Promise<any> {
   const data = await response.json()
   if (!response.ok) {
-    throw new Error(data?.error?.message ?? `Anfrage fehlgeschlagen (${response.status})`)
+    throw new Error(data?.error?.message ?? `Request failed (${response.status})`)
   }
   return data
 }
 
-/** Legt eine neue Sammlung an – standardmäßig privat, wenn `visibility` nicht gesetzt wird. */
+/** Creates a new collection - private by default if `visibility` isn't set. */
 export async function createCollection(
   name: string,
   description: string,
@@ -47,21 +47,21 @@ export async function createCollection(
   return data.data as StrapiCollectionRecord
 }
 
-/** Alle eigenen Sammlungen, unabhängig von der Sichtbarkeit (legt die Standard-Sammlung bei Bedarf an). */
+/** All of the user's own collections, regardless of visibility (creates the default collection if needed). */
 export async function fetchMyCollections(token: string): Promise<StrapiCollectionRecord[]> {
   const response = await fetch(`${strapiConfig.baseUrl}/api/collections/mine`, { headers: authHeaders(token) })
   const data = await readJsonOrThrow(response)
   return data.data as StrapiCollectionRecord[]
 }
 
-/** Öffentliche Sammlungen aller Personen, zum Durchstöbern/Abonnieren – auch ohne Login. */
+/** Public collections from everyone, for browsing/subscribing - works without login. */
 export async function fetchPublicCollections(): Promise<StrapiCollectionRecord[]> {
   const response = await fetch(`${strapiConfig.baseUrl}/api/collections`)
   const data = await readJsonOrThrow(response)
   return data.data as StrapiCollectionRecord[]
 }
 
-/** Öffentliche Sammlungen sieht jede:r, private nur die besitzende Person (daher der optionale Token). */
+/** Public collections are visible to everyone, private ones only to the owner (hence the optional token). */
 export async function fetchCollectionById(documentId: string, token?: string): Promise<StrapiCollectionRecord> {
   const response = await fetch(`${strapiConfig.baseUrl}/api/collections/${documentId}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -118,17 +118,7 @@ export async function removePatternFromCollection(
   return data.data as StrapiCollectionRecord
 }
 
-/** Fügt ein Muster der eigenen Standard-Sammlung hinzu (legt sie serverseitig bei Bedarf an). */
-export async function addToDefaultCollection(patternId: string, token: string): Promise<StrapiCollectionRecord> {
-  const response = await fetch(`${strapiConfig.baseUrl}/api/collections/default/patterns/${patternId}`, {
-    method: 'POST',
-    headers: authHeaders(token),
-  })
-  const data = await readJsonOrThrow(response)
-  return data.data as StrapiCollectionRecord
-}
-
-/** Nur öffentliche, fremde Sammlungen können abonniert werden. */
+/** Only public collections owned by someone else can be subscribed to. */
 export async function subscribeToCollection(documentId: string, token: string): Promise<StrapiCollectionRecord> {
   const response = await fetch(`${strapiConfig.baseUrl}/api/collections/${documentId}/subscribe`, {
     method: 'POST',
@@ -147,7 +137,7 @@ export async function unsubscribeFromCollection(documentId: string, token: strin
   return data.data as StrapiCollectionRecord
 }
 
-/** Sammlungen anderer Personen, die die eigene Person abonniert hat. */
+/** Other people's collections that the current user has subscribed to. */
 export async function fetchMySubscriptions(token: string): Promise<StrapiCollectionRecord[]> {
   const response = await fetch(`${strapiConfig.baseUrl}/api/collections/subscriptions`, {
     headers: authHeaders(token),

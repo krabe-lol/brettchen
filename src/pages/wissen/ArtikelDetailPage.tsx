@@ -1,10 +1,7 @@
 import { useParams } from 'react-router-dom'
 import { useLanguage } from '@/features/i18n/LanguageContext'
 
-/**
- * TODO: Artikel via strapiClient.findOne('articles', slug) laden, sobald das
- * Strapi-Backend steht.
- */
+// TODO: load the article via strapiClient.findOne('articles', slug) once that content type exists
 export function ArtikelDetailPage() {
   const { slug } = useParams<{ slug: string }>()
   const { t } = useLanguage()

@@ -8,7 +8,7 @@ import {
 } from '@/lib/strapi/auth'
 
 const STORAGE_KEY = 'brettchen.auth'
-/** Access-Token lebt 10 Minuten (Strapi-Sessions, siehe cms/config/plugins.ts) – mit Sicherheitsabstand erneuern. */
+/** Access token lives 10 minutes (Strapi sessions, see cms/config/plugins.ts) - refresh with a safety margin. */
 const REFRESH_INTERVAL_MS = 8 * 60 * 1000
 
 interface StoredAuth {
@@ -21,7 +21,7 @@ interface AuthContextValue {
   token: string | null
   isLoading: boolean
   login: (identifier: string, password: string) => Promise<void>
-  /** Übernimmt ein bereits vorliegendes {jwt, user} direkt (z. B. nach Registrierung/Passwort-Reset). */
+  /** Adopts an already-obtained {jwt, user} directly (e.g. after registration/password reset). */
   setSession: (result: AuthResult) => void
   logout: () => void
 }
@@ -39,11 +39,11 @@ function readStoredAuth(): StoredAuth | null {
 }
 
 /**
- * Hält den Login-Status im Browser (localStorage). Der Access-Token ist nur
- * 10 Minuten gültig – wird daher beim Start und danach periodisch über den
- * httpOnly Refresh-Token-Cookie erneuert (siehe lib/strapi/auth.ts). Schlägt
- * das fehl (z. B. Cookie abgelaufen oder gelöscht), wird abgemeldet, statt
- * mit einem toten Token weiterzumachen ("Missing or invalid credentials").
+ * Keeps login state in the browser (localStorage). The access token is only
+ * valid for 10 minutes, so it's refreshed on startup and then periodically
+ * via the httpOnly refresh-token cookie (see lib/strapi/auth.ts). Logs out
+ * if that fails (e.g. cookie expired or cleared) instead of continuing with
+ * a dead token.
  */
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [auth, setAuth] = useState<StoredAuth | null>(null)
@@ -59,34 +59,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAuth(null)
   }
 
+  function refreshAndPersist() {
+    return refreshAccessToken()
+      .then(({ jwt }) => fetchCurrentUser(jwt).then((user) => persist({ jwt, user })))
+      .catch(() => logout())
+  }
+
   useEffect(() => {
-    const stored = readStoredAuth()
-    if (!stored) {
+    if (!readStoredAuth()) {
       setIsLoading(false)
       return
     }
-    refreshAccessToken()
-      .then(({ jwt }) => fetchCurrentUser(jwt).then((user) => persist({ jwt, user })))
-      .catch(() => logout())
-      .finally(() => setIsLoading(false))
+    refreshAndPersist().finally(() => setIsLoading(false))
   }, [])
 
   useEffect(() => {
     if (!auth) return
-    const interval = setInterval(() => {
-      refreshAccessToken()
-        .then(({ jwt }) => fetchCurrentUser(jwt).then((user) => persist({ jwt, user })))
-        .catch(() => logout())
-    }, REFRESH_INTERVAL_MS)
+    const interval = setInterval(refreshAndPersist, REFRESH_INTERVAL_MS)
     return () => clearInterval(interval)
   }, [auth])
 
   /**
-   * localStorage wird pro Browser (nicht pro Tab) geteilt, ein anderer Tab
-   * kann also jederzeit ein anderes Konto einloggen/ausloggen. Ohne diesen
-   * Listener würde dieser Tab mit einem veralteten `user` weiterlaufen und
-   * beim nächsten eigenen Refresh dessen JWT fälschlich mit dem alten
-   * Nutzerobjekt verknüpfen – siehe fetchCurrentUser-Kommentar.
+   * localStorage is shared per browser, not per tab - another tab can log a
+   * different account in/out at any time. Without this listener, this tab
+   * would keep a stale `user` and wrongly pair its next refreshed JWT with
+   * it (see the fetchCurrentUser comment in lib/strapi/auth.ts).
    */
   useEffect(() => {
     function handleStorage(e: StorageEvent) {
@@ -117,6 +114,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext)
-  if (!context) throw new Error('useAuth muss innerhalb von AuthProvider verwendet werden')
+  if (!context) throw new Error('useAuth must be used within AuthProvider')
   return context
 }

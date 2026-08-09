@@ -1,8 +1,8 @@
 /**
- * Erweitert das users-permissions-Plugin um eine eigene Route, mit der die
- * eingeloggte Person ihre Anzeigepräferenzen (Dark/Light-Mode, Sprache)
- * speichern kann – Strapis Standard-`user.update` ist auf Admin-Rechte
- * beschränkt und dafür nicht gedacht.
+ * Extends the users-permissions plugin with a custom route that lets the
+ * logged-in user save their display preferences (dark/light mode,
+ * language) - Strapi's standard `user.update` is restricted to admin
+ * permissions and not meant for this.
  */
 export default (plugin: any) => {
   plugin.controllers.user.updatePreferences = async (ctx: any) => {

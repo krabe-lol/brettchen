@@ -1,7 +1,8 @@
 /**
- * Nur eigene Routen (kein `createCoreRouter`) – der Standard-Content-API-Router
- * würde `user` (Relation auf plugin::users-permissions.user) im Create/Update-Body
- * generell ablehnen, siehe dasselbe Problem bei Pattern/Collection.
+ * Custom routes only (no `createCoreRouter`) - the standard content API
+ * router would generally reject `user` (a relation to
+ * plugin::users-permissions.user) in the create/update body, same issue
+ * as with pattern/collection.
  */
 export default {
   type: 'content-api',

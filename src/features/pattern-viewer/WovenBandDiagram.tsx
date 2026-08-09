@@ -7,27 +7,27 @@ import type { Pattern, PaletteSlot } from './types'
 interface WovenBandDiagramProps {
   pattern: Pattern
   palette: PaletteSlot[]
-  /** Wenn gesetzt (0-basiert), wird diese Reihe hervorgehoben und bei Änderung in den Viewport gescrollt – siehe PatternDiagrams-Navigation. */
+  /** If set (0-based), this row is highlighted and scrolled into view on change - see PatternDiagrams navigation. */
   activeRow?: number | null
-  /** Zeigt das Band rückwärts (siehe applyUntwistOrder) – pro Muster/Nutzer:in gespeichert, siehe usePatternHighlightSettings. */
+  /** Shows the band in reverse (see applyUntwistOrder) - saved per pattern/user, see usePatternHighlightSettings. */
   untwistMode?: boolean
-  /** Blendet eine senkrechte Hilfslinie in der Brettchen-Mitte ein. Siehe DisplaySettings.showCenterLine. */
+  /** Shows a vertical guide line through the tablet centers. See DisplaySettings.showCenterLine. */
   showCenterLine?: boolean
 }
 
-/** Mindestanzahl Reihen in der Bandvorschau – kürzere Drehmuster werden dafür wiederholt. */
+/** Minimum row count in the band preview - shorter turning sequences repeat to fill it. */
 const MIN_DISPLAY_ROWS = 40
 
 /**
- * Realistische Bandvorschau, in derselben Ausrichtung wie das Drehmuster
- * (Brettchen als Spalten von links, Reihe 1 unten, wächst nach oben). Statt
- * Ellipsen zeigt jede Zelle ein Parallelogramm mit geraden, senkrechten
- * Seiten und schrägen (45°/135°) Ober-/Unterkanten – die höhere Spitze
- * liegt auf der Seite, in die die Ellipse im Drehmuster kippen würde
- * (`effectiveDirection`). Nur die Reihe eines Richtungswechsels (derselbe
- * Umkehrpunkt, den das Drehmuster mit der cyanen Linie markiert) wird zum
- * Dreieck: die stumpfe obere Ecke fällt weg, die Reihe davor und die direkt
- * danach bleiben normale Parallelogramme. Rein lesend, nicht klickbar.
+ * Realistic band preview, in the same orientation as the turning diagram
+ * (tablets as columns from the left, row 1 at the bottom, growing
+ * upward). Instead of ellipses, each cell shows a parallelogram with
+ * straight vertical sides and slanted (45°/135°) top/bottom edges - the
+ * taller point sits on the side the ellipse would tilt toward in the
+ * turning diagram (`effectiveDirection`). Only the row of a direction
+ * change (the same turnaround point the turning diagram marks with the
+ * cyan line) becomes a triangle: the blunt top corner drops out, the rows
+ * before and right after stay normal parallelograms. Read-only, not clickable.
  */
 export function WovenBandDiagram({
   pattern,
@@ -53,7 +53,7 @@ export function WovenBandDiagram({
   const totalWidth = ROW_LABEL_WIDTH + gridWidth
   const totalHeight = COL_LABEL_HEIGHT + gridHeight
 
-  /** Reihe 0 (zuerst gewebt) unten, höhere Reihen weiter oben – wie im Drehmuster. */
+  /** Row 0 (woven first) at the bottom, higher rows further up - same as the turning diagram. */
   const rowY = (rowIndex: number) => COL_LABEL_HEIGHT + (displayNumRows - 1 - rowIndex) * STEP
 
   return (
@@ -106,7 +106,7 @@ export function WovenBandDiagram({
 
           let points: string
           if (cell.effectiveDirection === 0) {
-            // Kein Kipp-Ausschlag: einfaches, ungeneigtes Rechteck über eine Reihe.
+            // No tilt: a simple, straight rectangle spanning one row.
             const yTop = cy - STEP / 2
             const yBottom = cy + STEP / 2
             points = `${xLeft},${yTop} ${xRight},${yTop} ${xRight},${yBottom} ${xLeft},${yBottom}`
@@ -123,7 +123,7 @@ export function WovenBandDiagram({
             const bottomRight = leaningLeft ? yBottomShoulder : yBottomExtreme
 
             if (isDirectionChange) {
-              // während Richtungswechsel
+              // at a direction change
               const sharpBottomX = leaningLeft ? xRight : xLeft
               const sharpTopX = leaningLeft ? xRight : xLeft
               const otherX = leaningLeft ? xLeft : xRight

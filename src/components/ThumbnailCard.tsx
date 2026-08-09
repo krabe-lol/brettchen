@@ -9,25 +9,25 @@ interface ThumbnailCardProps {
   href: string
   thumbnail: ReactNode
   title: string
-  /** Zeigt das Privat/Schloss-Badge neben dem Titel (gemeinsames Aussehen für Muster- und Sammlungskarten). */
+  /** Shows the private/lock badge next to the title (shared look for pattern and collection cards). */
   isPrivate?: boolean
-  /** Weitere Badges neben dem Titel, z. B. die "(Standard)"-Markierung einer Sammlung. */
+  /** Extra badges next to the title, e.g. the "(default)" marker on a collection. */
   titleBadges?: ReactNode
-  /** Overlay-Button oben rechts auf dem Thumbnail – bei Mustern "zu Sammlung hinzufügen", bei Sammlungen "Abonnieren". */
+  /** Overlay button top-right on the thumbnail - "add to collection" for patterns, "subscribe" for collections. */
   cornerAction?: ReactNode
-  /** Ersteller-/Besitzer-Benutzername, direkt unter dem Titel, verlinkt zum öffentlichen Profil. */
+  /** Creator/owner username, right below the title, links to their public profile. */
   ownerUsername?: string
-  /** Zeile unter dem Titel (Stil bei Mustern, Beschreibung bei Sammlungen). */
+  /** Line below the title (style for patterns, description for collections). */
   subtitle?: ReactNode
-  /** Zusätzliche Zeile darunter (z. B. Musteranzahl einer Sammlung). */
+  /** Extra line below that (e.g. a collection's pattern count). */
   footer?: ReactNode
   className?: string
 }
 
 /**
- * Gemeinsame Karte mit Vorschaubild (fest 3:1) für Muster- und
- * Sammlungsübersichten – PatternCard und CollectionCard unterscheiden sich
- * nur im Thumbnail-Inhalt und den Overlay-Aktionen.
+ * Shared card with a fixed 3:1 thumbnail for pattern and collection
+ * overviews - PatternCard and CollectionCard only differ in thumbnail
+ * content and overlay actions.
  */
 export function ThumbnailCard({
   href,

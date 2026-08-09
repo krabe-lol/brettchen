@@ -16,9 +16,9 @@ const ToggleGroupContext = React.createContext<ToggleGroupContextValue>({
 
 type ToggleGroupProps = React.ComponentProps<typeof ToggleGroupPrimitive.Root> &
   VariantProps<typeof toggleVariants> & {
-    /** `none`: Items berühren sich zu einer zusammenhängenden Gruppe (ein gemeinsamer Rahmen). `default`: Abstand zwischen den Items, jedes behält eigene Ecken. */
+    /** `none`: items touch, forming one connected group with a shared border. `default`: gap between items, each keeps its own rounded corners. */
     spacing?: 'default' | 'none'
-    /** `stretched`: Items teilen sich den verfügbaren Platz gleichmäßig, statt nur ihre Label-Breite einzunehmen. */
+    /** `stretched`: items share the available width evenly instead of just fitting their label. */
     stretch?: 'default' | 'stretched'
   }
 

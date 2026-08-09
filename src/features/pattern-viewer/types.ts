@@ -1,13 +1,13 @@
 /**
- * Kanonische, nomenklatur-unabhängige Musterdaten – spiegelt den Strapi
- * Content-Type "pattern". Farb- und Wende-Darstellung sind bewusst NICHT
- * Teil dieser Typen, siehe PaletteOverride/NomenclatureSet.
+ * Canonical, nomenclature-independent pattern data - mirrors the Strapi
+ * "pattern" content type. Color and turn display are deliberately NOT part
+ * of these types, see PaletteOverride/NomenclatureSet.
  */
 
 export type TabletOrientation = 'S' | 'Z'
 
 export interface ThreadingHole {
-  /** Referenz auf einen Farb-Slot in Pattern.defaultPalette / PaletteOverride */
+  /** References a color slot in Pattern.defaultPalette / PaletteOverride. */
   colorSlotId: string
 }
 
@@ -17,8 +17,8 @@ export interface TabletThreading {
 }
 
 /**
- * Vorzeichenbehaftete Anzahl Viertelumdrehungen pro Brettchen und Reihe.
- * +1 = eine Vierteldrehung vorwärts, -2 = zwei rückwärts, 0 = Idle.
+ * Signed number of quarter turns per tablet and row.
+ * +1 = one quarter turn forward, -2 = two turns backward, 0 = idle.
  */
 export type TurnValue = number
 
@@ -42,34 +42,32 @@ export interface Pattern {
   turningSequence: TurnValue[][]
   defaultPalette: PaletteSlot[]
   defaultNomenclatureId: string | null
-  /** Username der Person, die das Muster eingereicht hat. */
+  /** Username of the person who submitted the pattern. */
   createdBy: string
-  /** Freie Stil-Tags, z. B. ["Keltisch", "Baltisch"]. */
+  /** Free-form style tags, e.g. ["Celtic", "Baltic"]. */
   style: string[]
-  /** Freitext-Beschreibung/Notizen zum Muster. */
+  /** Free-text notes about the pattern. */
   notes: string
-  /** Optionaler Link zur Quelle des Musters (z. B. Originalveröffentlichung). */
+  /** Optional link to the pattern's source (e.g. the original publication). */
   sourceUrl: string
-  /** Gesetzt, wenn dieses Muster ein Remix eines anderen Musters ist – solange sich der Link nicht durch genug Änderung gelöst hat. */
+  /** Set if this pattern is a remix of another one - until the link breaks from enough divergence. */
   remixOf: { title: string; slug: string } | null
-  /** ISO-Zeitstempel der Erstellung; fehlt bei einem noch nicht gespeicherten neuen Muster. */
+  /** ISO creation timestamp; absent for a new, not-yet-saved pattern. */
   createdAt?: string
   /**
-   * Optionale 1-basierte Reihennummer, ab der sich das Drehmuster wiederholt
-   * (z. B. bei einem Muster mit nicht wiederholtem Anfangsstück). `null`
-   * bedeutet: das gesamte Drehmuster ab Reihe 1 wiederholt sich, siehe
-   * WovenBandDiagram.
+   * Optional 1-based row number where the turning sequence starts repeating
+   * (e.g. for a pattern with a non-repeating intro section). `null` means
+   * the whole turning sequence repeats from row 1, see WovenBandDiagram.
    */
   repeatFromRow: number | null
   /**
-   * Farb-Slot des Schussfadens (Weft), optional. Gilt als benutzt, auch wenn
-   * kein Loch der Schärung diese Farbe referenziert – siehe pruneUnusedColors
-   * in PatternEditor.tsx.
+   * Weft color slot, optional. Counts as used even if no threading hole
+   * references it - see pruneUnusedColors in PatternEditor.tsx.
    */
   weftColorSlotId: string | null
 }
 
-/** Client-seitiger Override der Standardfarben, nie persistiert. */
+/** Client-side override of the default colors, never persisted. */
 export type PaletteOverride = Record<string /* slotId */, string /* hex */>
 
 export type TurnCategory = 'forward' | 'backward' | 'idle'

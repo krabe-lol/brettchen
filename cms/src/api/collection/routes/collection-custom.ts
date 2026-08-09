@@ -1,10 +1,10 @@
 /**
- * Eigene Routen für alles, was der Standard-Content-API-Router nicht bietet
- * (siehe Kommentar in collection.ts): Anlegen, eigene Sammlungen/Abos
- * laden, Muster hinzufügen/entfernen, abonnieren/kündigen. Reihenfolge
- * wichtig bei überlappenden Pfaden – literale Segmente (z. B. "default")
- * stehen vor den entsprechenden `:id`-Routen, damit sie nicht fälschlich
- * als `:id` interpretiert werden.
+ * Custom routes for everything the standard content API router doesn't
+ * offer (see the comment in collection.ts): creating, loading own
+ * collections/subscriptions, adding/removing patterns, subscribing/
+ * unsubscribing. Order matters for overlapping paths - literal segments
+ * come before the corresponding `:id` routes, so they aren't wrongly
+ * interpreted as `:id`.
  */
 export default {
   type: 'content-api',
@@ -23,11 +23,6 @@ export default {
       method: 'GET',
       path: '/collections/subscriptions',
       handler: 'collection.mySubscriptions',
-    },
-    {
-      method: 'POST',
-      path: '/collections/default/patterns/:patternId',
-      handler: 'collection.addToDefaultCollection',
     },
     {
       method: 'POST',

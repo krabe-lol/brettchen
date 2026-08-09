@@ -15,19 +15,19 @@ import type { Pattern, PaletteSlot } from './types'
 interface PatternDiagramsProps {
   pattern: Pattern
   palette: PaletteSlot[]
-  /** Wenn gesetzt, werden die Zellen in der Schärpatrone klickbar (Farbe anwenden). */
+  /** If set, cells in the threading chart become clickable (apply color). */
   onThreadingCellClick?: (tabletIndex: number, holeIndex: number) => void
-  /** Wenn gesetzt, wird die S/Z-Kartenstellung unter jedem Brettchen klickbar. */
+  /** If set, the S/Z card orientation below each tablet becomes clickable. */
   onOrientationClick?: (tabletIndex: number) => void
-  /** Wenn gesetzt, lässt sich ein Brettchen in der Schärpatrone per Drag & Drop verschieben. */
+  /** If set, a tablet can be dragged to move it in the threading chart. */
   onMoveTablet?: (fromIndex: number, toIndex: number) => void
-  /** Wenn gesetzt, erscheint unter jeder Spalte der Schärpatrone ein kleines "×" zum Löschen genau dieses Brettchens. */
+  /** If set, a small "x" appears below each threading chart column to delete that tablet. */
   onRemoveTablet?: (tabletIndex: number) => void
-  /** Wenn gesetzt, werden die Zellen im Drehmuster klickbar (Drehrichtung ändern) – gilt nur für die Drehmuster-Ansicht, nicht fürs Webmuster. */
+  /** If set, cells in the turning diagram become clickable (change turn direction) - only applies to the turning view, not the woven band. */
   onWeaveCellClick?: (rowIndex: number, tabletIndex: number) => void
-  /** Wenn gesetzt, lässt sich die Schussfadenfarbe auswählen (siehe WeftColorSelector) – ohne wird nur der aktuelle Wert angezeigt. */
+  /** If set, the weft color can be picked (see WeftColorSelector) - without it, only the current value is shown. */
   onWeftColorChange?: (slotId: string | null) => void
-  /** Reihen-/Brettchen-Hervorhebung + Untwist-Modus, siehe PatternHighlightSettingsCard/usePatternHighlightSettings – ohne diese Props bleiben Hervorhebung/Untwist aus (z. B. Muster-Vorschau auf der Einstellungsseite). */
+  /** Row/tablet highlighting + untwist mode, see PatternHighlightSettingsCard/usePatternHighlightSettings - without these props, highlighting/untwist stays off (e.g. the pattern preview on the settings page). */
   highlightSettings?: PatternHighlightSettings
   onHighlightSettingsChange?: (settings: PatternHighlightSettings) => void
 }
@@ -39,28 +39,25 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 /**
- * Schärpatrone und Drehmuster/Webmuster, unverpackt (kein Rahmen, keine
- * Card). Jedes teilt sich per `flex-1` den verfügbaren Platz mit dem
- * anderen – die Diagramme selbst bleiben aber in ihrer natürlichen
- * Zellgröße, werden also nicht auf die Spaltenbreite hochskaliert. Rechts
- * lässt sich per ToggleGroup zwischen dem editierbaren Drehmuster (Ellipsen,
- * anklickbar) und einer rein lesenden, gewebt wirkenden Bandvorschau
- * umschalten – beide liegen an derselben Stelle.
+ * Threading chart and turning/woven diagram, unwrapped (no border, no
+ * card). Each shares the available space with the other via `flex-1` -
+ * but the diagrams themselves stay at their natural cell size, they're
+ * never scaled up to the column width. On the right, a ToggleGroup
+ * switches between the editable turning diagram (ellipses, clickable) and
+ * a read-only, woven-look band preview - both occupy the same spot.
  *
- * Reihen-/Brettchen-Hervorhebung + Untwist-Modus (siehe
- * PatternHighlightSettingsCard, `highlightSettings`/`onHighlightSettingsChange`
- * – anders als die übrigen Anzeigeoptionen pro Muster UND Nutzer:in
- * gespeichert, nicht global): zwei vollständig unabhängige Cursor mit
- * eigenem Schalter und eigener Zahleneingabe – die aktive Reihe
- * (hervorgehoben im Drehmuster/Band) und das aktive Brettchen (hervorgehoben
- * als Spalte im Schärmuster). Beide lassen sich zusätzlich per Pfeiltasten
- * verschieben (Hoch/Runter für die Reihe, Links/Rechts fürs Brettchen) –
- * das ist rein optional, da beide auch direkt in der Card eingegeben werden
- * können. Auf Mobilgeräten zusätzlich ein Floating-Steuerkreuz unten
- * rechts, da dort keine Pfeiltasten zur Verfügung stehen; es zeigt nur die
- * Richtungen des jeweils aktivierten Cursors. Pfeiltasten werden ignoriert,
- * solange ein Eingabefeld fokussiert ist, damit normale Textnavigation
- * nicht gestört wird.
+ * Row/tablet highlighting + untwist mode (see PatternHighlightSettingsCard,
+ * `highlightSettings`/`onHighlightSettingsChange` - saved per pattern AND
+ * user unlike the other display options, not globally): two fully
+ * independent cursors with their own toggle and number input - the active
+ * row (highlighted in the turning diagram/band) and the active tablet
+ * (highlighted as a column in the threading chart). Both can also be
+ * moved with arrow keys (up/down for the row, left/right for the tablet) -
+ * purely optional, since both can also be typed directly into the card.
+ * On mobile, an additional floating D-pad in the bottom right, since arrow
+ * keys aren't available there; it only shows the directions of whichever
+ * cursor is active. Arrow keys are ignored while an input field is
+ * focused, so normal text navigation isn't disrupted.
  */
 export function PatternDiagrams({
   pattern,

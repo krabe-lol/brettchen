@@ -6,7 +6,7 @@ interface ColorDefinition {
   names: Record<Language, string>
 }
 
-/** Grundfarben mit einfachen Namen, für die Schnellauswahl-Buttons im Picker. */
+/** Basic colors with simple names, for the quick-pick buttons in the color picker. */
 export const BASIC_COLOR_DEFINITIONS: ColorDefinition[] = [
   { hex: '#ffffff', names: { de: 'Weiß', en: 'White' } },
   { hex: '#808080', names: { de: 'Grau', en: 'Gray' } },
@@ -20,28 +20,27 @@ export const BASIC_COLOR_DEFINITIONS: ColorDefinition[] = [
   { hex: '#ec4899', names: { de: 'Pink', en: 'Pink' } },
 ]
 
-/** Für die Schnellauswahl-Buttons im Picker, in der aktuellen Sprache. */
+/** For the quick-pick buttons in the color picker, in the current language. */
 export function localizedBasicColors(language: Language): { name: string; hex: string }[] {
   return BASIC_COLOR_DEFINITIONS.map((color) => ({ name: color.names[language], hex: color.hex }))
 }
 
 /**
- * Ab welcher Delta-E-Distanz (CIE76) zwei Farben noch als "gleich" gelten –
- * unterhalb der Wahrnehmungsschwelle (JND liegt bei ca. 2.3), damit auch
- * Farben verhindert werden, die sich nur minimal vom Original unterscheiden.
+ * Delta-E distance (CIE76) below which two colors still count as "the
+ * same" - well above the perceptual threshold (JND is ~2.3), so colors
+ * that differ only minimally from the original get caught too.
  */
 const DUPLICATE_COLOR_THRESHOLD = 8
 
-/** Ob zwei Hex-Farben identisch oder einander so ähnlich sind, dass sie im Muster nicht zu unterscheiden wären. */
+/** Whether two hex colors are identical or similar enough to be indistinguishable in the pattern. */
 export function isSimilarColor(hexA: string, hexB: string): boolean {
   return chroma.deltaE(hexA, hexB) < DUPLICATE_COLOR_THRESHOLD
 }
 
 /**
- * Größeres Farbnamen-Vokabular für die automatische Benennung: enthält die
- * Grundfarben (gleiche Hex-Werte wie BASIC_COLOR_DEFINITIONS, damit ein Klick
- * auf eine Grundfarbe exakt ihren einfachen Namen behält) plus feinere
- * Zwischentöne für frei gewählte Farben.
+ * Larger color-name vocabulary for automatic naming: includes the basic
+ * colors (same hex values as BASIC_COLOR_DEFINITIONS, so clicking one keeps
+ * its exact simple name) plus finer in-between shades for freely picked colors.
  */
 const EXTENDED_COLOR_DEFINITIONS: ColorDefinition[] = [
   ...BASIC_COLOR_DEFINITIONS,
@@ -62,10 +61,9 @@ const EXTENDED_COLOR_DEFINITIONS: ColorDefinition[] = [
 ]
 
 /**
- * Sucht die wahrnehmungsnächste Farbdefinition per Delta-E (CIE76), derselben
- * Distanzberechnung, die auch die Bibliothek color-namer verwendet – nur auf
- * unser eigenes, zweisprachiges Namensvokabular angewendet statt auf deren
- * (rein englische) Listen.
+ * Finds the perceptually closest color definition via Delta-E (CIE76), the
+ * same distance metric the color-namer library uses - just applied to our
+ * own bilingual name vocabulary instead of its English-only lists.
  */
 function nearestColorDefinition(hex: string): ColorDefinition {
   let best = EXTENDED_COLOR_DEFINITIONS[0]
@@ -80,7 +78,7 @@ function nearestColorDefinition(hex: string): ColorDefinition {
   return best
 }
 
-/** Generiert einen innerhalb der bestehenden Namen eindeutigen Farbnamen aus einem Hex-Wert. */
+/** Generates a color name from a hex value that's unique among the existing names. */
 export function generateColorName(hex: string, existingNames: string[], language: Language): string {
   const baseName = nearestColorDefinition(hex).names[language]
   if (!existingNames.includes(baseName)) return baseName

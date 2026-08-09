@@ -6,7 +6,7 @@ interface CollectionThumbnailProps {
   className?: string
 }
 
-/** Wie viele Muster im Thumbnail gezeigt werden: 1→1, 2–3→2, 4+→4. */
+/** How many patterns to show in the thumbnail: 1→1, 2-3→2, 4+→4. */
 function shownCount(total: number): 0 | 1 | 2 | 4 {
   if (total <= 0) return 0
   if (total === 1) return 1
@@ -15,9 +15,9 @@ function shownCount(total: number): 0 | 1 | 2 | 4 {
 }
 
 /**
- * Sammlungs-Vorschau, aus denselben PatternThumbnail-Kacheln zusammengesetzt
- * wie die einzelne Musterkarte: 1 Muster füllt die volle Fläche, 2–3 Muster
- * zeigen die ersten beiden nebeneinander, ab 4 Mustern ein 2×2-Raster.
+ * Collection preview built from the same PatternThumbnail tiles as a single
+ * pattern card: 1 pattern fills the area, 2-3 show the first two
+ * side by side, 4+ show a 2x2 grid.
  */
 export function CollectionThumbnail({ patterns, className }: CollectionThumbnailProps) {
   const count = shownCount(patterns.length)

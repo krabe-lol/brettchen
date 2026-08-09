@@ -14,10 +14,10 @@ interface DisplaySettingsDialogProps {
   isSavingDisplayDefault?: boolean
   canSaveDisplayDefault?: boolean
   /**
-   * Reihen-/Brettchen-Hervorhebung + Untwist-Modus – nur im Lesemodus
-   * (PatternViewer) gesetzt. Im Bearbeiten-Modus (PatternEditor) bewusst
-   * weggelassen: beim Bearbeiten der Schärung/Drehfolge wäre eine parallel
-   * eingeblendete Hervorhebung nur verwirrend.
+   * Row/tablet highlighting + untwist mode - only set in read mode
+   * (PatternViewer). Deliberately omitted in edit mode (PatternEditor):
+   * highlighting shown alongside editing the threading/turning sequence
+   * would just be confusing.
    */
   highlightSettings?: PatternHighlightSettings
   onHighlightSettingsChange?: (settings: PatternHighlightSettings) => void
@@ -29,11 +29,10 @@ interface DisplaySettingsDialogProps {
 }
 
 /**
- * Anzeigeoptionen (DisplaySettingsCard) und, sofern gesetzt, Reihen-/
- * Brettchen-Hervorhebung + Untwist-Modus (PatternHighlightSettingsCard)
- * hinter einem Button als Overlay statt als dauerhafte Seitenspalte – hält
- * die eigentliche Mustereinsicht (Diagramme, Farben, Infos) im Fokus,
- * besonders auf schmalen Bildschirmen.
+ * Display options (DisplaySettingsCard) and, if set, row/tablet
+ * highlighting + untwist mode (PatternHighlightSettingsCard) behind a
+ * button as an overlay instead of a permanent sidebar - keeps the actual
+ * pattern view (diagrams, colors, info) in focus, especially on narrow screens.
  */
 export function DisplaySettingsDialog({
   displaySettings,

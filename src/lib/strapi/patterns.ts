@@ -2,14 +2,13 @@ import { strapiConfig } from './config'
 import type { Pattern } from '@/features/pattern-viewer/types'
 
 /**
- * "draft" ist nur für den Ersteller sichtbar (siehe /patterns/mine),
- * "published" für alle. "in_review"/"rejected" existieren im Strapi-Schema
- * für einen späteren Moderationsworkflow, werden vom Frontend aber aktuell
- * nicht gesetzt.
+ * "draft" is only visible to its creator (see /patterns/mine), "published"
+ * to everyone. "in_review"/"rejected" exist in the schema for a future
+ * moderation workflow but aren't set by the frontend yet.
  */
 export type ModerationStatus = 'draft' | 'in_review' | 'published' | 'rejected'
 
-/** Strapi-Repräsentation eines Musters (flach, Strapi v5, ohne data/attributes-Nesting). */
+/** Strapi representation of a pattern (flat, Strapi v5, no data/attributes nesting). */
 export interface StrapiPatternRecord {
   id: number
   documentId: string
@@ -27,15 +26,15 @@ export interface StrapiPatternRecord {
   source: string | null
   moderationStatus: ModerationStatus
   createdAt: string
-  /** Automatisch beim Speichern gesetzt (siehe pattern.ts Backend-Controller): true, wenn sich die Verdrillung bei jedem Brettchen zu 0 aufhebt. */
+  /** Set automatically on save (see pattern.ts backend controller): true if turning nets to zero twist for every tablet. */
   isTwistNeutral: boolean
-  /** 1-basierte Reihennummer, ab der sich das Drehmuster wiederholt (optional), siehe WovenBandDiagram. */
+  /** 1-based row number where the turning sequence starts repeating (optional), see WovenBandDiagram. */
   repeatFromRow: number | null
-  /** Farb-Slot des Schussfadens (optional) – gilt als benutzt, auch ohne Referenz durch ein Loch der Schärung. */
+  /** Weft color slot (optional) - counts as used even without a threading hole referencing it. */
   weftColorSlot: string | null
-  /** Bei find/mine nur `username` populiert, bei findOne zusätzlich `id` (siehe cms/src/api/pattern/controllers/pattern.ts). */
+  /** Only `username` on find/mine, plus `id` on findOne (see cms/src/api/pattern/controllers/pattern.ts). */
   author?: { id?: number; username: string } | null
-  /** Nur bei findOne/update/remix populiert; null sobald der Remix-Link gebrochen ist. */
+  /** Only populated on findOne/update/remix; null once the remix link has broken. */
   remixOf?: { title: string; slug: string } | null
 }
 
@@ -43,7 +42,7 @@ function authHeaders(token: string): HeadersInit {
   return { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }
 }
 
-/** Rein zufällige Zeichenfolge, bewusst ohne Bezug zum Titel (z. B. für die URL /pattern/:slug). */
+/** Random string, deliberately unrelated to the title (used for the /pattern/:slug URL). */
 function randomSlug(): string {
   return crypto.randomUUID().replace(/-/g, '').slice(0, 12)
 }
@@ -51,17 +50,31 @@ function randomSlug(): string {
 async function readJsonOrThrow(response: Response): Promise<any> {
   const data = await response.json()
   if (!response.ok) {
-    throw new Error(data?.error?.message ?? `Anfrage fehlgeschlagen (${response.status})`)
+    throw new Error(data?.error?.message ?? `Request failed (${response.status})`)
   }
   return data
 }
 
-/**
- * Legt ein neues Muster in Strapi an. `author` wird serverseitig aus
- * dem authentifizierten Nutzer gesetzt (siehe cms/src/api/pattern/controllers/pattern.ts),
- * nicht aus dem Request-Body – Strapi verbietet clientseitig gesetzte
- * Relationen auf das User-Model.
- */
+/** Shared request body for create/update - excludes `slug` and `moderationStatus`, which each caller sets differently. */
+function toPatternPayload(pattern: Pattern) {
+  return {
+    title: pattern.title,
+    summary: pattern.summary,
+    numTablets: pattern.numTablets,
+    holesPerTablet: pattern.holesPerTablet,
+    numRows: pattern.numRows,
+    threading: pattern.threading,
+    turningSequence: pattern.turningSequence,
+    defaultPalette: pattern.defaultPalette,
+    style: pattern.style,
+    notes: pattern.notes,
+    source: pattern.sourceUrl,
+    repeatFromRow: pattern.repeatFromRow,
+    weftColorSlot: pattern.weftColorSlotId,
+  }
+}
+
+/** `author` is set server-side from the authenticated user (see cms/src/api/pattern/controllers/pattern.ts), not from the request body - Strapi rejects client-set relations to the User model. */
 export async function createPattern(
   pattern: Pattern,
   moderationStatus: 'draft' | 'published',
@@ -71,35 +84,14 @@ export async function createPattern(
     method: 'POST',
     headers: authHeaders(token),
     body: JSON.stringify({
-      data: {
-        title: pattern.title,
-        slug: randomSlug(),
-        summary: pattern.summary,
-        numTablets: pattern.numTablets,
-        holesPerTablet: pattern.holesPerTablet,
-        numRows: pattern.numRows,
-        threading: pattern.threading,
-        turningSequence: pattern.turningSequence,
-        defaultPalette: pattern.defaultPalette,
-        style: pattern.style,
-        notes: pattern.notes,
-        source: pattern.sourceUrl,
-        repeatFromRow: pattern.repeatFromRow,
-        weftColorSlot: pattern.weftColorSlotId,
-        moderationStatus,
-      },
+      data: { ...toPatternPayload(pattern), slug: randomSlug(), moderationStatus },
     }),
   })
   const data = await readJsonOrThrow(response)
   return data.data as StrapiPatternRecord
 }
 
-/**
- * Lädt alle Muster des eingeloggten Nutzers über die eigene
- * `/patterns/mine`-Route (siehe cms/src/api/pattern/controllers/pattern.ts):
- * Filtern per `filters[author]` über die Standard-Find-Route ist aus
- * demselben Grund wie beim Anlegen nicht möglich.
- */
+/** Loads all patterns of the logged-in user via the dedicated `/patterns/mine` route (filtering by `author` on the standard find route isn't allowed, same reason as in `createPattern`). */
 export async function fetchMyPatterns(token: string): Promise<StrapiPatternRecord[]> {
   const response = await fetch(`${strapiConfig.baseUrl}/api/patterns/mine`, {
     headers: authHeaders(token),
@@ -108,18 +100,14 @@ export async function fetchMyPatterns(token: string): Promise<StrapiPatternRecor
   return data.data as StrapiPatternRecord[]
 }
 
-/**
- * Lädt alle veröffentlichten Muster (Musterdatenbank) – auch ohne Login.
- * Der Server liefert hier IMMER nur `moderationStatus: 'published'`,
- * unabhängig von Query-Parametern (siehe pattern.find im Backend).
- */
+/** Loads all published patterns - works without login. The server always returns only `moderationStatus: 'published'` here, regardless of query params (see pattern.find in the backend). */
 export async function fetchPublishedPatterns(): Promise<StrapiPatternRecord[]> {
   const response = await fetch(`${strapiConfig.baseUrl}/api/patterns`)
   const data = await readJsonOrThrow(response)
   return data.data as StrapiPatternRecord[]
 }
 
-/** Alle im übergebenen Musterbestand tatsächlich verwendeten Stil-Tags, dedupliziert und sortiert – für Autocomplete/Filter. */
+/** All style tags actually used in the given patterns, deduplicated and sorted - for autocomplete/filters. */
 export function collectStyleTags(patterns: StrapiPatternRecord[]): string[] {
   const tags = new Set<string>()
   for (const pattern of patterns) {
@@ -128,13 +116,7 @@ export function collectStyleTags(patterns: StrapiPatternRecord[]): string[] {
   return [...tags].sort((a, b) => a.localeCompare(b))
 }
 
-/**
- * Lädt ein einzelnes Muster per Slug (nicht documentId) – so verlinken
- * Musterkarten (`/pattern/:slug`). Veröffentlichte Muster sind für alle
- * sichtbar; Entwürfe nur für die Ersteller-Person, daher der optionale
- * Token (siehe pattern.findOne im Backend). Wirft 404 bei unbekanntem Slug
- * oder fremden Entwürfen.
- */
+/** Loads a single pattern by slug (not documentId), as used by /pattern/:slug links. Published patterns are visible to everyone; drafts only to their creator, hence the optional token (see pattern.findOne in the backend). 404s for an unknown slug or someone else's draft. */
 export async function fetchPatternBySlug(slug: string, token?: string): Promise<StrapiPatternRecord> {
   const response = await fetch(`${strapiConfig.baseUrl}/api/patterns/${encodeURIComponent(slug)}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -143,7 +125,7 @@ export async function fetchPatternBySlug(slug: string, token?: string): Promise<
   return data.data as StrapiPatternRecord
 }
 
-/** Wandelt einen Strapi-Datensatz in das für PatternEditor/PatternViewer erwartete Pattern-Format um. */
+/** Converts a Strapi record into the Pattern shape expected by PatternEditor/PatternViewer. */
 export function toPattern(record: StrapiPatternRecord): Pattern {
   return {
     id: String(record.id),
@@ -168,12 +150,7 @@ export function toPattern(record: StrapiPatternRecord): Pattern {
   }
 }
 
-/**
- * Kopiert ein veröffentlichtes fremdes Muster als neuen, eigenen Entwurf
- * (siehe pattern.remix im Backend) – Schären, Wendefolge, Palette und Stil
- * werden übernommen, verlinkt aber auf das Original (`remixOf`). Der Link
- * bricht automatisch, sobald beim Speichern genug verändert wurde.
- */
+/** Copies a pattern as a new draft of your own (see pattern.remix in the backend): threading, turning sequence, palette and style tags carry over, linked back to the original via `remixOf`. The link breaks automatically once enough has changed on save. */
 export async function remixPattern(documentId: string, token: string): Promise<StrapiPatternRecord> {
   const response = await fetch(`${strapiConfig.baseUrl}/api/patterns/${documentId}/remix`, {
     method: 'POST',
@@ -183,10 +160,7 @@ export async function remixPattern(documentId: string, token: string): Promise<S
   return data.data as StrapiPatternRecord
 }
 
-/**
- * Löscht ein Muster unwiderruflich. Der Server lässt das nur für die
- * Ersteller-Person zu (siehe pattern.delete im Backend).
- */
+/** Deletes a pattern permanently. The server only allows this for its creator (see pattern.delete in the backend). */
 export async function deletePattern(documentId: string, token: string): Promise<void> {
   const response = await fetch(`${strapiConfig.baseUrl}/api/patterns/${documentId}`, {
     method: 'DELETE',
@@ -195,11 +169,7 @@ export async function deletePattern(documentId: string, token: string): Promise<
   await readJsonOrThrow(response)
 }
 
-/**
- * Speichert Änderungen an einem bestehenden Muster. Der Server lässt das nur
- * für die Ersteller-Person zu (siehe pattern.update im Backend), auch wenn
- * hier fälschlicherweise ein anderes documentId übergeben würde.
- */
+/** Saves changes to an existing pattern. The server only allows this for its creator (see pattern.update in the backend). */
 export async function updatePattern(
   documentId: string,
   pattern: Pattern,
@@ -209,24 +179,7 @@ export async function updatePattern(
   const response = await fetch(`${strapiConfig.baseUrl}/api/patterns/${documentId}`, {
     method: 'PUT',
     headers: authHeaders(token),
-    body: JSON.stringify({
-      data: {
-        title: pattern.title,
-        summary: pattern.summary,
-        numTablets: pattern.numTablets,
-        holesPerTablet: pattern.holesPerTablet,
-        numRows: pattern.numRows,
-        threading: pattern.threading,
-        turningSequence: pattern.turningSequence,
-        defaultPalette: pattern.defaultPalette,
-        style: pattern.style,
-        notes: pattern.notes,
-        source: pattern.sourceUrl,
-        repeatFromRow: pattern.repeatFromRow,
-        weftColorSlot: pattern.weftColorSlotId,
-        moderationStatus,
-      },
-    }),
+    body: JSON.stringify({ data: { ...toPatternPayload(pattern), moderationStatus } }),
   })
   const data = await readJsonOrThrow(response)
   return data.data as StrapiPatternRecord

@@ -19,9 +19,9 @@ function getInitialTheme(): Theme {
 }
 
 /**
- * Manuelle Hell/Dunkel-Wahl, unabhängig von der System-Präferenz (die bleibt
- * als Standard aktiv, solange noch keine explizite Wahl in localStorage
- * steht) – siehe die `:root.dark`/`:root.light`-Overrides in global.css.
+ * Manual light/dark choice, independent of the system preference (which
+ * stays the default until an explicit choice is stored) - see the
+ * `:root.dark`/`:root.light` overrides in global.css.
  */
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(getInitialTheme)
@@ -43,6 +43,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
 export function useTheme() {
   const context = useContext(ThemeContext)
-  if (!context) throw new Error('useTheme muss innerhalb von ThemeProvider verwendet werden')
+  if (!context) throw new Error('useTheme must be used within ThemeProvider')
   return context
 }

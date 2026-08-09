@@ -18,15 +18,15 @@ import { LoaderCircle, Pencil, Trash } from 'lucide-react'
 interface PatternViewerProps {
   heading: string
   pattern: Pattern
-  /** Wenn gesetzt, erscheint ein "Remixen"-Button neben der Überschrift (für alle eingeloggten Personen, auch die Ersteller-Person selbst). */
+  /** If set, shows a "remix" button next to the heading (for all logged-in users, including the creator). */
   onRemix?: () => void
   isRemixing?: boolean
-  /** Wenn gesetzt, erscheint ein "Bearbeiten"-Button neben der Überschrift (nur für die Ersteller-Person). */
+  /** If set, shows an "edit" button next to the heading (creator only). */
   onEdit?: () => void
-  /** Wenn gesetzt, erscheint ein "Löschen"-Button neben der Überschrift (nur für die Ersteller-Person). */
+  /** If set, shows a "delete" button next to the heading (creator only). */
   onDelete?: () => void
   isDeleting?: boolean
-  /** Musterkennung für's Sammeln-Icon; zusammen mit `collections`/`token` gesetzt, wenn eingeloggt (siehe CollectionBookmarkButton). */
+  /** Pattern id for the bookmark icon; set together with `collections`/`token` when logged in (see CollectionBookmarkButton). */
   patternId?: string
   collections?: StrapiCollectionRecord[]
   token?: string | null
@@ -34,16 +34,14 @@ interface PatternViewerProps {
 }
 
 /**
- * Muster-Ansicht für Besucher und für eingeloggte Nutzer:innen, die NICHT
- * die Ersteller-Person sind: Anzeigeeinstellungen und Umfärben der
- * vorhandenen Farben, aber keine Struktur-Bearbeitung (keine neuen
- * Brettchen/Reihen/Farben, keine Richtungswechsel) – Titel/Stil/Freitext
- * nur zur Ansicht. Für die volle Bearbeitung durch die Ersteller-Person
- * siehe PatternEditor. Eingeloggte Personen können sich das Muster per
- * "Remixen" als eigenen Entwurf kopieren, siehe onRemix. Die Ersteller-Person
- * selbst landet nach dem Öffnen eines eigenen Musters ebenfalls zuerst hier
- * (nicht direkt im Editor) und wechselt über den "Bearbeiten"-Button gezielt
- * in die volle Bearbeitung, siehe onEdit.
+ * Pattern view for visitors and logged-in users who are NOT the creator:
+ * display settings and recoloring existing colors, but no structural
+ * editing (no new tablets/rows/colors, no direction changes) - title/
+ * style/notes are read-only. See PatternEditor for full editing by the
+ * creator. Logged-in users can copy the pattern as their own draft via
+ * "remix", see onRemix. The creator also lands here first after opening
+ * their own pattern (not directly in the editor) and switches to full
+ * editing via the "edit" button, see onEdit.
  */
 export function PatternViewer({
   heading,
@@ -111,7 +109,7 @@ export function PatternViewer({
         </div>
       </div>
 
-      {/* Unter 'lg' (Tablet/Handy): Infos direkt unter dem Titel. Ab 'lg' (Desktop): stattdessen unter den Farben, siehe unten. */}
+      {/* Below 'lg' (tablet/phone): info directly below the title. From 'lg' (desktop) up: below the colors instead, see further down. */}
       <div className="mt-4 max-w-md lg:hidden">
         <PatternInfoSection
           title={pattern.title}
@@ -125,7 +123,7 @@ export function PatternViewer({
         />
       </div>
 
-      {/* Unter 'lg' (Tablet/Handy): Anzeigeoptionen hinter Button+Overlay, siehe DisplaySettingsDialog. */}
+      {/* Below 'lg' (tablet/phone): display options behind a button+overlay, see DisplaySettingsDialog. */}
       <div className="mt-4 lg:hidden">
         <DisplaySettingsDialog
           displaySettings={displaySettings}
@@ -144,7 +142,7 @@ export function PatternViewer({
       </div>
 
       <div className="mt-6 flex flex-col items-stretch gap-6 lg:flex-row lg:items-start">
-        {/* Ab 'lg' (Desktop): Anzeigeoptionen wieder als dauerhafte Seitenspalte statt Overlay. */}
+        {/* From 'lg' (desktop) up: display options as a permanent sidebar again instead of an overlay. */}
         <div className="hidden lg:flex lg:w-80 lg:shrink-0 lg:flex-col lg:gap-6">
           <DisplaySettingsCard
             settings={displaySettings}
@@ -173,7 +171,7 @@ export function PatternViewer({
 
         <div className="flex w-full flex-col gap-6 lg:w-56 lg:shrink-0">
           <PatternColorCard pattern={pattern} palette={activePalette} onSlotColorChange={setSlotColor} onReset={resetColors} />
-          {/* Ab 'lg' (Desktop): Infos wieder unter den Farben statt unter dem Titel. */}
+          {/* From 'lg' (desktop) up: info below the colors again instead of below the title. */}
           <div className="hidden lg:block">
             <PatternInfoSection
               title={pattern.title}

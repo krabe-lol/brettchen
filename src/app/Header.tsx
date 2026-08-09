@@ -41,7 +41,7 @@ export function Header() {
       {!mobileSearchOpen && (
         <Link to="/" className="shrink-0 font-semibold">
           Brettchen
-          </Link>
+        </Link>
       )}
 
       <nav className="hidden items-center gap-4 md:flex">

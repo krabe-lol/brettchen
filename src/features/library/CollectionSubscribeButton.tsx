@@ -9,14 +9,14 @@ interface CollectionSubscribeButtonProps {
   collectionId: string
   isSubscribed: boolean
   token: string
-  /** Wird nach erfolgreichem Abonnieren/Kündigen aufgerufen, damit die aufrufende Seite neu lädt. */
+  /** Called after successfully subscribing/unsubscribing, so the calling page can reload. */
   onChanged: () => void
 }
 
 /**
- * Direkter Abonnieren/Kündigen-Toggle auf dem Sammlungsthumbnail – an
- * derselben Stelle wie CollectionBookmarkButton bei Mustern, aber ohne
- * Popover, da es hier nur einen einzigen Ein/Aus-Zustand gibt.
+ * Direct subscribe/unsubscribe toggle on the collection thumbnail - same
+ * spot as CollectionBookmarkButton on patterns, but without a popover since
+ * there's only a single on/off state here.
  */
 export function CollectionSubscribeButton({
   collectionId,

@@ -1,21 +1,21 @@
 import { factories } from '@strapi/strapi';
 
-/** Wie bei Mustern: pro anfragender Person unterschiedliche Antworten für dieselbe URL, daher kein Caching. */
+/** Same as for patterns: different responses per requesting user for the same URL, hence no caching. */
 function noStore(ctx: any) {
   ctx.set('Cache-Control', 'no-store');
 }
 
-/** Genug Felder, um sowohl PatternThumbnail als auch PatternCard direkt wiederzuverwenden. */
+/** Enough fields to directly reuse both PatternThumbnail and PatternCard. */
 const PATTERN_THUMBNAIL_FIELDS = {
   fields: ['documentId', 'title', 'slug', 'style', 'numTablets', 'numRows', 'threading', 'turningSequence', 'moderationStatus'],
   populate: { defaultPalette: true, author: { fields: ['username'] } },
 };
 
 /**
- * `owner` braucht überall auch `id` (nicht nur `username`), damit das
- * Frontend zuverlässig erkennen kann, ob die anfragende Person selbst die
- * besitzende Person ist (siehe CollectionCard `isOwner`) – sonst zeigt z. B.
- * eine öffentliche eigene Sammlung fälschlich den "Abonnieren"-Button.
+ * `owner` always needs `id` too (not just `username`), so the frontend
+ * can reliably tell whether the requesting user is the owner (see
+ * CollectionCard `isOwner`) - otherwise e.g. a public collection the user
+ * owns would wrongly show the "subscribe" button.
  */
 const COLLECTION_POPULATE = {
   owner: { fields: ['id', 'username'] },
@@ -24,11 +24,11 @@ const COLLECTION_POPULATE = {
 };
 
 /**
- * Jedes Muster hat dank `ensurePublished` (siehe Pattern-Controller) IMMER
- * sowohl eine Draft- als auch eine veröffentlichte Strapi-Version – beim
- * Populaten der `patterns`-Relation kommt eine documentId deshalb doppelt
- * zurück (kein `status`-Filter innerhalb von `populate` möglich). Hier
- * nachträglich in JS dedupliziert, statt bei der Abfrage gefiltert.
+ * Every pattern ALWAYS has both a draft and a published Strapi version
+ * thanks to `ensurePublished` (see the pattern controller) - populating
+ * the `patterns` relation therefore returns each documentId twice (no
+ * `status` filter is possible inside `populate`). Deduplicated here in JS
+ * afterward instead of filtered in the query.
  */
 function dedupePatterns(entity: any): any {
   if (!entity?.patterns) return entity;
@@ -47,7 +47,7 @@ function dedupePatternsMany(entities: any[]): any[] {
 
 const DEFAULT_COLLECTION_NAME = 'Gespeichert';
 
-/** Findet die Standard-Sammlung einer Person oder legt sie an, falls sie noch keine hat. */
+/** Finds a user's default collection, or creates it if they don't have one yet. */
 async function findOrCreateDefaultCollection(strapi: any, userId: number) {
   const [existing] = await strapi.documents('api::collection.collection').findMany({
     filters: { owner: userId, isDefault: true },
@@ -61,10 +61,10 @@ async function findOrCreateDefaultCollection(strapi: any, userId: number) {
 }
 
 /**
- * `owner`/`subscribers` (Relationen auf plugin::users-permissions.user)
- * werden vom Standard-Content-API-Sanitizer immer aus dem Input entfernt –
- * dieselbe Einschränkung wie bei `author` im Pattern-Controller. Daher
- * überall eigene Document-Service-Aufrufe statt `super.*()`.
+ * `owner`/`subscribers` (relations to plugin::users-permissions.user) are
+ * always stripped from the input by the standard content API sanitizer -
+ * same restriction as `author` in the pattern controller. Hence custom
+ * document service calls everywhere instead of `super.*()`.
  */
 export default factories.createCoreController('api::collection.collection', ({ strapi }) => ({
   async create(ctx) {
@@ -91,7 +91,7 @@ export default factories.createCoreController('api::collection.collection', ({ s
     ctx.body = { data: sanitized, meta: {} };
   },
 
-  /** Alle eigenen Sammlungen, unabhängig von der Sichtbarkeit. Legt die Standard-Sammlung an, falls noch keine existiert. */
+  /** All of the user's own collections, regardless of visibility. Creates the default collection if none exists yet. */
   async mine(ctx) {
     noStore(ctx);
     if (!ctx.state.user) return ctx.unauthorized();
@@ -111,7 +111,7 @@ export default factories.createCoreController('api::collection.collection', ({ s
     ctx.body = { data: sanitized, meta: {} };
   },
 
-  /** Öffentliche Sammlungen aller Personen, zum Durchstöbern/Abonnieren. */
+  /** Public collections from everyone, for browsing/subscribing. */
   async find(ctx) {
     const entities = await strapi.documents('api::collection.collection').findMany({
       filters: { visibility: 'public' },
@@ -126,7 +126,7 @@ export default factories.createCoreController('api::collection.collection', ({ s
     ctx.body = { data: sanitized, meta: {} };
   },
 
-  /** Öffentliche Sammlungen sieht jede:r, private nur die besitzende Person. */
+  /** Public collections are visible to everyone, private ones only to the owner. */
   async findOne(ctx) {
     noStore(ctx);
     const entity = await strapi.documents('api::collection.collection').findOne({
@@ -191,7 +191,7 @@ export default factories.createCoreController('api::collection.collection', ({ s
     ctx.body = { data: null, meta: {} };
   },
 
-  /** Fügt ein Muster zu einer eigenen Sammlung hinzu. */
+  /** Adds a pattern to one of the user's own collections. */
   async addPattern(ctx) {
     if (!ctx.state.user) return ctx.unauthorized();
 
@@ -215,7 +215,7 @@ export default factories.createCoreController('api::collection.collection', ({ s
     ctx.body = { data: sanitized, meta: {} };
   },
 
-  /** Entfernt ein Muster aus einer eigenen Sammlung. */
+  /** Removes a pattern from one of the user's own collections. */
   async removePattern(ctx) {
     if (!ctx.state.user) return ctx.unauthorized();
 
@@ -239,25 +239,7 @@ export default factories.createCoreController('api::collection.collection', ({ s
     ctx.body = { data: sanitized, meta: {} };
   },
 
-  /** Fügt ein Muster der eigenen Standard-Sammlung hinzu (legt sie bei Bedarf an). */
-  async addToDefaultCollection(ctx) {
-    if (!ctx.state.user) return ctx.unauthorized();
-
-    const defaultCollection = await findOrCreateDefaultCollection(strapi, ctx.state.user.id);
-    const entity = await strapi.documents('api::collection.collection').update({
-      documentId: defaultCollection.documentId,
-      data: { patterns: { connect: [ctx.params.patternId] } } as any,
-      populate: COLLECTION_POPULATE,
-    });
-
-    const sanitized = await strapi.contentAPI.sanitize.output(
-      dedupePatterns(entity),
-      strapi.getModel('api::collection.collection'),
-    );
-    ctx.body = { data: sanitized, meta: {} };
-  },
-
-  /** Nur öffentliche Sammlungen können abonniert werden, nicht die eigenen. */
+  /** Only public collections can be subscribed to, not the user's own. */
   async subscribe(ctx) {
     if (!ctx.state.user) return ctx.unauthorized();
 
@@ -301,7 +283,7 @@ export default factories.createCoreController('api::collection.collection', ({ s
     ctx.body = { data: sanitized, meta: {} };
   },
 
-  /** Sammlungen anderer Personen, die die eigene Person abonniert hat. */
+  /** Other users' collections that the current user has subscribed to. */
   async mySubscriptions(ctx) {
     noStore(ctx);
     if (!ctx.state.user) return ctx.unauthorized();

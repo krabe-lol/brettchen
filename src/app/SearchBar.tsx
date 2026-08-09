@@ -11,18 +11,17 @@ import { fetchPublicCollections, type StrapiCollectionRecord } from '@/lib/strap
 const MAX_RESULTS_PER_GROUP = 5
 
 interface SearchBarProps {
-  /** Fokussiert das Eingabefeld direkt beim Einblenden – für die mobile Icon-zu-Leiste-Erweiterung im Header. */
+  /** Focuses the input as soon as it's shown - used for the mobile icon-to-bar expansion in the header. */
   autoFocus?: boolean
-  /** Wird aufgerufen, sobald tatsächlich navigiert wird (Absenden oder Klick auf ein Ergebnis) – schließt z. B. die mobile Suchleiste im Header wieder. */
+  /** Called once actual navigation happens (submit or clicking a result) - e.g. closes the mobile search bar in the header. */
   onNavigate?: () => void
 }
 
 /**
- * Suchleiste im Header: durchsucht Mustertitel, Sammlungstitel und
- * Stiltags. Lädt veröffentlichte Muster/öffentliche Sammlungen einmalig
- * beim ersten Mount (Header wird nicht pro Seite neu gemountet) und
- * filtert danach rein clientseitig, analog zu den bestehenden Filtern auf
- * PatternListPage.
+ * Header search bar: searches pattern titles, collection titles and style
+ * tags. Loads published patterns/public collections once on first mount
+ * (the header isn't remounted per page) and filters client-side after
+ * that, same approach as the existing filters on PatternListPage.
  */
 export function SearchBar({ autoFocus, onNavigate }: SearchBarProps) {
   const { t } = useLanguage()

@@ -1,103 +1,99 @@
-import type { Pattern, TurnValue } from '../types';
+import type { Pattern, TurnValue } from '../types'
 
 export interface WeaveCell {
-  tabletIndex: number;
-  rowIndex: number;
-  colorSlotId: string;
-  turn: TurnValue;
+  tabletIndex: number
+  rowIndex: number
+  colorSlotId: string
+  turn: TurnValue
   /**
-   * Vorzeichen der tatsächlichen Bewegung durch die Lochfolge (Schären ×
-   * Drehung): -1/+1, oder 0 bei Idle. Das ist das Ergebnis aus Kartenstellung
-   * UND Drehbefehl zusammen – nicht dasselbe wie `turn` allein.
+   * Sign of the actual movement through the hole sequence (threading x
+   * turn): -1/+1, or 0 when idle. This is the combined result of card
+   * orientation AND the turn command - not the same as `turn` alone.
    */
-  effectiveDirection: -1 | 0 | 1;
+  effectiveDirection: -1 | 0 | 1
 }
 
 /**
- * Kehrt die Reihenfolge der Reihen um und invertiert jede Drehung – für den
- * "Untwist"-Anzeigemodus (siehe DisplaySettings.untwistMode): zeigt das
- * Muster so, wie es beim rückwärtigen Weben zum Entdrillen abläuft (die
- * zuletzt gewebte Reihe zuerst, jede Drehung in die Gegenrichtung). Rein
- * anzeigeseitig, ändert nie das gespeicherte Muster.
+ * Reverses row order and inverts every turn - for the "untwist" display
+ * mode (see DisplaySettings.untwistMode): shows the pattern the way it
+ * plays out when weaving backward to remove twist (last-woven row first,
+ * every turn in the opposite direction). Display-only, never changes the
+ * saved pattern.
  */
 export function applyUntwistOrder(pattern: Pattern): Pattern {
   return {
     ...pattern,
     turningSequence: [...pattern.turningSequence].reverse().map((row) => row.map((turn) => -turn)),
-  };
+  }
 }
 
 function mod(n: number, m: number): number {
-  return ((n % m) + m) % m;
+  return ((n % m) + m) % m
 }
 
 function sign(n: number): -1 | 0 | 1 {
-  if (n > 0) return 1;
-  if (n < 0) return -1;
-  return 0;
+  if (n > 0) return 1
+  if (n < 0) return -1
+  return 0
 }
 
 /**
- * Berechnet pro Reihe und Brettchen, welche Schär-Farbe sichtbar ist.
+ * Computes which threading color is visible per row and tablet.
  *
- * Reihe 1 ist ein Sonderfall: sie beginnt frisch an dem Lochfolge-Ende, das
- * zur Richtung der ersten Drehung passt – Loch A, wenn Reihe 1 vorwärts
- * gedreht wird, Loch D, wenn sie rückwärts gedreht wird.
+ * Row 1 is a special case: it starts fresh at whichever end of the hole
+ * sequence matches the direction of the first turn - hole A if row 1 turns
+ * forward, hole D if it turns backward.
  *
- * Ab Reihe 2 gilt: ein Richtungswechsel (diese Reihe dreht anders als die
- * vorherige) bedeutet, dass dieselbe Farbe wie in der vorherigen Reihe noch
- * einmal gedreht wird (die Karte "kehrt an derselben Stelle um"), und die
- * Lochfolge danach in der neuen Richtung weiterläuft. Ohne Richtungswechsel
- * läuft die Lochfolge einfach kontinuierlich in der bisherigen Richtung
- * weiter.
+ * From row 2 on: a direction change (this row turns the other way than the
+ * previous one) means the same color as the previous row is turned once
+ * more (the card "reverses in place"), and the hole sequence then continues
+ * in the new direction. Without a direction change, the hole sequence just
+ * continues in the same direction as before.
  *
- * Die Farbreihenfolge hängt dabei NICHT von `orientation` (S/Z) ab: bei
- * identischem Schären und identischer Drehfolge zeigen ein S- und ein
- * Z-ausgerichtetes Brettchen dieselbe Farbfolge. `orientation` beeinflusst
- * ausschließlich `effectiveDirection` – also nur, wie die Ellipse geneigt
- * gezeichnet wird, nicht welche Farbe sie zeigt.
+ * The color sequence does NOT depend on `orientation` (S/Z): given
+ * identical threading and turning sequence, an S- and a Z-oriented tablet
+ * show the same color sequence. `orientation` only affects
+ * `effectiveDirection` - i.e. how the ellipse is drawn tilted, not which
+ * color it shows.
  */
-export function computeWeaveGrid(
-  pattern: Pick<Pattern, 'threading' | 'turningSequence'>,
-): WeaveCell[][] {
+export function computeWeaveGrid(pattern: Pick<Pattern, 'threading' | 'turningSequence'>): WeaveCell[][] {
   const faceIndex = pattern.threading.map((tablet, tabletIndex) => {
-    const holeCount = tablet.holes.length || 1;
-    const firstTurn = pattern.turningSequence[0]?.[tabletIndex] ?? 0;
-    return sign(firstTurn) < 0 ? holeCount - 1 : 0;
-  });
+    const holeCount = tablet.holes.length || 1
+    const firstTurn = pattern.turningSequence[0]?.[tabletIndex] ?? 0
+    return sign(firstTurn) < 0 ? holeCount - 1 : 0
+  })
 
   return pattern.turningSequence.map((row, rowIndex) =>
     row.map((turn, tabletIndex) => {
-      const tablet = pattern.threading[tabletIndex];
-      const holeCount = tablet.holes.length || 1;
-      const colorSlotId = tablet.holes[faceIndex[tabletIndex]]?.colorSlotId ?? '';
-      const direction = tablet.orientation === 'Z' ? 1 : -1;
+      const tablet = pattern.threading[tabletIndex]
+      const holeCount = tablet.holes.length || 1
+      const colorSlotId = tablet.holes[faceIndex[tabletIndex]]?.colorSlotId ?? ''
+      const direction = tablet.orientation === 'Z' ? 1 : -1
 
-      const nextTurn = pattern.turningSequence[rowIndex + 1]?.[tabletIndex];
-      const isTurnaround = sign(turn) !== 0 && nextTurn !== undefined && sign(nextTurn) !== sign(turn);
-      const appliedStep = isTurnaround ? 0 : turn;
+      const nextTurn = pattern.turningSequence[rowIndex + 1]?.[tabletIndex]
+      const isTurnaround = sign(turn) !== 0 && nextTurn !== undefined && sign(nextTurn) !== sign(turn)
+      const appliedStep = isTurnaround ? 0 : turn
 
-      faceIndex[tabletIndex] = mod(faceIndex[tabletIndex] + appliedStep, holeCount);
-      return { tabletIndex, rowIndex, colorSlotId, turn, effectiveDirection: sign(direction * turn) };
+      faceIndex[tabletIndex] = mod(faceIndex[tabletIndex] + appliedStep, holeCount)
+      return { tabletIndex, rowIndex, colorSlotId, turn, effectiveDirection: sign(direction * turn) }
     }),
-  );
+  )
 }
 
 /**
- * Wie `computeWeaveGrid`, aber mit Wiederholung, damit auch kurze Muster
- * eine Bandvorschau mit mindestens `minDisplayRows` Reihen füllen (siehe
- * WovenBandDiagram/PatternThumbnail). Ist `repeatFromRow` gesetzt (1-basiert),
- * erscheint der Teil davor ("Anfangsstück") einmal, danach wiederholt sich
- * nur die Einheit ab dieser Reihe; ohne `repeatFromRow` wiederholt sich das
- * gesamte Muster (kein Anfangsstück).
+ * Like `computeWeaveGrid`, but repeated so even short patterns fill a band
+ * preview of at least `minDisplayRows` rows (see WovenBandDiagram/
+ * PatternThumbnail). If `repeatFromRow` is set (1-based), everything before
+ * it (the "lead-in") appears once, and only the unit from that row on
+ * repeats; without `repeatFromRow`, the whole pattern repeats (no lead-in).
  *
- * Jede Wiederholung ist eine EXAKTE Kopie der einmal berechneten Zellen der
- * Einheit, nicht neu durchgerechnet: `computeWeaveGrid` führt die
- * Lochposition über die gesamte übergebene Folge fort – würde man die rohen
- * Drehwerte einfach aneinanderhängen und als eine große Folge neu
- * durchrechnen, würde die Lochposition von Wiederholung zu Wiederholung
- * langsam weiterdriften, sobald die Einheit selbst nicht twist-neutral ist,
- * und jede Kopie sähe anders aus statt identisch zu wiederholen.
+ * Each repeat is an EXACT copy of the unit's once-computed cells, not
+ * recomputed: `computeWeaveGrid` carries the hole position forward across
+ * the whole sequence it's given - simply concatenating the raw turn values
+ * and recomputing them as one long sequence would let the hole position
+ * slowly drift from repeat to repeat whenever the unit itself isn't
+ * twist-neutral, so each copy would look different instead of repeating
+ * identically.
  */
 export function computeDisplayWeaveGrid(
   pattern: Pick<Pattern, 'threading' | 'turningSequence' | 'numRows' | 'repeatFromRow'>,
@@ -105,26 +101,26 @@ export function computeDisplayWeaveGrid(
 ): WeaveCell[][] {
   const repeatStartIndex = pattern.repeatFromRow
     ? Math.min(Math.max(pattern.repeatFromRow - 1, 0), Math.max(pattern.numRows - 1, 0))
-    : 0;
-  const leadInRows = pattern.turningSequence.slice(0, repeatStartIndex);
-  const repeatingUnit = pattern.turningSequence.slice(repeatStartIndex);
+    : 0
+  const leadInRows = pattern.turningSequence.slice(0, repeatStartIndex)
+  const repeatingUnit = pattern.turningSequence.slice(repeatStartIndex)
   const repeatCount =
     repeatingUnit.length > 0
       ? Math.max(1, Math.ceil((minDisplayRows - leadInRows.length) / repeatingUnit.length))
-      : 1;
+      : 1
 
   const singlePassGrid = computeWeaveGrid({
     threading: pattern.threading,
     turningSequence: [...leadInRows, ...repeatingUnit],
-  });
-  const unitTemplate = singlePassGrid.slice(leadInRows.length);
+  })
+  const unitTemplate = singlePassGrid.slice(leadInRows.length)
 
-  const weaveGrid: WeaveCell[][] = [...singlePassGrid];
+  const weaveGrid: WeaveCell[][] = [...singlePassGrid]
   for (let copy = 1; copy < repeatCount; copy++) {
-    const rowOffset = leadInRows.length + copy * repeatingUnit.length;
+    const rowOffset = leadInRows.length + copy * repeatingUnit.length
     unitTemplate.forEach((row, i) => {
-      weaveGrid.push(row.map((cell) => ({ ...cell, rowIndex: rowOffset + i })));
-    });
+      weaveGrid.push(row.map((cell) => ({ ...cell, rowIndex: rowOffset + i })))
+    })
   }
-  return weaveGrid;
+  return weaveGrid
 }

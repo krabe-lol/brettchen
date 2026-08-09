@@ -17,7 +17,7 @@ function nextSlotId(existing: PaletteSlot[]): string {
   return `slot-${existing.length + 1}`
 }
 
-/** Standard-Drehrichtung für neu angefügte Reihen/Brettchen: vorwärts. */
+/** Default turn direction for newly added rows/tablets: forward. */
 const DEFAULT_TURN = 1
 
 function clamp(value: number, min: number, max: number): number {
@@ -25,11 +25,10 @@ function clamp(value: number, min: number, max: number): number {
 }
 
 /**
- * Hält Schären, Wendefolge und Palette eines Musters als editierbaren
- * lokalen State. Brettchen/Reihen/Farben werden ausschließlich am Ende
- * angefügt oder entfernt bzw. gezielt an einer Zelle geändert – nichts wird
- * dabei neu erzeugt oder überschrieben, damit ein bereits eingestelltes
- * Muster nie verloren geht.
+ * Holds a pattern's threading, turning sequence and palette as editable
+ * local state. Tablets/rows/colors are only ever appended/removed at the
+ * end or changed at a specific cell - nothing is ever regenerated or
+ * overwritten, so an already-configured pattern never gets lost.
  */
 export function usePatternEditor(initialPattern: Pattern) {
   const { language } = useLanguage()
@@ -67,14 +66,14 @@ export function usePatternEditor(initialPattern: Pattern) {
     setTurningSequence((prev) => prev.map((row) => row.slice(0, -1)))
   }
 
-  /** Entfernt genau ein Brettchen an einer beliebigen Position (nicht nur am Ende), siehe "×" unter jeder Spalte in der Schärpatrone. */
+  /** Removes exactly one tablet at any position (not just the end), see the "x" below each column in the threading chart. */
   function removeTabletAt(index: number) {
     if (numTablets <= MIN_TABLETS) return
     setThreading((prev) => prev.filter((_, i) => i !== index))
     setTurningSequence((prev) => prev.map((row) => row.filter((_, i) => i !== index)))
   }
 
-  /** Neue Reihen setzen die Drehrichtung jedes Brettchens einfach fort (kein automatischer Wechsel zurück auf vorwärts). */
+  /** New rows just continue each tablet's turn direction (no automatic reset back to forward). */
   function addRow() {
     if (numRows >= MAX_ROWS) return
     setTurningSequence((prev) => {
@@ -104,9 +103,9 @@ export function usePatternEditor(initialPattern: Pattern) {
   }
 
   /**
-   * Kehrt die Drehrichtung ab (einschließlich) der angeklickten Reihe für
-   * dieses Brettchen um – alle folgenden Reihen desselben Brettchens
-   * werden mit umgekehrt, alle anderen Brettchen/Reihen bleiben unverändert.
+   * Inverts the turn direction from (and including) the clicked row for
+   * this tablet - all following rows of the same tablet flip too, every
+   * other tablet/row stays unchanged.
    */
   function invertTurnsFrom(rowIndex: number, tabletIndex: number) {
     setTurningSequence((prev) =>
@@ -115,9 +114,9 @@ export function usePatternEditor(initialPattern: Pattern) {
   }
 
   /**
-   * Verschiebt ein Brettchen an eine andere Position (Drag & Drop in der
-   * Schärpatrone) – Fädelung UND Wendefolge werden gemeinsam umsortiert,
-   * damit sie pro Brettchen zusammen bleiben.
+   * Moves a tablet to another position (drag & drop in the threading
+   * chart) - threading AND turning sequence are reordered together, so
+   * they stay paired per tablet.
    */
   function moveTablet(fromIndex: number, toIndex: number) {
     if (fromIndex === toIndex) return
@@ -137,7 +136,7 @@ export function usePatternEditor(initialPattern: Pattern) {
     )
   }
 
-  /** Wechselt die Kartenstellung (S/Z) eines einzelnen Brettchens, alle anderen bleiben unverändert. */
+  /** Toggles the card orientation (S/Z) of a single tablet, all others stay unchanged. */
   function toggleOrientation(tabletIndex: number) {
     setThreading((prev) =>
       prev.map((tablet, t) =>
@@ -146,7 +145,7 @@ export function usePatternEditor(initialPattern: Pattern) {
     )
   }
 
-  /** Weist einem einzelnen Loch einen Farb-Slot zu, alle anderen Löcher bleiben unverändert. */
+  /** Assigns a color slot to a single hole, all other holes stay unchanged. */
   function paintHole(tabletIndex: number, holeIndex: number, colorSlotId: string) {
     setThreading((prev) =>
       prev.map((tablet, t) =>
@@ -158,12 +157,11 @@ export function usePatternEditor(initialPattern: Pattern) {
   }
 
   /**
-   * Fügt einen neuen Farb-Slot mit automatisch generiertem Namen hinzu, gibt
-   * dessen slotId zurück. Gibt es bereits eine gleiche oder sehr ähnliche
-   * Farbe in der Palette (siehe isSimilarColor), wird stattdessen deren
-   * slotId zurückgegeben, ohne einen neuen Slot anzulegen – so bleibt die
-   * Palette frei von kaum unterscheidbaren Doppeleinträgen und die
-   * bestehende Farbe wird einfach aktiv.
+   * Adds a new color slot with an auto-generated name, returns its slotId.
+   * If the palette already has an identical or very similar color (see
+   * isSimilarColor), returns that slot's id instead without creating a new
+   * one - keeps the palette free of near-indistinguishable duplicates and
+   * just activates the existing color.
    */
   function addColor(hex: string): string {
     const duplicate = palette.find((slot) => isSimilarColor(slot.hex, hex))
@@ -178,15 +176,15 @@ export function usePatternEditor(initialPattern: Pattern) {
     return slotId
   }
 
-  /** Ändert den Hex-Wert eines bestehenden Farb-Slots. */
+  /** Changes the hex value of an existing color slot. */
   function setColorHex(slotId: string, hex: string) {
     setPalette((prev) => prev.map((slot) => (slot.slotId === slotId ? { ...slot, hex } : slot)))
   }
 
   /**
-   * Entfernt einen Farb-Slot. Löcher, die diese Farbe verwendet haben,
-   * werden auf "leer" gesetzt (leerer colorSlotId, im Muster als X gezeigt) –
-   * alle anderen Zellen bleiben unverändert.
+   * Removes a color slot. Holes that used this color are set to "empty"
+   * (empty colorSlotId, shown as X in the pattern) - all other cells stay
+   * unchanged.
    */
   function removeColor(slotId: string) {
     setPalette((prev) => prev.filter((slot) => slot.slotId !== slotId))

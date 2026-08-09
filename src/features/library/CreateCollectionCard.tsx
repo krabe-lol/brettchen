@@ -9,11 +9,11 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
 interface CreateCollectionCardProps {
   token: string
-  /** Wird nach erfolgreichem Anlegen aufgerufen (z. B. um die Liste neu zu laden). */
+  /** Called after successfully creating a collection (e.g. to reload the list). */
   onCreated: () => void
 }
 
-/** Kachel zum Anlegen einer neuen Sammlung, an gleicher Stelle wie die bestehenden Sammlungskarten (siehe CollectionCard). */
+/** Tile for creating a new collection, in the same spot as the existing collection cards (see CollectionCard). */
 export function CreateCollectionCard({ token, onCreated }: CreateCollectionCardProps) {
   const { t } = useLanguage()
   const { toast } = useToast()

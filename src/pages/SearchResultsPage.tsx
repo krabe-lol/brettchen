@@ -9,7 +9,7 @@ import { CollectionCard } from '@/features/library/CollectionCard'
 import { fetchPublishedPatterns, type StrapiPatternRecord } from '@/lib/strapi/patterns'
 import { fetchMyCollections, fetchPublicCollections, type StrapiCollectionRecord } from '@/lib/strapi/collections'
 
-/** Ergebnisseite der Header-Suchleiste: durchsucht Mustertitel, Sammlungstitel und Stiltags. */
+/** Results page for the header search bar: searches pattern titles, collection titles, and style tags. */
 export function SearchResultsPage() {
   const { t } = useLanguage()
   const { user, token } = useAuth()

@@ -3,22 +3,15 @@ import type { Language } from '@/features/i18n/translations'
 const cache = new Map<string, string>()
 
 /**
- * Übersetzt einen kurzen Suchbegriff über die kostenlose MyMemory-API
- * (translated.net), damit die Suche sprachübergreifend funktioniert (z. B.
- * "Diamonds" findet auch Muster mit dem Titel "Einfache Diamanten") – ohne
- * eine feste Synonymliste pflegen zu müssen. Die Quellsprache wird bewusst
- * NICHT auf die aktuelle UI-Sprache festgelegt, sondern per `autodetect` von
- * MyMemory selbst erkannt: der Suchbegriff kann in einer anderen Sprache
- * getippt sein als die UI gerade eingestellt ist, und `autodetect` liefert
- * außerdem eine echte KI-Übersetzung statt eines zufälligen
- * Übersetzungsspeicher-Treffers mit abweichender Wortwahl (getestet: bei
- * explizitem `en|de` lieferte MyMemory für "Diamonds" z. B. "Rauten" statt
- * "Diamanten", mit `autodetect|de` dagegen korrekt "Diamanten"). Ergebnisse
- * werden im Prozessspeicher gecacht, da derselbe Suchbegriff sonst bei jedem
- * Tastenanschlag erneut übersetzt würde. Bei Netzwerkfehlern oder
- * Rate-Limit wird einfach der Originalbegriff zurückgegeben – die Suche
- * bleibt dann nur auf die eingegebene Sprache beschränkt, statt
- * fehlzuschlagen.
+ * Translates a search term via the free MyMemory API so search works across
+ * languages (e.g. "Diamonds" also finds a pattern titled "Einfache
+ * Diamanten"), without maintaining a synonym list. Source language is
+ * `autodetect`, not the current UI language - the query may be typed in a
+ * different language, and `autodetect` also returns a real translation
+ * instead of an unrelated translation-memory hit (tested: explicit `en|de`
+ * turned "Diamonds" into "Rauten", `autodetect|de` correctly into
+ * "Diamanten"). Falls back to the original term on network/rate-limit
+ * errors so search degrades instead of failing.
  */
 export async function translateQuery(query: string, targetLang: Language): Promise<string> {
   const trimmed = query.trim()

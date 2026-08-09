@@ -10,16 +10,14 @@ import {
 const SAVE_DEBOUNCE_MS = 600
 
 /**
- * Reihen-/Brettchen-Hervorhebung und Untwist-Modus sind PRO Muster UND
- * Nutzer:in gespeichert (siehe PatternHighlightSettingsCard) – anders als
- * die globalen Anzeigeoptionen (DisplaySettingsContext), daher ein eigener,
- * an `patternDocumentId` gebundener Hook statt Teil des gemeinsamen
- * Contexts. Ohne Login oder ohne bereits gespeichertes Muster (z. B. eine
- * noch nicht gespeicherte Neuanlage) bleibt alles rein lokal/ephemer –
- * `canSave` zeigt das der Card an, damit sie den Speichern-Schalter
- * deaktiviert mit erklärendem Tooltip zeigt. `saveEnabled` startet aus
- * (Standard) und wird beim Laden automatisch eingeschaltet, wenn bereits
- * eine gespeicherte Präferenz existiert.
+ * Row/tablet highlighting and untwist mode are saved PER pattern AND user
+ * (see PatternHighlightSettingsCard) - unlike the global display options
+ * (DisplaySettingsContext), hence its own hook bound to
+ * `patternDocumentId` instead of being part of the shared context. Without
+ * login or a saved pattern (e.g. a not-yet-saved new one), everything
+ * stays local/ephemeral - `canSave` tells the card to show the save
+ * toggle disabled with an explanatory tooltip. `saveEnabled` starts off by
+ * default and turns on automatically on load if a saved preference exists.
  */
 export function usePatternHighlightSettings(patternDocumentId: string | null | undefined, token: string | null) {
   const [settings, setSettingsState] = useState<PatternHighlightSettings>(DEFAULT_PATTERN_HIGHLIGHT_SETTINGS)

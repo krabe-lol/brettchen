@@ -2,28 +2,28 @@ import { randomUUID } from 'node:crypto';
 import { factories } from '@strapi/strapi';
 
 /**
- * `/patterns/mine` und `/patterns/:slug` (findOne, wegen Entwurf-Sichtbarkeit
- * für die Ersteller-Person) liefern je nach anfragender Person andere Daten
- * für dieselbe URL – ohne `no-store` könnte der Browser eine Antwort von
- * Nutzer:in A cachen und sie später fälschlich Nutzer:in B unter derselben
- * URL zeigen (z. B. "Meine Muster" nach einem Nutzerwechsel im selben Tab).
+ * `/patterns/mine` and `/patterns/:slug` (findOne, because of draft
+ * visibility for the creator) return different data for the same URL
+ * depending on who's asking - without `no-store`, the browser could cache
+ * a response for user A and later wrongly show it to user B under the
+ * same URL (e.g. "my patterns" after switching users in the same tab).
  */
 function noStore(ctx: any) {
   ctx.set('Cache-Control', 'no-store');
 }
 
-/** Rein zufällige Zeichenfolge, wie randomSlug() im Frontend (src/lib/strapi/patterns.ts). */
+/** Purely random string, same as randomSlug() in the frontend (src/lib/strapi/patterns.ts). */
 function randomSlug(): string {
   return randomUUID().replace(/-/g, '').slice(0, 12);
 }
 
 /**
- * Ein Muster ist twist-neutral, wenn sich die Verdrillung (+1 je Vorwärts-,
- * -1 je Rückwärtsdrehung, aufsummiert über alle Reihen) bei JEDEM Brettchen
- * zu 0 aufhebt – siehe computeTwistByTablet/isTwistNeutral im Frontend
- * (render/twist.ts), hier serverseitig dieselbe Berechnung, damit das Feld
- * nie von der tatsächlichen Wendefolge abweichen kann (immer automatisch
- * gesetzt, nie clientseitig überschreibbar).
+ * A pattern is twist-neutral when the twist (+1 per forward turn, -1 per
+ * backward turn, summed over all rows) cancels out to 0 for EVERY tablet -
+ * see computeTwistByTablet/isTwistNeutral in the frontend (render/twist.ts).
+ * Same computation here server-side, so the field can never diverge from
+ * the actual turning sequence (always set automatically, never
+ * client-overridable).
  */
 function computeIsTwistNeutral(turningSequence: number[][] | undefined): boolean {
   if (!turningSequence || turningSequence.length === 0) return true;
@@ -37,24 +37,23 @@ function computeIsTwistNeutral(turningSequence: number[][] | undefined): boolean
 }
 
 /**
- * Bewusst NICHT an unser eigenes `moderationStatus`-Feld gekoppelt (das
- * bleibt allein für die Sichtbarkeitslogik zuständig, siehe find/findOne/
- * mine) – jedes neu angelegte Muster bekommt bei Strapi selbst trotzdem
- * immer eine veröffentlichte Version, damit es im Admin-Panel nicht
- * fälschlich als Draft/unveröffentlicht auftaucht.
+ * Deliberately NOT tied to our own `moderationStatus` field (that field
+ * alone drives visibility, see find/findOne/mine) - every newly created
+ * pattern still always gets a published version in Strapi itself, so it
+ * doesn't wrongly show up as draft/unpublished in the admin panel.
  */
 async function ensurePublished(strapi: any, documentId: string) {
   await strapi.documents('api::pattern.pattern').publish({ documentId });
 }
 
 /**
- * Mindestens so viele Reihen mit anderem Vorzeichen der Drehrichtung
- * gegenüber dem Original, bevor ein Remix-Link gebrochen werden darf (siehe
+ * Minimum number of cells with a different turn direction sign compared
+ * to the original before a remix link is allowed to break (see
  * `hasEnoughRemixDivergence`).
  */
 const REMIX_TURN_DIVERGENCE_THRESHOLD = 3;
 
-/** Anzahl Zellen, in denen sich die Drehrichtung (Vorwärts/Rückwärts/Idle) gegenüber der Quelle unterscheidet. */
+/** Number of cells where the turn direction (forward/backward/idle) differs from the source. */
 function countTurnDivergence(a: number[][] | undefined, b: number[][] | undefined): number {
   const rows = Math.max(a?.length ?? 0, b?.length ?? 0);
   let count = 0;
@@ -69,7 +68,7 @@ function countTurnDivergence(a: number[][] | undefined, b: number[][] | undefine
   return count;
 }
 
-/** Ob sich Schärung (Farbzuweisung oder S/Z-Kartenstellung) irgendwo von der Quelle unterscheidet. */
+/** Whether the threading (color assignment or S/Z card orientation) differs from the source anywhere. */
 function hasThreadingDivergence(a: any[] | undefined, b: any[] | undefined): boolean {
   const length = Math.max(a?.length ?? 0, b?.length ?? 0);
   for (let i = 0; i < length; i++) {
@@ -86,10 +85,9 @@ function hasThreadingDivergence(a: any[] | undefined, b: any[] | undefined): boo
 }
 
 /**
- * Genug verändert, um den Remix-Link zum Original zu brechen: mindestens
- * `REMIX_TURN_DIVERGENCE_THRESHOLD` Zellen mit anderer Drehrichtung UND
- * mindestens eine Veränderung in der Schärpatrone – beides zusammen, nicht
- * nur eines von beidem.
+ * Changed enough to break the remix link to the original: at least
+ * `REMIX_TURN_DIVERGENCE_THRESHOLD` cells with a different turn direction
+ * AND at least one change in the threading - both together, not just either one.
  */
 function hasEnoughRemixDivergence(
   threading: any[] | undefined,
@@ -104,12 +102,12 @@ function hasEnoughRemixDivergence(
 }
 
 /**
- * `author` (Relation auf plugin::users-permissions.user) wird vom
- * Standard-Content-API-Sanitizer IMMER aus dem Input entfernt, egal ob der
- * Client oder der Controller ihn setzt (Strapi verbietet clientseitig
- * beeinflussbare Relationen auf das User-Model grundsätzlich). Daher hier
- * kein `super.create()`, sondern direkter Document-Service-Aufruf, der den
- * Wert serverseitig aus dem authentifizierten Nutzer ergänzt.
+ * `author` (a relation to plugin::users-permissions.user) is ALWAYS
+ * stripped from the input by the standard content API sanitizer, whether
+ * the client or the controller sets it (Strapi generally disallows
+ * client-influenced relations to the User model). Hence no `super.create()`
+ * here, but a direct document service call that fills the value
+ * server-side from the authenticated user.
  */
 export default factories.createCoreController('api::pattern.pattern', ({ strapi }) => ({
   async create(ctx) {
@@ -127,9 +125,9 @@ export default factories.createCoreController('api::pattern.pattern', ({ strapi 
   },
 
   /**
-   * Eigene Route statt `find` mit `filters[author]`: dieselbe
-   * Query-Schema-Validierung, die author im Create-Body ablehnt,
-   * lehnt auch Filter auf Relationen zum User-Model ab.
+   * Dedicated route instead of `find` with `filters[author]`: the same
+   * query schema validation that rejects `author` in the create body also
+   * rejects filters on relations to the User model.
    */
   async mine(ctx) {
     noStore(ctx);
@@ -147,15 +145,15 @@ export default factories.createCoreController('api::pattern.pattern', ({ strapi 
   },
 
   /**
-   * `find`/`findOne` sind komplett eigenständig (nicht `super.find(ctx)`)
-   * und ignorieren bewusst alle Query-Filter des Clients: sie liefern IMMER
-   * nur `moderationStatus: 'published'`, egal wer fragt (public oder
-   * eingeloggt) – sonst könnte jede:r über eigene Filter fremde
-   * Entwürfe sehen. `status: 'draft'` hier bezieht sich auf Strapis EIGENES
-   * Draft/Publish (publishedAt) und liefert bewusst immer den aktuellen
-   * Stand – unser eigenes `moderationStatus`-Feld bleibt die einzige
-   * Quelle der Wahrheit für die Sichtbarkeit, unabhängig von Strapis
-   * eigenem Status (siehe `ensurePublished`).
+   * `find`/`findOne` are entirely custom (not `super.find(ctx)`) and
+   * deliberately ignore all client query filters: they ALWAYS return only
+   * `moderationStatus: 'published'`, no matter who's asking (public or
+   * logged in) - otherwise anyone could see someone else's drafts via
+   * their own filters. `status: 'draft'` here refers to Strapi's OWN
+   * draft/publish (publishedAt) and deliberately always returns the
+   * current state - our own `moderationStatus` field remains the single
+   * source of truth for visibility, independent of Strapi's own status
+   * (see `ensurePublished`).
    */
   async find(ctx) {
     const entities = await strapi.documents('api::pattern.pattern').findMany({
@@ -170,10 +168,10 @@ export default factories.createCoreController('api::pattern.pattern', ({ strapi 
   },
 
   /**
-   * Sucht per `slug` (nicht `documentId`) – so verlinkt das Frontend Muster
-   * (/pattern/:slug). Veröffentlichte Muster sieht jede:r; Entwürfe nur die
-   * Ersteller-Person selbst (z. B. um ein gerade gespeichertes Muster gleich
-   * wieder aufrufen zu können) – alle anderen Entwürfe bleiben ein 404.
+   * Looks up by `slug` (not `documentId`) - matches how the frontend
+   * links patterns (/pattern/:slug). Published patterns are visible to
+   * everyone; drafts only to their creator (e.g. to reopen a
+   * just-saved pattern) - every other draft stays a 404.
    */
   async findOne(ctx) {
     noStore(ctx);
@@ -200,16 +198,15 @@ export default factories.createCoreController('api::pattern.pattern', ({ strapi 
   },
 
   /**
-   * Eigene `update`-Aktion statt `super.update(ctx)`: nur der:die
-   * Ersteller:in darf ein Muster ändern (Strapis Standard-`update` prüft das
-   * NICHT automatisch – ohne diesen Check könnte jede:r eingeloggte Person
-   * jedes Muster überschreiben). `author` wird aus dem Body entfernt,
-   * bevor er in Update-Daten übernommen wird – aus demselben Grund wie bei
-   * `create` sollte er nie clientseitig gesetzt werden können. Ist das
-   * Muster ein Remix, wird bei genug Abweichung von der Quelle (siehe
-   * `hasEnoughRemixDivergence`) `remixOf` automatisch entfernt – der Link
-   * zum Original bricht dann von selbst, ohne dass die Person das aktiv tun
-   * müsste.
+   * Custom `update` action instead of `super.update(ctx)`: only the
+   * creator may change a pattern (Strapi's standard `update` does NOT
+   * check this automatically - without this check, any logged-in user
+   * could overwrite any pattern). `author` is stripped from the body
+   * before it's used as update data - same reason as in `create`, it
+   * should never be client-settable. If the pattern is a remix and
+   * diverges enough from the source (see `hasEnoughRemixDivergence`),
+   * `remixOf` is cleared automatically - the link to the original then
+   * breaks on its own, without the user having to do anything.
    */
   async update(ctx) {
     if (!ctx.state.user) return ctx.unauthorized();
@@ -251,15 +248,15 @@ export default factories.createCoreController('api::pattern.pattern', ({ strapi 
   },
 
   /**
-   * Kopiert ein Muster als neuen, eigenen Entwurf ("Remix"): Schären,
-   * Wendefolge, Palette und Stil werden übernommen, Freitext/Quelle bewusst
-   * NICHT (das sind persönliche Angaben der Ersteller-Person). `remixOf`
-   * verlinkt auf das Original, die `remixSource*`-Felder speichern den Stand
-   * zum Kopierzeitpunkt – daran wird später gemessen, ob genug verändert
-   * wurde, um den Link zu brechen (siehe `update`). Private Entwürfe können
-   * NUR von der eigenen Ersteller-Person geremixt werden (z. B. um eine
-   * Variante abzuspalten, ohne das Original zu verändern) – fremde private
-   * Muster bleiben unsichtbar und damit auch nicht remixbar, siehe `findOne`.
+   * Copies a pattern as a new draft of the caller's own ("remix"):
+   * threading, turning sequence, palette and style tags carry over,
+   * deliberately NOT notes/source (those are personal to the creator).
+   * `remixOf` links to the original, the `remixSource*` fields save the
+   * state at copy time - used later to measure whether enough changed to
+   * break the link (see `update`). Private drafts can ONLY be remixed by
+   * their own creator (e.g. to branch off a variant without touching the
+   * original) - other users' private patterns stay invisible and thus
+   * unremixable, see `findOne`.
    */
   async remix(ctx) {
     if (!ctx.state.user) return ctx.unauthorized();
@@ -305,11 +302,10 @@ export default factories.createCoreController('api::pattern.pattern', ({ strapi 
   },
 
   /**
-   * Eigene `delete`-Aktion statt `super.delete(ctx)`: aus demselben Grund
-   * wie bei `update` prüft Strapis Standard-`delete` die Ersteller:innenschaft
-   * NICHT automatisch – ohne diesen Check könnte jede:r eingeloggte Person
-   * jedes Muster löschen. Löscht alle Versionen (Draft + ggf. veröffentlicht)
-   * des Dokuments.
+   * Custom `delete` action instead of `super.delete(ctx)`: same reason as
+   * `update`, Strapi's standard `delete` does NOT check ownership
+   * automatically - without this check, any logged-in user could delete
+   * any pattern. Deletes all versions (draft + published, if any) of the document.
    */
   async delete(ctx) {
     if (!ctx.state.user) return ctx.unauthorized();

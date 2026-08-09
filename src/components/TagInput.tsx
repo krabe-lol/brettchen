@@ -7,19 +7,17 @@ interface TagInputProps {
   id?: string
   value: string[]
   onChange: (tags: string[]) => void
-  /** Vorhandene Tags aus anderen Mustern, als Autocomplete-Vorschläge unter dem Eingabefeld. */
+  /** Existing tags from other patterns, shown as autocomplete suggestions below the input. */
   suggestions?: string[]
   placeholder?: string
   className?: string
 }
 
 /**
- * Freitext-Tag-Eingabe: Enter übernimmt den aktuellen Text als neuen Tag
- * (dedupliziert case-insensitiv gegen bereits gesetzte Tags), Backspace bei
- * leerem Eingabefeld entfernt den letzten Tag. Darunter erscheint ein
- * Autocomplete-Dropdown mit vorhandenen Tags (aus `suggestions`), die zum
- * aktuellen Text passen und noch nicht gesetzt sind – ein Klick darauf
- * übernimmt sie genauso wie Enter.
+ * Free-text tag input: Enter adds the current text as a new tag
+ * (case-insensitive dedup against existing tags), Backspace on an empty
+ * input removes the last tag. Shows an autocomplete dropdown of matching,
+ * not-yet-added `suggestions` below the field - clicking one adds it too.
  */
 export function TagInput({ id, value, onChange, suggestions = [], placeholder, className }: TagInputProps) {
   const { t } = useLanguage()

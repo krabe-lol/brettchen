@@ -33,10 +33,10 @@ export default {
       handler: 'auth.updateEmail',
     },
     {
-      // POST statt DELETE: Strapis Body-Parser-Middleware liest den
-      // Request-Body bei DELETE nicht zuverlässig ein (leerer Body, obwohl
-      // gesendet) – ohne currentPassword im Body schlägt die eigene
-      // Passwort-Prüfung im Controller sonst fälschlich fehl.
+      // POST instead of DELETE: Strapi's body-parser middleware doesn't
+      // reliably read the request body on DELETE (comes through empty even
+      // though it was sent) - without currentPassword in the body, the
+      // controller's own password check would otherwise wrongly fail.
       method: 'POST',
       path: '/auth/local/account/delete',
       handler: 'auth.deleteAccount',

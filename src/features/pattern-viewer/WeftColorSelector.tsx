@@ -5,18 +5,18 @@ import type { PaletteSlot } from './types'
 interface WeftColorSelectorProps {
   palette: PaletteSlot[]
   weftColorSlotId: string | null
-  /** Wenn gesetzt, ist die Auswahl klickbar (nur im Editor) – ohne wird nur der aktuelle Wert angezeigt (und bei keinem gesetzten Wert gar nichts). */
+  /** If set, the selector is clickable (editor only) - without it, only the current value is shown (and nothing if none is set). */
   onChange?: (slotId: string | null) => void
 }
 
 /**
- * Auswahl der Schussfadenfarbe (Weft) aus den vorhandenen Musterfarben,
- * zwischen Schärmuster und Kartenstellungs-Legende. Anders als die Kettfäden
- * (Schärung) hat der Schussfaden keine feste Zuordnung zu einzelnen Löchern,
- * daher diese eigene, einfache Auswahl statt einer Zelle in der
- * Schärpatrone. Gilt beim Speichern immer als benutzte Farbe (siehe
- * pruneUnusedColors in PatternEditor.tsx), auch wenn sie sonst nirgends in
- * der Schärung vorkommt.
+ * Weft color picker from the pattern's existing colors, between the
+ * threading chart and the card-orientation legend. Unlike the warp
+ * threads (threading), the weft has no fixed assignment to individual
+ * holes, hence this separate, simple selector instead of a threading
+ * chart cell. Always counts as a used color on save (see
+ * pruneUnusedColors in PatternEditor.tsx), even if it doesn't otherwise
+ * appear in the threading.
  */
 export function WeftColorSelector({ palette, weftColorSlotId, onChange }: WeftColorSelectorProps) {
   const { t } = useLanguage()

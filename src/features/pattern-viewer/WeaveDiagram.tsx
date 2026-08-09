@@ -10,13 +10,13 @@ import type { Pattern, PaletteSlot, TurnValue } from './types'
 interface WeaveDiagramProps {
   pattern: Pattern
   palette: PaletteSlot[]
-  /** Wenn gesetzt, werden die Zellen klickbar (Drehrichtung ab hier umkehren). */
+  /** If set, cells become clickable (reverses turn direction from here on). */
   onCellClick?: (rowIndex: number, tabletIndex: number) => void
-  /** Rein anzeigeseitig, ändert nie den gespeicherten Wert. Siehe render/orientationDisplay.ts. */
+  /** Display-only, never changes the saved value. See render/orientationDisplay.ts. */
   displaySettings?: DisplaySettings
-  /** Wenn gesetzt (0-basiert), wird diese Reihe hervorgehoben und bei Änderung in den Viewport gescrollt – siehe PatternDiagrams-Navigation. */
+  /** If set (0-based), this row is highlighted and scrolled into view on change - see PatternDiagrams navigation. */
   activeRow?: number | null
-  /** Zeigt das Drehmuster rückwärts (siehe applyUntwistOrder) – pro Muster/Nutzer:in gespeichert, siehe usePatternHighlightSettings. */
+  /** Shows the turning diagram in reverse (see applyUntwistOrder) - saved per pattern/user, see usePatternHighlightSettings. */
   untwistMode?: boolean
 }
 
@@ -30,7 +30,7 @@ const SQUARE_SIZE = CELL
 const FORWARD_BG = 'var(--background)'
 const BACKWARD_BG = 'var(--foreground)'
 
-/** Der Ellipsenwinkel zeigt die Verdrillung: das Ergebnis aus Schären × Drehung (nicht die Drehung allein). */
+/** The ellipse angle shows the twist: the result of threading x turn (not the turn alone). */
 function angleForEffectiveDirection(effectiveDirection: -1 | 0 | 1): number {
   if (effectiveDirection < 0) return RIGHT_ANGLE
   if (effectiveDirection > 0) return LEFT_ANGLE
@@ -38,10 +38,9 @@ function angleForEffectiveDirection(effectiveDirection: -1 | 0 | 1): number {
 }
 
 /**
- * Hintergrund zeigt die Drehrichtung: Seitenhintergrund = vorwärts,
- * Vordergrundfarbe = rückwärts – deren Deckkraft ist über
- * `displaySettings.backwardContrast` einstellbar, damit sich der Kontrast
- * an die eigenen Bedürfnisse anpassen lässt.
+ * Background shows the turn direction: page background = forward,
+ * foreground color = backward - its opacity is adjustable via
+ * `displaySettings.backwardContrast` so the contrast can suit personal preference.
  */
 function backgroundForTurn(turn: TurnValue, backwardContrast: number): { fill: string; fillOpacity?: number } {
   if (turn < 0) return { fill: BACKWARD_BG, fillOpacity: backwardContrast / 100 }
@@ -49,20 +48,20 @@ function backgroundForTurn(turn: TurnValue, backwardContrast: number): { fill: s
 }
 
 /**
- * Drehmuster (Wendeplan): zeigt pro Reihe/Brettchen die sichtbare Fadenfarbe
- * als geneigte Ellipse. Die Neigung zeigt die Verdrillung – das tatsächliche Ergebnis aus
- * Kartenstellung (S/Z) UND Drehbefehl zusammen – bei S-Ausrichtung neigt
- * eine Vorwärtsdrehung nach rechts, eine Rückwärtsdrehung nach links (bei
- * Z-Ausrichtung ist es umgekehrt). Der Drehbefehl selbst (vorwärts/rückwärts)
- * wird separat als Hintergrundfläche hinter der Ellipse gezeigt. Ein Klick
- * auf eine Zelle kehrt die Drehrichtung ab dieser Reihe für das gesamte
- * Brettchen um (alle folgenden Reihen mit); eine rote Linie unter der
- * ersten geänderten Zelle markiert den Richtungswechsel. Ein Muster beginnt
- * unten bei Reihe 1 (Index 0 in turningSequence) und wächst nach oben –
- * näher an der Realität beim Weben. Spalten von links mit 1..n. Im
- * "Untwist"-Anzeigemodus (`untwistMode`) läuft die Reihenfolge umgekehrt und
- * jede Drehung ist invertiert (siehe applyUntwistOrder) – zeigt, wie
- * rückwärts gewebt werden muss, um das Muster zu entdrillen.
+ * Turning diagram: shows the visible thread color per row/tablet as a
+ * tilted ellipse. The tilt shows the twist - the actual result of card
+ * orientation (S/Z) AND turn command combined - with S orientation, a
+ * forward turn tilts right and a backward turn tilts left (reversed for Z
+ * orientation). The turn command itself (forward/backward) is shown
+ * separately as the background behind the ellipse. Clicking a cell
+ * reverses the turn direction from that row on for the whole tablet (all
+ * following rows too); a red line under the first changed cell marks the
+ * direction change. A pattern starts at the bottom with row 1 (index 0 in
+ * turningSequence) and grows upward - closer to how it works while
+ * actually weaving. Columns labeled 1..n from the left. In "untwist"
+ * display mode (`untwistMode`), the row order is reversed and every turn
+ * is inverted (see applyUntwistOrder) - shows how to weave backward to
+ * remove the twist.
  */
 export function WeaveDiagram({
   pattern,
@@ -91,7 +90,7 @@ export function WeaveDiagram({
   const totalWidth = ROW_LABEL_WIDTH + gridWidth
   const totalHeight = COL_LABEL_HEIGHT + gridHeight + COL_LABEL_HEIGHT
 
-  /** Reihe 0 (zuerst gewebt) unten, höhere Reihen weiter oben. */
+  /** Row 0 (woven first) at the bottom, higher rows further up. */
   const rowY = (rowIndex: number) => COL_LABEL_HEIGHT + (pattern.numRows - 1 - rowIndex) * STEP
 
   return (
