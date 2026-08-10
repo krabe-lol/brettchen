@@ -58,7 +58,9 @@ services:
     depends_on:
       - strapi
     ports:
-      - "80:80"
+      # Not 80:80 - Nginx Proxy Manager already owns host port 80/443,
+      # so the frontend gets its own host port and NPM forwards to it.
+      - "8080:80"
 
 volumes:
   postgres-data:
