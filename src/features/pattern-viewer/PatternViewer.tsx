@@ -6,6 +6,7 @@ import { PatternHighlightSettingsCard } from './PatternHighlightSettingsCard'
 import { PatternInfoSection } from './PatternInfoSection'
 import { useDisplaySettings, useSaveDisplaySettingsAsDefault } from './DisplaySettingsContext'
 import { usePatternHighlightSettings } from './usePatternHighlightSettings'
+import { downloadPatternFile } from './patternFile'
 import { isTwistNeutral } from './render/twist'
 import { useDisplayState } from './useDisplayState'
 import { useLanguage } from '@/features/i18n/LanguageContext'
@@ -13,7 +14,7 @@ import { Button } from '@/components/ui/button'
 import { CollectionBookmarkButton } from '@/features/library/CollectionBookmarkButton'
 import type { StrapiCollectionRecord } from '@/lib/strapi/collections'
 import type { Pattern } from './types'
-import { LoaderCircle, Pencil, Trash } from 'lucide-react'
+import { Download, LoaderCircle, Pencil, Trash } from 'lucide-react'
 
 interface PatternViewerProps {
   heading: string
@@ -96,6 +97,16 @@ export function PatternViewer({
               {isRemixing ? t('patternRemixing') : t('patternRemixButton')}
             </Button>
           )}
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            title={t('editorExport')}
+            aria-label={t('editorExport')}
+            onClick={() => downloadPatternFile(pattern)}
+          >
+            <Download />
+          </Button>
           {onEdit && (
             <Button variant="outline" size="icon" onClick={onEdit}>
               <Pencil />
