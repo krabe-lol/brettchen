@@ -16,7 +16,7 @@ export function App() {
           <ToastProvider>
             <AuthProvider>
               <PreferenceSync />
-              <div className="mx-auto flex min-h-svh max-w-[1536px] flex-col px-6">
+              <div className="mx-auto flex min-h-svh max-w-[1920px] flex-col px-6">
                 <Header />
                 <main className="flex-1">
                   <Outlet />
