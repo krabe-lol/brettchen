@@ -69,7 +69,13 @@ export function CollectionDetailPage() {
     return () => {
       cancelled = true
     }
-  }, [id, token, isAuthLoading, t])
+    // token/t deliberately not in the deps: AuthContext refreshes the token every few minutes in the
+    // background, and refetching here would silently overwrite name/description/visibility with the
+    // last-saved server state while editing, discarding unsaved changes without any warning. The token
+    // is still current when this effect does run (isAuthLoading only turns false once the initial
+    // refresh settles).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, isAuthLoading])
 
   /** For the bookmark icon on each pattern card (see CollectionBookmarkButton) - the logged-in user's own collections. */
   const loadMyCollections = useCallback(() => {

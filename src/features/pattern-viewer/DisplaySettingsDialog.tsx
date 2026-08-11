@@ -1,4 +1,4 @@
-import { SlidersHorizontal } from 'lucide-react'
+import { Highlighter, SlidersHorizontal } from 'lucide-react'
 import { DisplaySettingsCard } from './DisplaySettingsCard'
 import { PatternHighlightSettingsCard } from './PatternHighlightSettingsCard'
 import { useLanguage } from '@/features/i18n/LanguageContext'
@@ -30,9 +30,12 @@ interface DisplaySettingsDialogProps {
 
 /**
  * Display options (DisplaySettingsCard) and, if set, row/tablet
- * highlighting + untwist mode (PatternHighlightSettingsCard) behind a
- * button as an overlay instead of a permanent sidebar - keeps the actual
- * pattern view (diagrams, colors, info) in focus, especially on narrow screens.
+ * highlighting + untwist mode (PatternHighlightSettingsCard) each behind
+ * their own button as a separate overlay instead of a permanent sidebar -
+ * keeps the actual pattern view (diagrams, colors, info) in focus,
+ * especially on narrow screens. Two buttons instead of one shared dialog,
+ * since the two setting groups are unrelated enough that combining them
+ * behind a single "display settings" button was confusing.
  */
 export function DisplaySettingsDialog({
   displaySettings,
@@ -49,18 +52,19 @@ export function DisplaySettingsDialog({
   numTablets,
 }: DisplaySettingsDialogProps) {
   const { t } = useLanguage()
+  const hasHighlightSettings = highlightSettings && onHighlightSettingsChange && onHighlightSaveEnabledChange
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button type="button" variant="outline">
-          <SlidersHorizontal />
-          {t('displaySettingsHeading')}
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-md">
-        <DialogTitle className="sr-only">{t('displaySettingsHeading')}</DialogTitle>
-        <div className="flex flex-col gap-6">
+    <div className="flex flex-wrap gap-2">
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button type="button" variant="outline">
+            <SlidersHorizontal />
+            {t('displaySettingsHeading')}
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-md">
+          <DialogTitle className="sr-only">{t('displaySettingsHeading')}</DialogTitle>
           <DisplaySettingsCard
             settings={displaySettings}
             onChange={onDisplaySettingsChange}
@@ -68,7 +72,19 @@ export function DisplaySettingsDialog({
             isSavingDefault={isSavingDisplayDefault}
             canSaveAsDefault={canSaveDisplayDefault}
           />
-          {highlightSettings && onHighlightSettingsChange && onHighlightSaveEnabledChange && (
+        </DialogContent>
+      </Dialog>
+
+      {hasHighlightSettings && (
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button type="button" variant="outline">
+              <Highlighter />
+              {t('highlightSettingsHeading')}
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogTitle className="sr-only">{t('highlightSettingsHeading')}</DialogTitle>
             <PatternHighlightSettingsCard
               settings={highlightSettings}
               onChange={onHighlightSettingsChange}
@@ -78,9 +94,9 @@ export function DisplaySettingsDialog({
               numRows={numRows}
               numTablets={numTablets}
             />
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
   )
 }

@@ -38,9 +38,9 @@ interface PatternEditorProps {
   heading: string
   /** If set, shows the public/private toggle and the save button, which receive the current pattern. */
   onSave?: (pattern: Pattern, status: 'draft' | 'published') => void
-  /** If set, also shows a "save & close" button that switches to view mode after saving. */
-  onSaveAndClose?: (pattern: Pattern, status: 'draft' | 'published') => void
-  /** Disables the save buttons and shows a loading state while onSave/onSaveAndClose runs. */
+  /** If set, also shows a "close" button that switches to view mode without saving (asks for confirmation first if there are unsaved changes). */
+  onClose?: () => void
+  /** Disables the save button and shows a loading state while onSave runs. */
   isSaving?: boolean
   /** If set, shows a "delete" button (only for existing patterns, not when creating a new one). */
   onDelete?: () => void
@@ -65,7 +65,7 @@ export function PatternEditor({
   initialPattern,
   heading,
   onSave,
-  onSaveAndClose,
+  onClose,
   isSaving,
   onDelete,
   isDeleting,
@@ -85,6 +85,7 @@ export function PatternEditor({
     setTabletCount,
     setRowCount,
     invertTurnsFrom,
+    invertRow,
     moveTablet,
     removeTabletAt,
     toggleOrientation,
@@ -193,10 +194,6 @@ export function PatternEditor({
     onSave?.(pruneAndSyncColors(), status)
   }
 
-  function saveAndCloseWithPrunedColors(status: 'draft' | 'published') {
-    onSaveAndClose?.(pruneAndSyncColors(), status)
-  }
-
   /**
    * For an existing pattern ("save changes"), there's nothing to do as
    * long as neither the content nor the visibility differs from the
@@ -209,6 +206,12 @@ export function PatternEditor({
     moderationStatus === undefined ||
     JSON.stringify(pattern) !== JSON.stringify(initialPattern) ||
     visibility !== (moderationStatus === 'published' ? 'published' : 'draft')
+
+  /** Closes without saving; asks for confirmation first if there are unsaved changes. */
+  function handleClose() {
+    if (hasUnsavedChanges && !window.confirm(t('editorUnsavedChangesConfirm'))) return
+    onClose?.()
+  }
 
   /**
    * Warns when leaving as long as an existing pattern has unsaved changes
@@ -252,7 +255,7 @@ export function PatternEditor({
             </span>
           )}
         </h1>
-        <div className="flex shrink-0 flex-wrap items-center gap-4">
+        <div className="flex w-full flex-wrap items-center gap-4 lg:w-auto">
           <input
             ref={importInputRef}
             type="file"
@@ -304,17 +307,12 @@ export function PatternEditor({
               >
                 {isSaving ? t('editorSaving') : t('editorSave')}
               </Button>
-              {onSaveAndClose && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => saveAndCloseWithPrunedColors(visibility)}
-                  disabled={isSaving || !hasUnsavedChanges}
-                >
-                  {isSaving ? t('editorSaving') : t('editorSaveAndClose')}
-                </Button>
-              )}
             </>
+          )}
+          {onClose && (
+            <Button type="button" variant="outline" onClick={handleClose}>
+              {t('closeLabel')}
+            </Button>
           )}
         </div>
       </div>
@@ -411,6 +409,7 @@ export function PatternEditor({
           onMoveTablet={moveTablet}
           onRemoveTablet={removeTabletAt}
           onWeaveCellClick={invertTurnsFrom}
+          onInvertRow={invertRow}
           onWeftColorChange={setWeftColorSlotId}
         />
 

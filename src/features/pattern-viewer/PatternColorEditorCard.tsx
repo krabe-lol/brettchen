@@ -89,11 +89,13 @@ export function PatternColorEditorCard({
                 type="color"
                 value={slot.hex}
                 onChange={(e) => onColorHexChange(slot.slotId, e.target.value)}
-                className="size-6 shrink-0 cursor-pointer rounded border"
+                className="size-6 shrink-0 cursor-pointer appearance-none rounded border p-0 [&::-moz-color-swatch]:rounded-[3px] [&::-moz-color-swatch]:border-none [&::-webkit-color-swatch]:rounded-[3px] [&::-webkit-color-swatch]:border-none [&::-webkit-color-swatch-wrapper]:p-0"
               />
-              <span className="flex-1 truncate">{slot.name}</span>
-              <span className="text-xs text-muted-foreground">
-                {formatThreadCount(threadCounts.bySlot[slot.slotId] ?? 0)}
+              <span className="flex flex-1 flex-col truncate">
+                <span className="truncate">{slot.name}</span>
+                <span className="text-xs text-muted-foreground">
+                  {formatThreadCount(threadCounts.bySlot[slot.slotId] ?? 0)}
+                </span>
               </span>
             </div>
             <Button

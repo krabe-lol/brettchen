@@ -25,6 +25,8 @@ interface PatternDiagramsProps {
   onRemoveTablet?: (tabletIndex: number) => void
   /** If set, cells in the turning diagram become clickable (change turn direction) - only applies to the turning view, not the woven band. */
   onWeaveCellClick?: (rowIndex: number, tabletIndex: number) => void
+  /** If set, a button at the end of each row inverts every tablet's turn in that row - only applies to the turning view, not the woven band. */
+  onInvertRow?: (rowIndex: number) => void
   /** If set, the weft color can be picked (see WeftColorSelector) - without it, only the current value is shown. */
   onWeftColorChange?: (slotId: string | null) => void
   /** Row/tablet highlighting + untwist mode, see PatternHighlightSettingsCard/usePatternHighlightSettings - without these props, highlighting/untwist stays off (e.g. the pattern preview on the settings page). */
@@ -54,10 +56,11 @@ function clamp(value: number, min: number, max: number): number {
  * (highlighted as a column in the threading chart). Both can also be
  * moved with arrow keys (up/down for the row, left/right for the tablet) -
  * purely optional, since both can also be typed directly into the card.
- * On mobile, an additional floating D-pad in the bottom right, since arrow
- * keys aren't available there; it only shows the directions of whichever
- * cursor is active. Arrow keys are ignored while an input field is
- * focused, so normal text navigation isn't disrupted.
+ * On mobile, an additional floating button row in the bottom right, since
+ * arrow keys aren't available there (tablet left/right first, then row
+ * up/down); it only shows the directions of whichever cursor is active.
+ * Arrow keys are ignored while an input field is focused, so normal text
+ * navigation isn't disrupted.
  */
 export function PatternDiagrams({
   pattern,
@@ -67,6 +70,7 @@ export function PatternDiagrams({
   onMoveTablet,
   onRemoveTablet,
   onWeaveCellClick,
+  onInvertRow,
   onWeftColorChange,
   highlightSettings = DEFAULT_PATTERN_HIGHLIGHT_SETTINGS,
   onHighlightSettingsChange,
@@ -75,11 +79,17 @@ export function PatternDiagrams({
   const [weaveView, setWeaveView] = useState<WeaveView>('turning')
   const { settings: displaySettings } = useDisplaySettings()
 
+  /**
+   * Stepping past the last (topmost, see rowY in WeaveDiagram) row wraps
+   * back down to the repeat row instead of stopping - that's where weaving
+   * actually continues for a repeating pattern. Stepping below row 1 just
+   * clamps, since there's nothing to wrap to there.
+   */
   function stepRow(delta: number) {
-    onHighlightSettingsChange?.({
-      ...highlightSettings,
-      activeRow: clamp(highlightSettings.activeRow + delta, 1, pattern.numRows),
-    })
+    const next = highlightSettings.activeRow + delta
+    const activeRow =
+      next > pattern.numRows ? clamp(pattern.repeatFromRow ?? 1, 1, pattern.numRows) : clamp(next, 1, pattern.numRows)
+    onHighlightSettingsChange?.({ ...highlightSettings, activeRow })
   }
 
   function stepTablet(delta: number) {
@@ -160,6 +170,7 @@ export function PatternDiagrams({
             pattern={pattern}
             palette={palette}
             onCellClick={highlightSettings.untwistMode ? undefined : onWeaveCellClick}
+            onInvertRow={highlightSettings.untwistMode ? undefined : onInvertRow}
             displaySettings={displaySettings}
             activeRow={highlightSettings.highlightRow ? highlightSettings.activeRow - 1 : null}
             untwistMode={highlightSettings.untwistMode}
@@ -176,60 +187,55 @@ export function PatternDiagrams({
       </div>
 
       {(highlightSettings.highlightRow || highlightSettings.highlightTablet) && (
-        <div className="fixed right-4 bottom-4 z-40 grid grid-cols-3 grid-rows-3 gap-1 sm:hidden">
-          <div />
-          {highlightSettings.highlightRow && (
-            <Button
-              type="button"
-              size="icon"
-              variant="secondary"
-              className="shadow-lg"
-              aria-label={t('patternNavigationRowNext')}
-              onClick={() => stepRow(1)}
-            >
-              <ChevronUp />
-            </Button>
-          )}
-          <div />
+        <div className="fixed right-4 bottom-4 z-40 flex gap-1 sm:hidden">
           {highlightSettings.highlightTablet && (
-            <Button
-              type="button"
-              size="icon"
-              variant="secondary"
-              className="shadow-lg"
-              aria-label={t('patternNavigationTabletPrev')}
-              onClick={() => stepTablet(-1)}
-            >
-              <ChevronLeft />
-            </Button>
+            <>
+              <Button
+                type="button"
+                size="icon"
+                variant="secondary"
+                className="shadow-lg"
+                aria-label={t('patternNavigationTabletPrev')}
+                onClick={() => stepTablet(-1)}
+              >
+                <ChevronLeft />
+              </Button>
+              <Button
+                type="button"
+                size="icon"
+                variant="secondary"
+                className="shadow-lg"
+                aria-label={t('patternNavigationTabletNext')}
+                onClick={() => stepTablet(1)}
+              >
+                <ChevronRight />
+              </Button>
+            </>
           )}
-          <div />
-          {highlightSettings.highlightTablet && (
-            <Button
-              type="button"
-              size="icon"
-              variant="secondary"
-              className="shadow-lg"
-              aria-label={t('patternNavigationTabletNext')}
-              onClick={() => stepTablet(1)}
-            >
-              <ChevronRight />
-            </Button>
-          )}
-          <div />
           {highlightSettings.highlightRow && (
-            <Button
-              type="button"
-              size="icon"
-              variant="secondary"
-              className="shadow-lg"
-              aria-label={t('patternNavigationRowPrev')}
-              onClick={() => stepRow(-1)}
-            >
-              <ChevronDown />
-            </Button>
+            <>
+              <Button
+                type="button"
+                size="icon"
+                variant="secondary"
+                className="shadow-lg"
+                aria-label={t('patternNavigationRowNext')}
+                onClick={() => stepRow(1)}
+              >
+                <ChevronUp />
+              </Button>
+              <Button
+                type="button"
+                size="icon"
+                variant="secondary"
+                className="shadow-lg"
+                aria-label={t('patternNavigationRowPrev')}
+                onClick={() => stepRow(-1)}
+              >
+                <ChevronDown />
+              </Button>
+            </>
           )}
-          <div />
         </div>
       )}
     </>

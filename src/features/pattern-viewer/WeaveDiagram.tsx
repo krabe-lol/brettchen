@@ -1,4 +1,6 @@
 import { useEffect, useRef } from 'react'
+import type { PointerEvent as ReactPointerEvent } from 'react'
+import { ArrowUpDown } from 'lucide-react'
 import { applyUntwistOrder, computeWeaveGrid } from './render/weaveGrid'
 import { computeTwistByTablet } from './render/twist'
 import { CELL, COL_LABEL_HEIGHT, FALLBACK_COLOR, LABEL_FONT_SIZE, ROW_LABEL_WIDTH, STEP } from './render/gridLayout'
@@ -12,6 +14,8 @@ interface WeaveDiagramProps {
   palette: PaletteSlot[]
   /** If set, cells become clickable (reverses turn direction from here on). */
   onCellClick?: (rowIndex: number, tabletIndex: number) => void
+  /** If set, a button at the end of each row inverts every tablet's turn in that row. */
+  onInvertRow?: (rowIndex: number) => void
   /** Display-only, never changes the saved value. See render/orientationDisplay.ts. */
   displaySettings?: DisplaySettings
   /** If set (0-based), this row is highlighted and scrolled into view on change - see PatternDiagrams navigation. */
@@ -29,6 +33,18 @@ const SQUARE_SIZE = CELL
 
 const FORWARD_BG = 'var(--background)'
 const BACKWARD_BG = 'var(--foreground)'
+
+/** Reserved column at the right for the per-row invert button. */
+const INVERT_ROW_WIDTH = STEP
+const INVERT_ICON_SIZE = 14
+
+/**
+ * The drag-toggle (see handleCellPointerEnter) only reacts within this
+ * smaller, centered zone of a cell - a plain click still works anywhere in
+ * the full cell, but grazing just the edge of a neighboring cell while
+ * dragging along a row/column shouldn't also toggle it.
+ */
+const DRAG_HIT_INSET = 5
 
 /** The ellipse angle shows the twist: the result of threading x turn (not the turn alone). */
 function angleForEffectiveDirection(effectiveDirection: -1 | 0 | 1): number {
@@ -56,7 +72,12 @@ function backgroundForTurn(turn: TurnValue, backwardContrast: number): { fill: s
  * separately as the background behind the ellipse. Clicking a cell
  * reverses the turn direction from that row on for the whole tablet (all
  * following rows too); a red line under the first changed cell marks the
- * direction change. A pattern starts at the bottom with row 1 (index 0 in
+ * direction change. Press and drag across several cells to apply that same
+ * reversal to each cell the pointer passes over, one after another - only
+ * once the pointer is solidly inside a cell, not just grazing its edge (see
+ * DRAG_HIT_INSET). A button at the end of each row (if `onInvertRow` is
+ * set) inverts every tablet's turn in just that row instead, without
+ * cascading to other rows. A pattern starts at the bottom with row 1 (index 0 in
  * turningSequence) and grows upward - closer to how it works while
  * actually weaving. Columns labeled 1..n from the left. In "untwist"
  * display mode (`untwistMode`), the row order is reversed and every turn
@@ -67,6 +88,7 @@ export function WeaveDiagram({
   pattern,
   palette,
   onCellClick,
+  onInvertRow,
   displaySettings = DEFAULT_DISPLAY_SETTINGS,
   activeRow = null,
   untwistMode = false,
@@ -80,6 +102,32 @@ export function WeaveDiagram({
     if (activeRow != null) activeRowRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
   }, [activeRow])
 
+  /** Tracks press-and-drag across cells: pointer down starts it, pointer up (anywhere) ends it. */
+  const isDraggingRef = useRef(false)
+  useEffect(() => {
+    function handlePointerUp() {
+      isDraggingRef.current = false
+    }
+    window.addEventListener('pointerup', handlePointerUp)
+    return () => window.removeEventListener('pointerup', handlePointerUp)
+  }, [])
+
+  function handleCellPointerDown(rowIndex: number, tabletIndex: number, e: ReactPointerEvent) {
+    if (!onCellClick) return
+    e.preventDefault()
+    // Touch implicitly captures the pointer to this cell, which would suppress
+    // pointerenter on cells dragged over afterward (unlike mouse) - releasing it
+    // right away makes touch-dragging behave the same as a mouse drag.
+    e.currentTarget.releasePointerCapture(e.pointerId)
+    isDraggingRef.current = true
+    onCellClick(rowIndex, tabletIndex)
+  }
+
+  function handleCellPointerEnter(rowIndex: number, tabletIndex: number) {
+    if (!onCellClick || !isDraggingRef.current) return
+    onCellClick(rowIndex, tabletIndex)
+  }
+
   const weaveGrid = computeWeaveGrid(untwistMode ? applyUntwistOrder(pattern) : pattern)
 
   const twistByTablet = computeTwistByTablet(pattern)
@@ -87,7 +135,7 @@ export function WeaveDiagram({
 
   const gridWidth = pattern.numTablets * STEP
   const gridHeight = pattern.numRows * STEP
-  const totalWidth = ROW_LABEL_WIDTH + gridWidth
+  const totalWidth = ROW_LABEL_WIDTH + gridWidth + (onInvertRow ? INVERT_ROW_WIDTH : 0)
   const totalHeight = COL_LABEL_HEIGHT + gridHeight + COL_LABEL_HEIGHT
 
   /** Row 0 (woven first) at the bottom, higher rows further up. */
@@ -144,6 +192,25 @@ export function WeaveDiagram({
         </text>
       ))}
 
+      {onInvertRow &&
+        Array.from({ length: pattern.numRows }, (_, rowIndex) => (
+          <g
+            key={`invert-row-${rowIndex}`}
+            className="cursor-pointer text-muted-foreground hover:text-foreground"
+            onClick={() => onInvertRow(rowIndex)}
+          >
+            <title>{t('weaveInvertRowLabel', { number: String(rowIndex + 1) })}</title>
+            <rect x={ROW_LABEL_WIDTH + gridWidth} y={rowY(rowIndex)} width={INVERT_ROW_WIDTH} height={STEP} fill="transparent" />
+            <ArrowUpDown
+              x={ROW_LABEL_WIDTH + gridWidth + (INVERT_ROW_WIDTH - INVERT_ICON_SIZE) / 2}
+              y={rowY(rowIndex) + (STEP - INVERT_ICON_SIZE) / 2}
+              width={INVERT_ICON_SIZE}
+              height={INVERT_ICON_SIZE}
+              pointerEvents="none"
+            />
+          </g>
+        ))}
+
       {weaveGrid.map((row) =>
         row.map((cell) => {
           const cx = ROW_LABEL_WIDTH + cell.tabletIndex * STEP + CELL / 2
@@ -161,9 +228,21 @@ export function WeaveDiagram({
                 height={CELL}
                 rx={2}
                 {...backgroundForTurn(cell.turn, displaySettings.backwardContrast)}
-                onClick={onCellClick ? () => onCellClick(cell.rowIndex, cell.tabletIndex) : undefined}
+                onPointerDown={
+                  onCellClick ? (e) => handleCellPointerDown(cell.rowIndex, cell.tabletIndex, e) : undefined
+                }
                 className={onCellClick ? 'cursor-pointer hover:opacity-70' : undefined}
               />
+              {onCellClick && (
+                <rect
+                  x={cx - CELL / 2 + DRAG_HIT_INSET}
+                  y={cy - CELL / 2 + DRAG_HIT_INSET}
+                  width={CELL - DRAG_HIT_INSET * 2}
+                  height={CELL - DRAG_HIT_INSET * 2}
+                  fill="transparent"
+                  onPointerEnter={() => handleCellPointerEnter(cell.rowIndex, cell.tabletIndex)}
+                />
+              )}
               {displaySettings.weaveCellShape === 'square' ? (
                 <rect
                   x={cx - SQUARE_SIZE / 2}

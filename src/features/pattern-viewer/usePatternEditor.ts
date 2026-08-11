@@ -114,6 +114,11 @@ export function usePatternEditor(initialPattern: Pattern) {
     )
   }
 
+  /** Inverts every tablet's turn in a single row - unlike invertTurnsFrom, this doesn't cascade to other rows. */
+  function invertRow(rowIndex: number) {
+    setTurningSequence((prev) => prev.map((row, r) => (r === rowIndex ? row.map((turn) => -turn) : row)))
+  }
+
   /**
    * Moves a tablet to another position (drag & drop in the threading
    * chart) - threading AND turning sequence are reordered together, so
@@ -177,9 +182,13 @@ export function usePatternEditor(initialPattern: Pattern) {
     return slotId
   }
 
-  /** Changes the hex value of an existing color slot. */
+  /** Changes the hex value of an existing color slot and regenerates its name to match, same as a newly added color. */
   function setColorHex(slotId: string, hex: string) {
-    setPalette((prev) => prev.map((slot) => (slot.slotId === slotId ? { ...slot, hex } : slot)))
+    setPalette((prev) => {
+      const otherNames = prev.filter((slot) => slot.slotId !== slotId).map((slot) => slot.name)
+      const name = generateColorName(hex, otherNames, language)
+      return prev.map((slot) => (slot.slotId === slotId ? { ...slot, hex, name } : slot))
+    })
   }
 
   /**
@@ -244,6 +253,7 @@ export function usePatternEditor(initialPattern: Pattern) {
     setTabletCount,
     setRowCount,
     invertTurnsFrom,
+    invertRow,
     moveTablet,
     removeTabletAt,
     toggleOrientation,

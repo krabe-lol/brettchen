@@ -71,23 +71,25 @@ export function PatternDetailPage() {
     return () => {
       cancelled = true
     }
-    // location/user/navigate deliberately not in the deps: `openInEdit` should only be consumed once
+    // location/user/navigate/t deliberately not in the deps: `openInEdit` should only be consumed once
     // when this slug loads (then cleared right away via replace navigation), not reload the whole
-    // pattern again on every later change of location/user.
+    // pattern again on every later change of location/user. `token` deliberately not in the deps
+    // either - AuthContext refreshes it every few minutes in the background, and refetching here would
+    // reset isEditing to false, silently kicking anyone out of the editor mid-edit. The token is still
+    // current when this effect does run (isAuthLoading only turns false once the initial refresh settles).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slug, token, isAuthLoading, t])
+  }, [slug, isAuthLoading])
 
   const pattern = useMemo(() => (record ? toPattern(record) : null), [record])
   const isOwner = Boolean(user && record?.author?.username === user.username)
 
-  async function handleSave(updated: Pattern, status: 'draft' | 'published', close = false) {
+  async function handleSave(updated: Pattern, status: 'draft' | 'published') {
     if (!record || !token) return
     setSaveError(null)
     setIsSaving(true)
     try {
       const saved = await updatePattern(record.documentId, updated, status, token)
       setRecord(saved)
-      if (close) setIsEditing(false)
       toast(status === 'published' ? t('toastPatternPublished') : t('toastPatternSaved'))
     } catch (err) {
       setSaveError(err instanceof Error ? err.message : t('patternSaveError'))
@@ -137,7 +139,7 @@ export function PatternDetailPage() {
             heading={pattern.title}
             initialPattern={pattern}
             onSave={handleSave}
-            onSaveAndClose={(updated, status) => handleSave(updated, status, true)}
+            onClose={() => setIsEditing(false)}
             isSaving={isSaving}
             onDelete={handleDelete}
             isDeleting={isDeleting}
