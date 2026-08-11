@@ -84,6 +84,24 @@ async function ensureResetPasswordUrl(strapi: Core.Strapi) {
   }
 }
 
+/**
+ * One-time rename of existing default collections from the old German
+ * default name to the new English one (see DEFAULT_COLLECTION_NAME in the
+ * collection controller) - idempotent, becomes a no-op once no matches
+ * are left.
+ */
+async function renameDefaultCollections(strapi: Core.Strapi) {
+  const stale = await strapi.documents('api::collection.collection').findMany({
+    filters: { isDefault: true, name: 'Gespeichert' },
+  });
+  for (const collection of stale) {
+    await strapi.documents('api::collection.collection').update({
+      documentId: collection.documentId,
+      data: { name: 'Saved' } as any,
+    });
+  }
+}
+
 export default {
   /**
    * An asynchronous register function that runs before
@@ -104,5 +122,6 @@ export default {
     await ensurePermissions(strapi, 'authenticated', AUTHENTICATED_ACTIONS);
     await ensurePermissions(strapi, 'public', PUBLIC_ACTIONS);
     await ensureResetPasswordUrl(strapi);
+    await renameDefaultCollections(strapi);
   },
 };

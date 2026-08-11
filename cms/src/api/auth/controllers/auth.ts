@@ -15,15 +15,15 @@ export default {
     const { username, password, email } = ctx.request.body ?? {};
 
     if (typeof username !== 'string' || username.length < 3) {
-      return ctx.badRequest('username muss mindestens 3 Zeichen lang sein.');
+      return ctx.badRequest('username must be at least 3 characters long.');
     }
     if (typeof password !== 'string' || password.length < 6) {
-      return ctx.badRequest('password muss mindestens 6 Zeichen lang sein.');
+      return ctx.badRequest('password must be at least 6 characters long.');
     }
 
     const normalizedEmail = typeof email === 'string' ? email.trim() : '';
     if (normalizedEmail && !EMAIL_PATTERN.test(normalizedEmail)) {
-      return ctx.badRequest('email ist ungültig.');
+      return ctx.badRequest('email is invalid.');
     }
 
     const pluginStore = await strapi.store({ type: 'plugin', name: 'users-permissions' });
@@ -33,7 +33,7 @@ export default {
     };
 
     if (!settings.allow_register) {
-      return ctx.badRequest('Registrierung ist aktuell deaktiviert.');
+      return ctx.badRequest('Registration is currently disabled.');
     }
 
     const existingUsername = await strapi.db
@@ -41,7 +41,7 @@ export default {
       .findOne({ where: { username } });
 
     if (existingUsername) {
-      return ctx.badRequest('Username ist bereits vergeben.');
+      return ctx.badRequest('Username is already taken.');
     }
 
     if (normalizedEmail) {
@@ -50,7 +50,7 @@ export default {
         .findOne({ where: { email: normalizedEmail } });
 
       if (existingEmail) {
-        return ctx.badRequest('E-Mail-Adresse ist bereits vergeben.');
+        return ctx.badRequest('Email address is already taken.');
       }
     }
 
@@ -59,7 +59,7 @@ export default {
       .findOne({ where: { type: settings.default_role } });
 
     if (!role) {
-      return ctx.badRequest('Standard-Rolle nicht gefunden.');
+      return ctx.badRequest('Default role not found.');
     }
 
     const user = await strapi.plugin('users-permissions').service('user').add({
@@ -109,7 +109,7 @@ export default {
 
     const { username, currentPassword } = ctx.request.body ?? {};
     if (typeof username !== 'string' || username.length < 3) {
-      return ctx.badRequest('username muss mindestens 3 Zeichen lang sein.');
+      return ctx.badRequest('username must be at least 3 characters long.');
     }
 
     const record = await strapi.db
@@ -119,7 +119,7 @@ export default {
       .plugin('users-permissions')
       .service('user')
       .validatePassword(currentPassword ?? '', record.password);
-    if (!valid) return ctx.badRequest('Aktuelles Passwort ist falsch.');
+    if (!valid) return ctx.badRequest('Current password is incorrect.');
 
     if (username !== record.username) {
       const existing = await strapi.db.query('plugin::users-permissions.user').findOne({ where: { username } });
@@ -138,7 +138,7 @@ export default {
 
     const { currentPassword, newPassword } = ctx.request.body ?? {};
     if (typeof newPassword !== 'string' || newPassword.length < 6) {
-      return ctx.badRequest('newPassword muss mindestens 6 Zeichen lang sein.');
+      return ctx.badRequest('newPassword must be at least 6 characters long.');
     }
 
     const record = await strapi.db
@@ -148,7 +148,7 @@ export default {
       .plugin('users-permissions')
       .service('user')
       .validatePassword(currentPassword ?? '', record.password);
-    if (!valid) return ctx.badRequest('Aktuelles Passwort ist falsch.');
+    if (!valid) return ctx.badRequest('Current password is incorrect.');
 
     await strapi.documents('plugin::users-permissions.user').update({
       documentId: ctx.state.user.documentId,
@@ -163,7 +163,7 @@ export default {
     const { email, currentPassword } = ctx.request.body ?? {};
     const normalizedEmail = typeof email === 'string' ? email.trim() : '';
     if (normalizedEmail && !EMAIL_PATTERN.test(normalizedEmail)) {
-      return ctx.badRequest('email ist ungültig.');
+      return ctx.badRequest('email is invalid.');
     }
 
     const record = await strapi.db
@@ -173,7 +173,7 @@ export default {
       .plugin('users-permissions')
       .service('user')
       .validatePassword(currentPassword ?? '', record.password);
-    if (!valid) return ctx.badRequest('Aktuelles Passwort ist falsch.');
+    if (!valid) return ctx.badRequest('Current password is incorrect.');
 
     if (normalizedEmail && normalizedEmail !== record.email) {
       const existing = await strapi.db
@@ -201,7 +201,7 @@ export default {
       .plugin('users-permissions')
       .service('user')
       .validatePassword(currentPassword ?? '', record.password);
-    if (!valid) return ctx.badRequest('Aktuelles Passwort ist falsch.');
+    if (!valid) return ctx.badRequest('Current password is incorrect.');
 
     await strapi.documents('plugin::users-permissions.user').delete({ documentId: ctx.state.user.documentId });
     ctx.send({ ok: true });

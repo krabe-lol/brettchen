@@ -10,12 +10,12 @@ import type { Pattern } from '@/features/pattern-viewer/types'
 
 export function PatternNewPage() {
   const { user, token, isLoading } = useAuth()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const { toast } = useToast()
   const navigate = useNavigate()
   const initialPattern = useMemo(
-    () => createEmptyPattern(user?.username ?? '', t('patternDefaultTitle')),
-    [user?.username, t],
+    () => createEmptyPattern(user?.username ?? '', t('patternDefaultTitle'), language),
+    [user?.username, t, language],
   )
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)

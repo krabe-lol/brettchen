@@ -45,7 +45,7 @@ function dedupePatternsMany(entities: any[]): any[] {
   return entities.map(dedupePatterns);
 }
 
-const DEFAULT_COLLECTION_NAME = 'Gespeichert';
+const DEFAULT_COLLECTION_NAME = 'Saved';
 
 /** Finds a user's default collection, or creates it if they don't have one yet. */
 async function findOrCreateDefaultCollection(strapi: any, userId: number) {
@@ -71,7 +71,7 @@ export default factories.createCoreController('api::collection.collection', ({ s
     if (!ctx.state.user) return ctx.unauthorized();
 
     const { name, description, visibility } = ctx.request.body?.data ?? {};
-    if (!name || typeof name !== 'string') return ctx.badRequest('name ist erforderlich');
+    if (!name || typeof name !== 'string') return ctx.badRequest('name is required');
 
     const entity = await strapi.documents('api::collection.collection').create({
       data: {
@@ -185,7 +185,7 @@ export default factories.createCoreController('api::collection.collection', ({ s
     });
     if (!existing) return ctx.notFound();
     if ((existing as any).owner?.id !== ctx.state.user.id) return ctx.forbidden();
-    if ((existing as any).isDefault) return ctx.badRequest('Die Standard-Sammlung kann nicht gelöscht werden.');
+    if ((existing as any).isDefault) return ctx.badRequest('The default collection cannot be deleted.');
 
     await strapi.documents('api::collection.collection').delete({ documentId: ctx.params.id });
     ctx.body = { data: null, meta: {} };
@@ -249,7 +249,7 @@ export default factories.createCoreController('api::collection.collection', ({ s
     });
     if (!existing) return ctx.notFound();
     if (existing.visibility !== 'public') return ctx.forbidden();
-    if ((existing as any).owner?.id === ctx.state.user.id) return ctx.badRequest('Eigene Sammlungen können nicht abonniert werden.');
+    if ((existing as any).owner?.id === ctx.state.user.id) return ctx.badRequest('You cannot subscribe to your own collections.');
 
     const entity = await strapi.documents('api::collection.collection').update({
       documentId: ctx.params.id,

@@ -87,13 +87,13 @@ export function Header() {
               <>
                 <DropdownMenuSeparator className="sm:hidden" />
                 <DropdownMenuLabel className="sm:hidden">{t('languageSwitcherLabel')}</DropdownMenuLabel>
-                <DropdownMenuItem onSelect={() => handleSelectLanguage('de')} className="justify-between sm:hidden">
-                  Deutsch
-                  {language === 'de' && <Check className="size-4" />}
-                </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => handleSelectLanguage('en')} className="justify-between sm:hidden">
                   English
                   {language === 'en' && <Check className="size-4" />}
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => handleSelectLanguage('de')} className="justify-between sm:hidden">
+                  Deutsch
+                  {language === 'de' && <Check className="size-4" />}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="sm:hidden" />
                 <DropdownMenuItem onSelect={handleToggleTheme} className="sm:hidden">
@@ -165,13 +165,13 @@ export function Header() {
 
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>{t('languageSwitcherLabel')}</DropdownMenuLabel>
-                <DropdownMenuItem onSelect={() => handleSelectLanguage('de')} className="justify-between">
-                  Deutsch
-                  {language === 'de' && <Check className="size-4" />}
-                </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => handleSelectLanguage('en')} className="justify-between">
                   English
                   {language === 'en' && <Check className="size-4" />}
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => handleSelectLanguage('de')} className="justify-between">
+                  Deutsch
+                  {language === 'de' && <Check className="size-4" />}
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />

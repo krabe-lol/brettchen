@@ -2,8 +2,8 @@ export type Language = 'de' | 'en'
 
 /** Selectable languages; add new ones here plus a matching block below. */
 export const SUPPORTED_LANGUAGES: { code: Language; label: string }[] = [
-  { code: 'de', label: 'DE' },
   { code: 'en', label: 'EN' },
+  { code: 'de', label: 'DE' },
 ]
 
 /**
@@ -110,7 +110,7 @@ const de = {
   profileAddToCollection: 'Zu Sammlung hinzufügen',
   profileChooseCollection: 'Sammlung wählen…',
   profileCollections: 'Sammlungen',
-  profileDefaultCollectionHint: '"Gespeichert" ist deine Standard-Sammlung. Weitere kannst du selbst benennen.',
+  profileDefaultCollectionHint: '"Saved" ist deine Standard-Sammlung. Weitere kannst du selbst benennen.',
   profileNewCollectionPlaceholder: 'Neue Sammlung benennen',
   profileCreateCollection: 'Anlegen',
   profileDefaultBadge: '(Standard)',
@@ -190,7 +190,6 @@ const de = {
   editorSavePattern: 'Muster speichern',
   editorSaveChanges: 'Änderungen speichern',
   editorSave: 'Speichern',
-  editorSaveAndClose: 'Speichern & Schließen',
   editorDelete: 'Löschen',
   editorDeleting: 'Löscht…',
   editorDeleteConfirm: 'Dieses Muster wirklich unwiderruflich löschen?',
@@ -226,7 +225,7 @@ const de = {
   displaySettingsFacingRight: 'Rechts',
   displaySettingsHoleNotationLabel: 'Lochbeschriftung',
   displaySettingsHoleNotationLetters: 'ABCD',
-  displaySettingsHoleNotationHovu: 'HO/HU/VU/VO',
+  displaySettingsHoleNotationHovu: 'HO/VU',
   displaySettingsHoleNotationNumbers: '1234',
   displaySettingsWeaveCellShapeLabel: 'Drehmuster-Symbole',
   displaySettingsWeaveCellShapeEllipse: 'Ellipsen',
@@ -289,6 +288,7 @@ const de = {
   orientationLegendSCard: 'S-Brettchen',
   orientationLegendZCard: 'Z-Brettchen',
   weaveAriaLabel: 'Drehmuster für {{title}}',
+  weaveInvertRowLabel: 'Reihe {{number}} umkehren',
   weaveBandAriaLabel: 'Webmuster für {{title}}',
   weaveViewTurning: 'Drehmuster',
   weaveViewBand: 'fertiges Band',
@@ -483,7 +483,6 @@ const en: Record<keyof typeof de, string> = {
   editorSavePattern: 'Save pattern',
   editorSaveChanges: 'Save changes',
   editorSave: 'Save',
-  editorSaveAndClose: 'Save & close',
   editorDelete: 'Delete',
   editorDeleting: 'Deleting…',
   editorDeleteConfirm: 'Really delete this pattern? This cannot be undone.',
@@ -518,7 +517,7 @@ const en: Record<keyof typeof de, string> = {
   displaySettingsFacingRight: 'Right',
   displaySettingsHoleNotationLabel: 'Hole labels',
   displaySettingsHoleNotationLetters: 'ABCD',
-  displaySettingsHoleNotationHovu: 'HO/HU/VU/VO',
+  displaySettingsHoleNotationHovu: 'HO/VU',
   displaySettingsHoleNotationNumbers: '1234',
   displaySettingsWeaveCellShapeLabel: 'Turning diagram symbols',
   displaySettingsWeaveCellShapeEllipse: 'Ellipses',
@@ -581,6 +580,7 @@ const en: Record<keyof typeof de, string> = {
   orientationLegendSCard: 'S-card',
   orientationLegendZCard: 'Z-card',
   weaveAriaLabel: 'Turning diagram for {{title}}',
+  weaveInvertRowLabel: 'Invert row {{number}}',
   weaveBandAriaLabel: 'Woven band for {{title}}',
   weaveViewTurning: 'Turning diagram',
   weaveViewBand: 'Woven band',

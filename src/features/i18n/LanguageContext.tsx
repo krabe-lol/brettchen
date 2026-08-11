@@ -2,7 +2,7 @@ import { createContext, useContext, useState, type ReactNode } from 'react'
 import { translations, type Language, type TranslationKey } from './translations'
 
 const STORAGE_KEY = 'brettchen.language'
-const DEFAULT_LANGUAGE: Language = 'de'
+const DEFAULT_LANGUAGE: Language = 'en'
 
 interface LanguageContextValue {
   language: Language
