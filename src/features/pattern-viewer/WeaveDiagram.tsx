@@ -240,6 +240,11 @@ export function WeaveDiagram({
                   width={CELL - DRAG_HIT_INSET * 2}
                   height={CELL - DRAG_HIT_INSET * 2}
                   fill="transparent"
+                  className="cursor-pointer"
+                  // Sits on top of the full cell rect above, so it also needs its own
+                  // pointerdown - otherwise it would swallow clicks in the cell's center
+                  // without acting on them, leaving only the outer margin clickable.
+                  onPointerDown={(e) => handleCellPointerDown(cell.rowIndex, cell.tabletIndex, e)}
                   onPointerEnter={() => handleCellPointerEnter(cell.rowIndex, cell.tabletIndex)}
                 />
               )}
