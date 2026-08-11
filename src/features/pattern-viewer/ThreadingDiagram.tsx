@@ -6,6 +6,7 @@ import {
   DELETE_ROW_HEIGHT,
   FALLBACK_COLOR,
   LABEL_FONT_SIZE,
+  SPACE_DELETE,
   ORIENTATION_ROW_HEIGHT,
   ROW_LABEL_WIDTH,
   STEP,
@@ -67,7 +68,7 @@ export function ThreadingDiagram({
   const gridWidth = pattern.numTablets * STEP
   const gridHeight = pattern.holesPerTablet * STEP
   const totalWidth = ROW_LABEL_WIDTH + gridWidth
-  const totalHeight = COL_LABEL_HEIGHT + gridHeight + ORIENTATION_ROW_HEIGHT + (onRemoveTablet ? DELETE_ROW_HEIGHT : 0)
+  const totalHeight = COL_LABEL_HEIGHT + gridHeight + ORIENTATION_ROW_HEIGHT + (onRemoveTablet ? SPACE_DELETE + DELETE_ROW_HEIGHT : 0)
 
   const svgRef = useRef<SVGSVGElement>(null)
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
@@ -263,14 +264,14 @@ export function ThreadingDiagram({
                 <title>{t('threadingRemoveTabletLabel', { number: String(tabletIndex + 1) })}</title>
                 <rect
                   x={colX}
-                  y={orientationY + ORIENTATION_ROW_HEIGHT}
+                  y={orientationY + ORIENTATION_ROW_HEIGHT + SPACE_DELETE}
                   width={CELL}
                   height={DELETE_ROW_HEIGHT}
                   fill="transparent"
                 />
                 <text
                   x={colX + CELL / 2}
-                  y={orientationY + ORIENTATION_ROW_HEIGHT + DELETE_ROW_HEIGHT / 2}
+                  y={orientationY + ORIENTATION_ROW_HEIGHT + SPACE_DELETE + DELETE_ROW_HEIGHT / 2}
                   textAnchor="middle"
                   dominantBaseline="central"
                   fontSize={LABEL_FONT_SIZE}
