@@ -8,3 +8,4 @@ export const SPACE_DELETE = 8
 export const DELETE_ROW_HEIGHT = 24
 export const LABEL_FONT_SIZE = 11
 export const FALLBACK_COLOR = '#cccccc'
+export const WEFT_HEIGHT = CELL - 8

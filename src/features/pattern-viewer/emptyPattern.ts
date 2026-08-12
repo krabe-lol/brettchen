@@ -34,5 +34,6 @@ export function createEmptyPattern(createdBy: string, title: string, language: L
     remixOf: null,
     repeatFromRow: null,
     weftColorSlotId: null,
+    twistExemptTablets: [],
   }
 }
