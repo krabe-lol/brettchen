@@ -18,20 +18,39 @@ function randomSlug(): string {
 }
 
 /**
+ * Whether a tablet's turn direction ever flips across the rows - same
+ * comparison as hasDirectionChange in the frontend (render/twist.ts).
+ */
+function hasDirectionChange(turningSequence: number[][], tabletIndex: number): boolean {
+  let previousSign: number | undefined;
+  for (const row of turningSequence) {
+    const sign = Math.sign(row[tabletIndex] ?? 0);
+    if (previousSign !== undefined && sign !== previousSign) return true;
+    previousSign = sign;
+  }
+  return false;
+}
+
+/**
  * A pattern is twist-neutral when the twist (+1 per forward turn, -1 per
- * backward turn, summed over all rows) cancels out to 0 for EVERY tablet -
- * see computeTwistByTablet/isTwistNeutral in the frontend (render/twist.ts).
+ * backward turn, summed over all rows) cancels out to 0 for EVERY tablet,
+ * except tablets in `twistExemptTablets` - see
+ * computeTwistByTablet/isTwistNeutral in the frontend (render/twist.ts).
  * Same computation here server-side, so the field can never diverge from
  * the actual turning sequence (always set automatically, never
- * client-overridable).
+ * client-overridable). Recomputes `hasDirectionChange` independently
+ * instead of trusting the client's exemption list at face value - a
+ * tablet that has already changed direction can never become exempt this
+ * way, no matter what the client sends.
  */
-function computeIsTwistNeutral(turningSequence: number[][] | undefined): boolean {
+function computeIsTwistNeutral(turningSequence: number[][] | undefined, twistExemptTablets: number[] | undefined): boolean {
   if (!turningSequence || turningSequence.length === 0) return true;
   const numTablets = turningSequence[0]?.length ?? 0;
+  const exempt = new Set(twistExemptTablets ?? []);
   for (let t = 0; t < numTablets; t++) {
     let sum = 0;
     for (const row of turningSequence) sum += row[t] ?? 0;
-    if (sum !== 0) return false;
+    if (sum !== 0 && !(exempt.has(t) && !hasDirectionChange(turningSequence, t))) return false;
   }
   return true;
 }
@@ -115,7 +134,11 @@ export default factories.createCoreController('api::pattern.pattern', ({ strapi 
 
     const { data } = ctx.request.body;
     const entity = await strapi.documents('api::pattern.pattern').create({
-      data: { ...data, author: ctx.state.user.id, isTwistNeutral: computeIsTwistNeutral(data.turningSequence) },
+      data: {
+        ...data,
+        author: ctx.state.user.id,
+        isTwistNeutral: computeIsTwistNeutral(data.turningSequence, data.twistExemptTablets),
+      },
       populate: ctx.query.populate as never,
     });
     await ensurePublished(strapi, entity.documentId);
@@ -221,7 +244,7 @@ export default factories.createCoreController('api::pattern.pattern', ({ strapi 
     if (existing.author?.id !== ctx.state.user.id) return ctx.forbidden();
 
     const { author, ...data } = ctx.request.body?.data ?? {};
-    data.isTwistNeutral = computeIsTwistNeutral(data.turningSequence);
+    data.isTwistNeutral = computeIsTwistNeutral(data.turningSequence, data.twistExemptTablets);
 
     const breakRemixLink =
       Boolean((existing as any).remixOf) &&
@@ -280,7 +303,11 @@ export default factories.createCoreController('api::pattern.pattern', ({ strapi 
         numRows: original.numRows,
         threading: original.threading,
         turningSequence: original.turningSequence,
-        isTwistNeutral: computeIsTwistNeutral(original.turningSequence as number[][] | undefined),
+        twistExemptTablets: original.twistExemptTablets,
+        isTwistNeutral: computeIsTwistNeutral(
+          original.turningSequence as number[][] | undefined,
+          original.twistExemptTablets as number[] | undefined,
+        ),
         defaultPalette: (original.defaultPalette ?? []).map(({ id, ...slot }: any) => slot),
         style: original.style,
         repeatFromRow: original.repeatFromRow,

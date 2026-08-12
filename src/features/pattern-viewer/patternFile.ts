@@ -1,3 +1,4 @@
+import { hasDirectionChange } from './render/twist'
 import type { TranslationKey } from '@/features/i18n/translations'
 import type { PaletteSlot, Pattern, TabletThreading, TurnValue } from './types'
 
@@ -20,6 +21,7 @@ interface PatternFile {
   sourceUrl: string
   repeatFromRow: number | null
   weftColorSlotId: string | null
+  twistExemptTablets: number[]
 }
 
 function toPatternFile(pattern: Pattern): PatternFile {
@@ -35,6 +37,7 @@ function toPatternFile(pattern: Pattern): PatternFile {
     sourceUrl: pattern.sourceUrl,
     repeatFromRow: pattern.repeatFromRow,
     weftColorSlotId: pattern.weftColorSlotId,
+    twistExemptTablets: pattern.twistExemptTablets,
   }
 }
 
@@ -112,6 +115,9 @@ export function parsePatternFile(text: string): PatternFile {
     sourceUrl: typeof data.sourceUrl === 'string' ? data.sourceUrl : '',
     repeatFromRow: typeof data.repeatFromRow === 'number' ? data.repeatFromRow : null,
     weftColorSlotId: typeof data.weftColorSlotId === 'string' ? data.weftColorSlotId : null,
+    twistExemptTablets: Array.isArray(data.twistExemptTablets)
+      ? data.twistExemptTablets.filter((t): t is number => typeof t === 'number')
+      : [],
   }
 }
 
@@ -131,5 +137,10 @@ export function applyPatternFile(base: Pattern, file: PatternFile): Pattern {
     sourceUrl: file.sourceUrl,
     repeatFromRow: file.repeatFromRow,
     weftColorSlotId: file.weftColorSlotId,
+    // Re-validated against the imported turningSequence, same rule as toggling exemption by hand -
+    // an imported index only carries over if that tablet still hasn't changed direction in the new data.
+    twistExemptTablets: file.twistExemptTablets.filter(
+      (t) => t >= 0 && t < file.threading.length && !hasDirectionChange(file.turningSequence, t),
+    ),
   }
 }

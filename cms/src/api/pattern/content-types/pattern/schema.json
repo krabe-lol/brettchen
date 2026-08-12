@@ -78,6 +78,9 @@
     "weftColorSlot": {
       "type": "string"
     },
+    "twistExemptTablets": {
+      "type": "json"
+    },
     "style": {
       "type": "json"
     },

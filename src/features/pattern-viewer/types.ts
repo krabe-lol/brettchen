@@ -65,6 +65,15 @@ export interface Pattern {
    * references it - see pruneUnusedColors in PatternEditor.tsx.
    */
   weftColorSlotId: string | null
+  /**
+   * Tablet indices excluded from the twist-neutrality check (see
+   * hasDirectionChange/isTwistNeutral in render/twist.ts) - only ever set
+   * for a tablet that hasn't changed turn direction yet, typically a
+   * border tablet meant to just keep turning the same way. Set by
+   * clicking its twist counter in the turning diagram; once set, its
+   * cells stop reacting to edits so it can't accidentally change direction.
+   */
+  twistExemptTablets: number[]
 }
 
 /** Client-side override of the default colors, never persisted. */

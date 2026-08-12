@@ -32,6 +32,8 @@ export interface StrapiPatternRecord {
   repeatFromRow: number | null
   /** Weft color slot (optional) - counts as used even without a threading hole referencing it. */
   weftColorSlot: string | null
+  /** Tablet indices excluded from the twist-neutrality check, see Pattern.twistExemptTablets. */
+  twistExemptTablets: number[] | null
   /** Only `username` on find/mine, plus `id` on findOne (see cms/src/api/pattern/controllers/pattern.ts). */
   author?: { id?: number; username: string } | null
   /** Only populated on findOne/update/remix; null once the remix link has broken. */
@@ -71,6 +73,7 @@ function toPatternPayload(pattern: Pattern) {
     source: pattern.sourceUrl,
     repeatFromRow: pattern.repeatFromRow,
     weftColorSlot: pattern.weftColorSlotId,
+    twistExemptTablets: pattern.twistExemptTablets,
   }
 }
 
@@ -147,6 +150,7 @@ export function toPattern(record: StrapiPatternRecord): Pattern {
     createdAt: record.createdAt,
     repeatFromRow: record.repeatFromRow ?? null,
     weftColorSlotId: record.weftColorSlot ?? null,
+    twistExemptTablets: record.twistExemptTablets ?? [],
   }
 }
 
