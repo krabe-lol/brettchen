@@ -181,17 +181,15 @@ export function ThreadingDiagram({
                 width={CELL}
                 height={COL_LABEL_HEIGHT}
                 rx={2}
-                className={cn(
-                  onMoveTablet && 'cursor-grab fill-transparent group-hover:fill-accent',
-                  isDragged && 'cursor-grabbing fill-accent',
-                )}
+                fill="var(--background)"
+                className={cn(onMoveTablet && 'cursor-grab group-hover:fill-accent', isDragged && 'cursor-grabbing fill-accent')}
                 onPointerDown={(e) => handlePointerDown(tabletIndex, e)}
               />
               {onMoveTablet && (
                 <g
                   transform={`translate(${colX + CELL / 2 - GRIP_SIZE / 2}, ${COL_LABEL_HEIGHT / 2 - GRIP_SIZE / 2})`}
                   pointerEvents="none"
-                  className={cn('opacity-25 group-hover:opacity-80', isDragged && 'opacity-80')}
+                  className={cn('opacity-0 group-hover:opacity-80', isDragged && 'opacity-80')}
                 >
                   <GripHorizontal width={GRIP_SIZE} height={GRIP_SIZE} />
                 </g>

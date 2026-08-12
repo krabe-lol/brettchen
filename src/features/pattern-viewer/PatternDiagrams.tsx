@@ -25,8 +25,12 @@ interface PatternDiagramsProps {
   onRemoveTablet?: (tabletIndex: number) => void
   /** If set, cells in the turning diagram become clickable (change turn direction) - only applies to the turning view, not the woven band. */
   onWeaveCellClick?: (rowIndex: number, tabletIndex: number) => void
-  /** If set, a button at the end of each row inverts every tablet's turn in that row - only applies to the turning view, not the woven band. */
+  /** If set, a button at the end of each row inverts every tablet's turn from that row up - only applies to the turning view, not the woven band. */
   onInvertRow?: (rowIndex: number) => void
+  /** If set, a row can be dragged to move it in the turning diagram - only applies to the turning view, not the woven band. */
+  onMoveRow?: (fromIndex: number, toIndex: number) => void
+  /** If set, a tablet's twist counter becomes clickable to exclude/re-include it from the twist-neutrality check - only applies to the turning view, not the woven band. */
+  onToggleTwistExempt?: (tabletIndex: number) => void
   /** If set, the weft color can be picked (see WeftColorSelector) - without it, only the current value is shown. */
   onWeftColorChange?: (slotId: string | null) => void
   /** Row/tablet highlighting + untwist mode, see PatternHighlightSettingsCard/usePatternHighlightSettings - without these props, highlighting/untwist stays off (e.g. the pattern preview on the settings page). */
@@ -71,6 +75,8 @@ export function PatternDiagrams({
   onRemoveTablet,
   onWeaveCellClick,
   onInvertRow,
+  onMoveRow,
+  onToggleTwistExempt,
   onWeftColorChange,
   highlightSettings = DEFAULT_PATTERN_HIGHLIGHT_SETTINGS,
   onHighlightSettingsChange,
@@ -171,6 +177,8 @@ export function PatternDiagrams({
             palette={palette}
             onCellClick={highlightSettings.untwistMode ? undefined : onWeaveCellClick}
             onInvertRow={highlightSettings.untwistMode ? undefined : onInvertRow}
+            onMoveRow={highlightSettings.untwistMode ? undefined : onMoveRow}
+            onToggleTwistExempt={highlightSettings.untwistMode ? undefined : onToggleTwistExempt}
             displaySettings={displaySettings}
             activeRow={highlightSettings.highlightRow ? highlightSettings.activeRow - 1 : null}
             untwistMode={highlightSettings.untwistMode}

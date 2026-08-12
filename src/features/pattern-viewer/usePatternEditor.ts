@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { generateColorName, isSimilarColor } from './render/colorNames'
+import { hasDirectionChange } from './render/twist'
 import { useLanguage } from '@/features/i18n/LanguageContext'
 import type { PaletteSlot, Pattern, TabletThreading } from './types'
 
@@ -42,6 +43,10 @@ export function usePatternEditor(initialPattern: Pattern) {
   const [sourceUrl, setSourceUrl] = useState(initialPattern.sourceUrl)
   const [repeatFromRow, setRepeatFromRow] = useState<number | null>(initialPattern.repeatFromRow)
   const [weftColorSlotId, setWeftColorSlotId] = useState<string | null>(initialPattern.weftColorSlotId)
+  /** Per-tablet, parallel to `threading` - kept in sync through every add/remove/move so an exemption always stays on the right tablet. */
+  const [twistExempt, setTwistExempt] = useState<boolean[]>(() =>
+    initialPattern.threading.map((_, i) => initialPattern.twistExemptTablets.includes(i)),
+  )
 
   const numTablets = threading.length
   const numRows = turningSequence.length
@@ -59,12 +64,14 @@ export function usePatternEditor(initialPattern: Pattern) {
       },
     ])
     setTurningSequence((prev) => prev.map((row) => [...row, DEFAULT_TURN]))
+    setTwistExempt((prev) => [...prev, false])
   }
 
   function removeTablet() {
     if (numTablets <= MIN_TABLETS) return
     setThreading((prev) => prev.slice(0, -1))
     setTurningSequence((prev) => prev.map((row) => row.slice(0, -1)))
+    setTwistExempt((prev) => prev.slice(0, -1))
   }
 
   /** Removes exactly one tablet at any position (not just the end), see the "x" below each column in the threading chart. */
@@ -72,6 +79,7 @@ export function usePatternEditor(initialPattern: Pattern) {
     if (numTablets <= MIN_TABLETS) return
     setThreading((prev) => prev.filter((_, i) => i !== index))
     setTurningSequence((prev) => prev.map((row) => row.filter((_, i) => i !== index)))
+    setTwistExempt((prev) => prev.filter((_, i) => i !== index))
   }
 
   /** New rows just continue each tablet's turn direction (no automatic reset back to forward). */
@@ -106,17 +114,27 @@ export function usePatternEditor(initialPattern: Pattern) {
   /**
    * Inverts the turn direction from (and including) the clicked row for
    * this tablet - all following rows of the same tablet flip too, every
-   * other tablet/row stays unchanged.
+   * other tablet/row stays unchanged. No-op for a twist-exempt tablet (see
+   * toggleTwistExempt) - its whole point is to keep turning the same way undisturbed.
    */
   function invertTurnsFrom(rowIndex: number, tabletIndex: number) {
+    if (twistExempt[tabletIndex]) return
     setTurningSequence((prev) =>
       prev.map((row, r) => (r >= rowIndex ? row.map((turn, t) => (t === tabletIndex ? -turn : turn)) : row)),
     )
   }
 
-  /** Inverts every tablet's turn in a single row - unlike invertTurnsFrom, this doesn't cascade to other rows. */
+  /**
+   * Inverts every tablet's turn from (and including) this row on, same
+   * cascade as invertTurnsFrom but for all tablets at once instead of just
+   * the one clicked - twist-exempt tablets are skipped, same as invertTurnsFrom.
+   */
   function invertRow(rowIndex: number) {
-    setTurningSequence((prev) => prev.map((row, r) => (r === rowIndex ? row.map((turn) => -turn) : row)))
+    setTurningSequence((prev) =>
+      prev.map((row, r) =>
+        r >= rowIndex ? row.map((turn, t) => (twistExempt[t] ? turn : -turn)) : row,
+      ),
+    )
   }
 
   /**
@@ -140,6 +158,23 @@ export function usePatternEditor(initialPattern: Pattern) {
         return next
       }),
     )
+    setTwistExempt((prev) => {
+      const next = [...prev]
+      const [moved] = next.splice(fromIndex, 1)
+      next.splice(toIndex, 0, moved)
+      return next
+    })
+  }
+
+  /** Moves a row to another position (drag & drop in the turning diagram). */
+  function moveRow(fromIndex: number, toIndex: number) {
+    if (fromIndex === toIndex) return
+    setTurningSequence((prev) => {
+      const next = [...prev]
+      const [moved] = next.splice(fromIndex, 1)
+      next.splice(toIndex, 0, moved)
+      return next
+    })
   }
 
   /** Toggles the card orientation (S/Z) of a single tablet, all others stay unchanged. */
@@ -149,6 +184,23 @@ export function usePatternEditor(initialPattern: Pattern) {
         t === tabletIndex ? { ...tablet, orientation: tablet.orientation === 'S' ? 'Z' : 'S' } : tablet,
       ),
     )
+  }
+
+  /**
+   * Excludes a tablet from the twist-neutrality check (see render/twist.ts)
+   * - only allowed while the tablet hasn't changed direction yet (see
+   * hasDirectionChange), typically a border tablet meant to just keep
+   * turning the same way. Once exempt, its cells stop reacting to clicks/
+   * drag/row-invert (see invertTurnsFrom/invertRow), so it can't
+   * accidentally change direction afterward either. Un-exempting is
+   * always allowed; turning exemption on is silently ignored for a
+   * tablet that has already changed direction.
+   */
+  function toggleTwistExempt(tabletIndex: number) {
+    setTwistExempt((prev) => {
+      if (!prev[tabletIndex] && hasDirectionChange(turningSequence, tabletIndex)) return prev
+      return prev.map((exempt, t) => (t === tabletIndex ? !exempt : exempt))
+    })
   }
 
   /** Assigns a color slot to a single hole, all other holes stay unchanged. */
@@ -223,7 +275,10 @@ export function usePatternEditor(initialPattern: Pattern) {
     setSourceUrl(source.sourceUrl)
     setRepeatFromRow(source.repeatFromRow)
     setWeftColorSlotId(source.weftColorSlotId)
+    setTwistExempt(source.threading.map((_, i) => source.twistExemptTablets.includes(i)))
   }
+
+  const twistExemptTablets = twistExempt.flatMap((exempt, i) => (exempt ? [i] : []))
 
   const pattern: Pattern = {
     ...initialPattern,
@@ -239,6 +294,7 @@ export function usePatternEditor(initialPattern: Pattern) {
     sourceUrl,
     repeatFromRow,
     weftColorSlotId,
+    twistExemptTablets,
   }
 
   return {
@@ -255,8 +311,10 @@ export function usePatternEditor(initialPattern: Pattern) {
     invertTurnsFrom,
     invertRow,
     moveTablet,
+    moveRow,
     removeTabletAt,
     toggleOrientation,
+    toggleTwistExempt,
     palette,
     paintHole,
     addColor,

@@ -87,8 +87,10 @@ export function PatternEditor({
     invertTurnsFrom,
     invertRow,
     moveTablet,
+    moveRow,
     removeTabletAt,
     toggleOrientation,
+    toggleTwistExempt,
     palette,
     paintHole,
     addColor,
@@ -401,7 +403,7 @@ export function PatternEditor({
           pattern={pattern}
           palette={palette}
           onThreadingCellClick={
-            effectiveActiveSlotId
+            effectiveActiveSlotId !== null
               ? (tabletIndex, holeIndex) => paintHole(tabletIndex, holeIndex, effectiveActiveSlotId)
               : undefined
           }
@@ -410,6 +412,8 @@ export function PatternEditor({
           onRemoveTablet={removeTabletAt}
           onWeaveCellClick={invertTurnsFrom}
           onInvertRow={invertRow}
+          onMoveRow={moveRow}
+          onToggleTwistExempt={toggleTwistExempt}
           onWeftColorChange={setWeftColorSlotId}
         />
 

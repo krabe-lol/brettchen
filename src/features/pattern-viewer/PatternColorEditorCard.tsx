@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Plus, X } from 'lucide-react'
+import { Ban, Plus, X } from 'lucide-react'
 import { BasicColorPicker } from './BasicColorPicker'
 import { computeThreadCounts } from './render/threadCounts'
 import { useLanguage } from '@/features/i18n/LanguageContext'
@@ -18,14 +18,19 @@ interface PatternColorEditorCardProps {
   onRemoveColor: (slotId: string) => void
 }
 
+/** Sentinel for "no color" - same empty colorSlotId a hole gets when its color is removed from the palette. */
+const EMPTY_SLOT_ID = ''
+
 /**
  * "Colors" column in the editor: clicking a color selects it as the active
  * paint color (to apply in the threading chart), the native color picker
  * next to it changes the hex value, the x button removes the color again
- * (affected cells in the pattern then show as empty/x). Below: a "+" entry
- * in the same style as the color list opens an overlay with the basic
- * colors and free color picking (BasicColorPicker) - stays open until
- * clicked elsewhere, so several colors can be added in a row.
+ * (affected cells in the pattern then show as empty/x). A fixed "no
+ * thread" entry above the palette selects the same empty state directly,
+ * for deliberately leaving a hole unthreaded without removing a whole
+ * color. Below the palette: a "+" entry in the same style opens an
+ * overlay with the basic colors and free color picking (BasicColorPicker)
+ * - stays open until clicked elsewhere, so several colors can be added in a row.
  */
 export function PatternColorEditorCard({
   pattern,
@@ -65,6 +70,27 @@ export function PatternColorEditorCard({
         <p className="text-xs text-muted-foreground">
           {t('colorsThreadCountTotalLabel')}: {formatThreadCount(threadCounts.total)}
         </p>
+        <div
+          role="radio"
+          aria-checked={activeSlotId === EMPTY_SLOT_ID}
+          tabIndex={0}
+          onClick={() => onSelectActive(EMPTY_SLOT_ID)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault()
+              onSelectActive(EMPTY_SLOT_ID)
+            }
+          }}
+          className={cn(
+            'flex cursor-pointer items-center gap-2 rounded-md border px-2 py-1.5 text-sm transition-colors',
+            activeSlotId === EMPTY_SLOT_ID ? 'border-ring ring-2 ring-ring/50' : 'border-transparent hover:bg-accent',
+          )}
+        >
+          <span className="flex size-6 shrink-0 items-center justify-center rounded border text-muted-foreground">
+            <Ban className="size-3.5" />
+          </span>
+          <span className="text-muted-foreground">{t('colorsEmptyLabel')}</span>
+        </div>
         {palette.map((slot) => (
           <div key={slot.slotId} className="flex items-center gap-1">
             <div

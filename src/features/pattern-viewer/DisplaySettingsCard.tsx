@@ -1,3 +1,4 @@
+import { RotateCcw, RotateCw } from 'lucide-react'
 import { useLanguage } from '@/features/i18n/LanguageContext'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -95,8 +96,20 @@ export function DisplaySettingsCard({
             value={settings.holeLabelNotation === 'hovu' ? 'clockwise' : settings.holeLabelDirection}
             onValueChange={(value) => value && set('holeLabelDirection', value as HoleLabelDirection)}
           >
-            <ToggleGroupItem value="clockwise">{t('displaySettingsDirectionClockwise')}</ToggleGroupItem>
-            <ToggleGroupItem value="counterclockwise">{t('displaySettingsDirectionCounterclockwise')}</ToggleGroupItem>
+            <ToggleGroupItem
+              value="clockwise"
+              title={t('displaySettingsDirectionClockwise')}
+              aria-label={t('displaySettingsDirectionClockwise')}
+            >
+              <RotateCw />
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="counterclockwise"
+              title={t('displaySettingsDirectionCounterclockwise')}
+              aria-label={t('displaySettingsDirectionCounterclockwise')}
+            >
+              <RotateCcw />
+            </ToggleGroupItem>
           </ToggleGroup>
         </div>
         <div className="flex flex-col gap-2">

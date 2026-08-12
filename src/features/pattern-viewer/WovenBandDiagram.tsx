@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { applyUntwistOrder, computeDisplayWeaveGrid } from './render/weaveGrid'
-import { CELL, COL_LABEL_HEIGHT, FALLBACK_COLOR, LABEL_FONT_SIZE, ROW_LABEL_WIDTH, STEP } from './render/gridLayout'
+import { CELL, COL_LABEL_HEIGHT, FALLBACK_COLOR, LABEL_FONT_SIZE, ROW_LABEL_WIDTH, STEP, WEFT_HEIGHT } from './render/gridLayout'
 import { useLanguage } from '@/features/i18n/LanguageContext'
 import type { Pattern, PaletteSlot } from './types'
 
@@ -18,6 +18,9 @@ interface WovenBandDiagramProps {
 /** Minimum row count in the band preview - shorter turning sequences repeat to fill it. */
 const MIN_DISPLAY_ROWS = 40
 
+/** Fixed (not theme-dependent) so the outline stays visibly grey in both light and dark mode - `--border` would nearly disappear in dark mode. */
+const PARALLELOGRAM_STROKE = '#808080'
+
 /**
  * Realistic band preview, in the same orientation as the turning diagram
  * (tablets as columns from the left, row 1 at the bottom, growing
@@ -27,7 +30,12 @@ const MIN_DISPLAY_ROWS = 40
  * turning diagram (`effectiveDirection`). Only the row of a direction
  * change (the same turnaround point the turning diagram marks with the
  * cyan line) becomes a triangle: the blunt top corner drops out, the rows
- * before and right after stay normal parallelograms. Read-only, not clickable.
+ * before and right after stay normal parallelograms. An unthreaded hole
+ * (see the "no thread" color in the editor) draws no parallelogram at
+ * all, showing a background bar in the weft color through the gap
+ * instead - same as in a real band, where the weft only shows through
+ * where a warp thread is missing. Defaults to the first palette color
+ * until a weft color is explicitly set (see WeftColorSelector). Read-only, not clickable.
  */
 export function WovenBandDiagram({
   pattern,
@@ -39,6 +47,7 @@ export function WovenBandDiagram({
   const { t } = useLanguage()
   const colorBySlot = new Map(palette.map((slot) => [slot.slotId, slot.hex]))
   const colorOf = (slotId: string) => colorBySlot.get(slotId) ?? FALLBACK_COLOR
+  const weftHex = (pattern.weftColorSlotId ? colorBySlot.get(pattern.weftColorSlotId) : undefined) ?? palette[0]?.hex ?? FALLBACK_COLOR
 
   const activeRowRef = useRef<SVGRectElement>(null)
   useEffect(() => {
@@ -93,8 +102,22 @@ export function WovenBandDiagram({
         </text>
       ))}
 
+      {/* One bar per row, not one solid block - the small gap between them (matching the cell grid's own spacing) makes individual weft picks recognizable. */}
+      {Array.from({ length: displayNumRows }, (_, rowIndex) => (
+        <rect
+          key={`weft-${rowIndex}`}
+          x={ROW_LABEL_WIDTH - 2}
+          y={rowY(rowIndex) + (CELL - WEFT_HEIGHT) / 2}
+          width={gridWidth + 4}
+          height={WEFT_HEIGHT}
+          fill={weftHex}
+        />
+      ))}
+
       {weaveGrid.map((row) =>
         row.map((cell) => {
+          if (!colorBySlot.has(cell.colorSlotId)) return null
+
           const cx = ROW_LABEL_WIDTH + cell.tabletIndex * STEP + CELL / 2
           const cy = rowY(cell.rowIndex) + CELL / 2
           const xLeft = cx - CELL / 2
@@ -138,7 +161,7 @@ export function WovenBandDiagram({
               key={`${cell.rowIndex}-${cell.tabletIndex}`}
               points={points}
               fill={fill}
-              stroke="black"
+              stroke={PARALLELOGRAM_STROKE}
               strokeWidth={0.5}
             />
           )
