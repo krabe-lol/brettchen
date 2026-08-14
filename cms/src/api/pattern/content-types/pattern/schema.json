@@ -105,20 +105,10 @@
       "component": "pattern.palette-slot",
       "repeatable": true
     },
-    "technique": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "api::technique.technique"
-    },
     "defaultNomenclature": {
       "type": "relation",
       "relation": "manyToOne",
       "target": "api::nomenclature-set.nomenclature-set"
-    },
-    "tags": {
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::tag.tag"
     },
     "author": {
       "type": "relation",
