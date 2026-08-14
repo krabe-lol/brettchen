@@ -31,7 +31,6 @@ const AUTHENTICATED_ACTIONS = [
   'plugin::users-permissions.user.updatePreferences',
   'api::pattern-preference.pattern-preference.get',
   'api::pattern-preference.pattern-preference.set',
-  'api::pattern-preference.pattern-preference.unset',
   'api::auth.auth.updateUsername',
   'api::auth.auth.updatePassword',
   'api::auth.auth.updateEmail',
@@ -84,6 +83,48 @@ async function ensureResetPasswordUrl(strapi: Core.Strapi) {
   }
 }
 
+function parseFromAddress(value: string): { name: string; email: string } {
+  const match = value.match(/^(.*?)\s*<(.+)>$/);
+  if (match) return { name: match[1].trim(), email: match[2].trim() };
+  return { name: '', email: value.trim() };
+}
+
+/**
+ * Strapi's built-in "reset password"/"email confirmation" templates carry
+ * their OWN shipper address in the plugin store (Settings > Email
+ * Templates), separate from and NOT overridden by SMTP_FROM in
+ * config/plugins.ts - it defaults to the placeholder
+ * "Administration Panel" <no-reply@strapi.io> and stays that way forever
+ * unless someone edits it by hand in the admin panel. Sending as
+ * no-reply@strapi.io while authenticating as our actual SMTP account fails
+ * SPF/DKIM alignment for the recipient, so the mail gets silently dropped
+ * long before it would show up as an error in Strapi's own logs. Syncing
+ * it from SMTP_FROM/SMTP_REPLY_TO on every boot keeps it correct without
+ * relying on a manual admin-panel step.
+ */
+async function ensureResetPasswordEmailSender(strapi: Core.Strapi) {
+  const fromRaw = process.env.SMTP_FROM;
+  if (!fromRaw) return;
+  const from = parseFromAddress(fromRaw);
+  const replyTo = process.env.SMTP_REPLY_TO || '';
+
+  const pluginStore = await strapi.store({ type: 'plugin', name: 'users-permissions' });
+  const emailSettings = (await pluginStore.get({ key: 'email' })) as Record<string, any>;
+  let changed = false;
+  for (const templateKey of ['reset_password', 'email_confirmation']) {
+    const options = emailSettings?.[templateKey]?.options;
+    if (!options) continue;
+    if (options.from?.email !== from.email || options.from?.name !== from.name || options.response_email !== replyTo) {
+      options.from = { name: from.name, email: from.email };
+      options.response_email = replyTo;
+      changed = true;
+    }
+  }
+  if (changed) {
+    await pluginStore.set({ key: 'email', value: emailSettings });
+  }
+}
+
 /**
  * One-time rename of existing default collections from the old German
  * default name to the new English one (see DEFAULT_COLLECTION_NAME in the
@@ -122,6 +163,7 @@ export default {
     await ensurePermissions(strapi, 'authenticated', AUTHENTICATED_ACTIONS);
     await ensurePermissions(strapi, 'public', PUBLIC_ACTIONS);
     await ensureResetPasswordUrl(strapi);
+    await ensureResetPasswordEmailSender(strapi);
     await renameDefaultCollections(strapi);
   },
 };

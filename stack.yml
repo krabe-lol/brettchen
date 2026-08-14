@@ -41,6 +41,15 @@ services:
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-true}
       # Muss die tatsächliche Frontend-URL sein (siehe cms/config/middlewares.ts) - sonst blockiert CORS den Login.
       CLIENT_URL: ${CLIENT_URL}
+      # SMTP für "Passwort vergessen" (siehe cms/config/plugins.ts) - ohne SMTP_HOST bleibt
+      # das Versenden ein No-op statt eines Fehlers.
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      SMTP_REPLY_TO: ${SMTP_REPLY_TO:-}
     volumes:
       - strapi-uploads:/opt/app/public/uploads
     ports:
