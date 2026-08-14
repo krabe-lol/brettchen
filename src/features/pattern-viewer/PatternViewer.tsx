@@ -70,14 +70,12 @@ export function PatternViewer({
     onSaveAsDefault,
     isSaving: isSavingDisplayDefault,
     isAvailable: canSaveDisplayDefault,
+    hasChanges: hasDisplayChanges,
   } = useSaveDisplaySettingsAsDefault()
-  const {
-    settings: highlightSettings,
-    setSettings: setHighlightSettings,
-    saveEnabled: highlightSaveEnabled,
-    setSaveEnabled: setHighlightSaveEnabled,
-    canSave: canSaveHighlight,
-  } = usePatternHighlightSettings(patternId, token ?? null)
+  const { settings: highlightSettings, setSettings: setHighlightSettings } = usePatternHighlightSettings(
+    patternId,
+    token ?? null,
+  )
 
   return (
     <div>
@@ -142,11 +140,9 @@ export function PatternViewer({
           onSaveAsDefault={onSaveAsDefault}
           isSavingDisplayDefault={isSavingDisplayDefault}
           canSaveDisplayDefault={canSaveDisplayDefault}
+          hasDisplayChangesToSave={hasDisplayChanges}
           highlightSettings={highlightSettings}
           onHighlightSettingsChange={setHighlightSettings}
-          highlightSaveEnabled={highlightSaveEnabled}
-          onHighlightSaveEnabledChange={setHighlightSaveEnabled}
-          canSaveHighlight={canSaveHighlight}
           numRows={pattern.numRows}
           numTablets={pattern.numTablets}
         />
@@ -161,13 +157,11 @@ export function PatternViewer({
             onSaveAsDefault={onSaveAsDefault}
             isSavingDefault={isSavingDisplayDefault}
             canSaveAsDefault={canSaveDisplayDefault}
+            hasChangesToSave={hasDisplayChanges}
           />
           <PatternHighlightSettingsCard
             settings={highlightSettings}
             onChange={setHighlightSettings}
-            saveEnabled={highlightSaveEnabled}
-            onSaveEnabledChange={setHighlightSaveEnabled}
-            canSave={canSaveHighlight}
             numRows={pattern.numRows}
             numTablets={pattern.numTablets}
           />

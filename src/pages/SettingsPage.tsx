@@ -27,6 +27,7 @@ export function SettingsPage() {
     onSaveAsDefault,
     isSaving: isSavingDisplay,
     isAvailable: canSaveDisplayDefault,
+    hasChanges: hasDisplayChanges,
   } = useSaveDisplaySettingsAsDefault()
 
   const [previewPatterns, setPreviewPatterns] = useState<StrapiPatternRecord[]>([])
@@ -51,7 +52,7 @@ export function SettingsPage() {
     <div className="py-12">
       <h1 className="text-3xl font-semibold tracking-tight">{t('settingsHeading')}</h1>
 
-      <Tabs defaultValue="account" orientation="vertical" className="mt-8 flex-col sm:flex-row">
+      <Tabs defaultValue="account" orientation="vertical" className="mt-8 flex-col sm:flex-row gap-12">
         <TabsList className="sm:w-48">
           <TabsTrigger value="account">{t('accountSettingsHeading')}</TabsTrigger>
           <TabsTrigger value="display">{t('displaySettingsHeading')}</TabsTrigger>
@@ -74,6 +75,7 @@ export function SettingsPage() {
                 onSaveAsDefault={onSaveAsDefault}
                 isSavingDefault={isSavingDisplay}
                 canSaveAsDefault={canSaveDisplayDefault}
+                hasChangesToSave={hasDisplayChanges}
               />
             </div>
 

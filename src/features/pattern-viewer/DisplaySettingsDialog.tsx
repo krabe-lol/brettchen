@@ -13,6 +13,7 @@ interface DisplaySettingsDialogProps {
   onSaveAsDefault?: () => void
   isSavingDisplayDefault?: boolean
   canSaveDisplayDefault?: boolean
+  hasDisplayChangesToSave?: boolean
   /**
    * Row/tablet highlighting + untwist mode - only set in read mode
    * (PatternViewer). Deliberately omitted in edit mode (PatternEditor):
@@ -21,9 +22,6 @@ interface DisplaySettingsDialogProps {
    */
   highlightSettings?: PatternHighlightSettings
   onHighlightSettingsChange?: (settings: PatternHighlightSettings) => void
-  highlightSaveEnabled?: boolean
-  onHighlightSaveEnabledChange?: (enabled: boolean) => void
-  canSaveHighlight?: boolean
   numRows?: number
   numTablets?: number
 }
@@ -43,16 +41,14 @@ export function DisplaySettingsDialog({
   onSaveAsDefault,
   isSavingDisplayDefault,
   canSaveDisplayDefault,
+  hasDisplayChangesToSave,
   highlightSettings,
   onHighlightSettingsChange,
-  highlightSaveEnabled,
-  onHighlightSaveEnabledChange,
-  canSaveHighlight,
   numRows,
   numTablets,
 }: DisplaySettingsDialogProps) {
   const { t } = useLanguage()
-  const hasHighlightSettings = highlightSettings && onHighlightSettingsChange && onHighlightSaveEnabledChange
+  const hasHighlightSettings = highlightSettings && onHighlightSettingsChange
 
   return (
     <div className="flex flex-wrap gap-2">
@@ -71,6 +67,7 @@ export function DisplaySettingsDialog({
             onSaveAsDefault={onSaveAsDefault}
             isSavingDefault={isSavingDisplayDefault}
             canSaveAsDefault={canSaveDisplayDefault}
+            hasChangesToSave={hasDisplayChangesToSave}
           />
         </DialogContent>
       </Dialog>
@@ -88,9 +85,6 @@ export function DisplaySettingsDialog({
             <PatternHighlightSettingsCard
               settings={highlightSettings}
               onChange={onHighlightSettingsChange}
-              saveEnabled={highlightSaveEnabled ?? false}
-              onSaveEnabledChange={onHighlightSaveEnabledChange}
-              canSave={canSaveHighlight ?? false}
               numRows={numRows}
               numTablets={numTablets}
             />

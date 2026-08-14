@@ -25,6 +25,8 @@ interface DisplaySettingsCardProps {
   isSavingDefault?: boolean
   /** Without login (false), the button is disabled and shows an explanatory tooltip instead of saving. */
   canSaveAsDefault?: boolean
+  /** Disables the button (no tooltip) while the settings still match the already-saved default - nothing to save yet. */
+  hasChangesToSave?: boolean
 }
 
 /**
@@ -42,6 +44,7 @@ export function DisplaySettingsCard({
   onSaveAsDefault,
   isSavingDefault,
   canSaveAsDefault = true,
+  hasChangesToSave = true,
 }: DisplaySettingsCardProps) {
   const { t } = useLanguage()
 
@@ -169,7 +172,11 @@ export function DisplaySettingsCard({
       <CardFooter>
         {/* Browsers suppress the native title tooltip on disabled elements themselves, hence the wrapping, non-disabled span. */}
         <span title={canSaveAsDefault ? undefined : t('displaySettingsSaveRequiresLogin')} className="inline-block">
-          <Button type="button" onClick={onSaveAsDefault} disabled={isSavingDefault || !canSaveAsDefault}>
+          <Button
+            type="button"
+            onClick={onSaveAsDefault}
+            disabled={isSavingDefault || !canSaveAsDefault || !hasChangesToSave}
+          >
             {isSavingDefault ? t('editorSaving') : t('displaySettingsSaveAsDefault')}
           </Button>
         </span>

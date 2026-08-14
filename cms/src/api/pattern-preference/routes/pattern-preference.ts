@@ -17,10 +17,5 @@ export default {
       path: '/pattern-preferences/:patternId',
       handler: 'pattern-preference.set',
     },
-    {
-      method: 'DELETE',
-      path: '/pattern-preferences/:patternId',
-      handler: 'pattern-preference.unset',
-    },
   ],
 };

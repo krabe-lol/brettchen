@@ -118,6 +118,7 @@ export function PatternEditor({
     onSaveAsDefault: onSaveDisplaySettingsAsDefault,
     isSaving: isSavingDisplayDefault,
     isAvailable: canSaveDisplayDefault,
+    hasChanges: hasDisplayChanges,
   } = useSaveDisplaySettingsAsDefault()
   const [visibility, setVisibility] = useState<'draft' | 'published'>(
     moderationStatus === 'published' ? 'published' : 'draft',
@@ -347,6 +348,7 @@ export function PatternEditor({
           onSaveAsDefault={onSaveDisplaySettingsAsDefault}
           isSavingDisplayDefault={isSavingDisplayDefault}
           canSaveDisplayDefault={canSaveDisplayDefault}
+          hasDisplayChangesToSave={hasDisplayChanges}
         />
       </div>
 
@@ -395,6 +397,7 @@ export function PatternEditor({
               onSaveAsDefault={onSaveDisplaySettingsAsDefault}
               isSavingDefault={isSavingDisplayDefault}
               canSaveAsDefault={canSaveDisplayDefault}
+              hasChangesToSave={hasDisplayChanges}
             />
           </div>
         </div>

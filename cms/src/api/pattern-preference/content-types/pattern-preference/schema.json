@@ -5,7 +5,7 @@
     "singularName": "pattern-preference",
     "pluralName": "pattern-preferences",
     "displayName": "Muster-Präferenz",
-    "description": "Pro Nutzer:in und Muster gespeicherte Hervorhebungs-/Untwist-Einstellungen – nur wenn die Person das Speichern für dieses Muster explizit aktiviert hat."
+    "description": "Pro Nutzer:in und Muster automatisch gespeicherte Reihen-/Brettchen-Position und Untwist-Modus. Die Highlight-Ein/Aus-Schalter selbst werden bewusst nie gespeichert, nur wo man zuletzt war."
   },
   "options": {
     "draftAndPublish": false
@@ -24,21 +24,11 @@
       "target": "api::pattern.pattern",
       "required": true
     },
-    "highlightRow": {
-      "type": "boolean",
-      "required": true,
-      "default": false
-    },
     "activeRow": {
       "type": "integer",
       "required": true,
       "default": 1,
       "min": 1
-    },
-    "highlightTablet": {
-      "type": "boolean",
-      "required": true,
-      "default": false
     },
     "activeTablet": {
       "type": "integer",

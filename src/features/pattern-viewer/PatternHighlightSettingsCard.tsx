@@ -1,20 +1,15 @@
 import { SquareArrowDown, SquareArrowLeft, SquareArrowRight, SquareArrowUp } from 'lucide-react'
 import { CountControl } from './CountControl'
 import { useLanguage } from '@/features/i18n/LanguageContext'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
-import { cn } from '@/lib/utils'
 import type { PatternHighlightSettings } from '@/lib/strapi/patternPreferences'
 
 interface PatternHighlightSettingsCardProps {
   settings: PatternHighlightSettings
   onChange: (settings: PatternHighlightSettings) => void
-  saveEnabled: boolean
-  onSaveEnabledChange: (enabled: boolean) => void
-  /** Without login or a saved pattern, the save toggle is disabled (see usePatternHighlightSettings). */
-  canSave: boolean
   numRows?: number
   numTablets?: number
 }
@@ -23,16 +18,15 @@ interface PatternHighlightSettingsCardProps {
  * Separate card below the display options: row/tablet highlighting and
  * untwist mode (see PatternDiagrams navigation). Unlike the display
  * options, these values apply per pattern AND user - "set as default" in
- * the display options deliberately does NOT cover this card. The "save
- * for this pattern" toggle below (default: off) decides whether changes
- * here get persisted at all, see usePatternHighlightSettings.
+ * the display options deliberately does NOT cover this card. The active
+ * row/tablet position and untwist mode save automatically (see
+ * usePatternHighlightSettings); the on/off switches below are
+ * deliberately session-only and never saved, so opening a pattern always
+ * starts with highlighting off.
  */
 export function PatternHighlightSettingsCard({
   settings,
   onChange,
-  saveEnabled,
-  onSaveEnabledChange,
-  canSave,
   numRows = 2000,
   numTablets = 200,
 }: PatternHighlightSettingsCardProps) {
@@ -116,22 +110,6 @@ export function PatternHighlightSettingsCard({
           <p className="text-xs text-muted-foreground">{t('displaySettingsUntwistHint')}</p>
         </div>
       </CardContent>
-      <CardFooter>
-        {/* Browsers suppress the native title tooltip on disabled elements themselves, hence the wrapping, non-disabled span. */}
-        <span title={canSave ? undefined : t('highlightSettingsSaveUnavailable')} className="inline-block">
-          <div className="flex items-center gap-2">
-            <Switch
-              id="highlight-save"
-              checked={saveEnabled}
-              onCheckedChange={onSaveEnabledChange}
-              disabled={!canSave}
-            />
-            <Label htmlFor="highlight-save" className={cn(canSave && 'cursor-pointer')}>
-              {t('highlightSettingsSaveLabel')}
-            </Label>
-          </div>
-        </span>
-      </CardFooter>
     </Card>
   )
 }

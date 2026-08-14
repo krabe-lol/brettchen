@@ -39,13 +39,19 @@ export function useDisplaySettings() {
  * embedded (settings page, PatternEditor, PatternViewer). Without login
  * there's no server to save to - `isAvailable` tells the card to show the
  * button disabled with an explanatory tooltip instead of clickable.
+ * `hasChanges` is a separate flag (no tooltip, just disables the button):
+ * true once the current settings differ from the already-saved default,
+ * so there's nothing to click until something actually changed.
  */
 export function useSaveDisplaySettingsAsDefault() {
-  const { token } = useAuth()
+  const { token, user } = useAuth()
   const { t } = useLanguage()
   const { toast } = useToast()
   const { settings } = useDisplaySettings()
   const [isSaving, setIsSaving] = useState(false)
+
+  const savedDefault: DisplaySettings = { ...DEFAULT_DISPLAY_SETTINGS, ...user?.displaySettings }
+  const hasChanges = JSON.stringify(settings) !== JSON.stringify(savedDefault)
 
   async function onSaveAsDefault() {
     if (!token) return
@@ -60,5 +66,5 @@ export function useSaveDisplaySettingsAsDefault() {
     }
   }
 
-  return { onSaveAsDefault, isSaving, isAvailable: Boolean(token) }
+  return { onSaveAsDefault, isSaving, isAvailable: Boolean(token), hasChanges }
 }

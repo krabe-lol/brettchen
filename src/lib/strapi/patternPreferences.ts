@@ -8,6 +8,9 @@ export interface PatternHighlightSettings {
   untwistMode: boolean
 }
 
+/** The subset that actually gets persisted - see usePatternHighlightSettings for why highlightRow/highlightTablet never do. */
+export type PersistedPatternSettings = Pick<PatternHighlightSettings, 'activeRow' | 'activeTablet' | 'untwistMode'>
+
 export const DEFAULT_PATTERN_HIGHLIGHT_SETTINGS: PatternHighlightSettings = {
   highlightRow: false,
   activeRow: 1,
@@ -19,44 +22,35 @@ export const DEFAULT_PATTERN_HIGHLIGHT_SETTINGS: PatternHighlightSettings = {
 async function readJsonOrThrow(response: Response): Promise<any> {
   const data = await response.json()
   if (!response.ok) {
-    throw new Error(data?.error?.message ?? `Anfrage fehlgeschlagen (${response.status})`)
+    throw new Error(data?.error?.message ?? `Request failed (${response.status})`)
   }
   return data
 }
 
-/** Loads the saved highlight/untwist preference for this pattern, or `null` if none is saved yet. */
+/** Loads the saved row/tablet position + untwist mode for this pattern, or `null` if none is saved yet. */
 export async function fetchPatternHighlightSettings(
   patternDocumentId: string,
   token: string,
-): Promise<PatternHighlightSettings | null> {
+): Promise<PersistedPatternSettings | null> {
   const response = await fetch(`${strapiConfig.baseUrl}/api/pattern-preferences/${patternDocumentId}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
   const data = await readJsonOrThrow(response)
   if (!data.data) return null
-  const { highlightRow, activeRow, highlightTablet, activeTablet, untwistMode } = data.data
-  return { highlightRow, activeRow, highlightTablet, activeTablet, untwistMode }
+  const { activeRow, activeTablet, untwistMode } = data.data
+  return { activeRow, activeTablet, untwistMode }
 }
 
-/** Creates or updates the preference (upsert) - only while "save for this pattern" is enabled. */
+/** Creates or updates the preference (upsert) - called automatically whenever the position/untwist mode changes. */
 export async function savePatternHighlightSettings(
   patternDocumentId: string,
-  settings: PatternHighlightSettings,
+  settings: PersistedPatternSettings,
   token: string,
 ): Promise<void> {
   const response = await fetch(`${strapiConfig.baseUrl}/api/pattern-preferences/${patternDocumentId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify({ data: settings }),
-  })
-  await readJsonOrThrow(response)
-}
-
-/** Removes the saved preference - called once "save for this pattern" is disabled again. */
-export async function deletePatternHighlightSettings(patternDocumentId: string, token: string): Promise<void> {
-  const response = await fetch(`${strapiConfig.baseUrl}/api/pattern-preferences/${patternDocumentId}`, {
-    method: 'DELETE',
-    headers: { Authorization: `Bearer ${token}` },
   })
   await readJsonOrThrow(response)
 }
