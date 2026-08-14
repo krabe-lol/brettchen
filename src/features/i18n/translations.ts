@@ -47,15 +47,22 @@ const de = {
   homeToKnowledge: 'Zur Wissensdatenbank',
   homeToPatterns: 'Zur Musterdatenbank',
 
-  footerDisclaimer: 'Die Rechte an jedem Muster bleiben bei der Person, die es erstellt hat.',
+  footerDisclaimer: 'Wir beanspruchen keine Rechte an den hier gezeigten Mustern.',
   footerTerms: 'Nutzungsbedingungen',
   footerImprint: 'Impressum',
 
   termsHeading: 'Nutzungsbedingungen',
-  termsPlaceholder: 'Inhalt folgt.',
+  termsRightsHeading: 'Rechte an den Mustern',
+  termsRightsIntro:
+    'Der Betreiber dieser Seite erhebt keinen Anspruch auf das Urheberrecht oder sonstige Rechte an den hier veröffentlichten Mustern. Die Seite dient als Sammlung und Darstellung von Brettchenwebmustern unterschiedlicher Herkunft – eigene Kreationen, traditionelle Muster und Muster aus anderen Quellen.',
+  termsUploadNote:
+    'Wer ein Muster hochlädt, versichert, dass er dazu berechtigt ist, und wird gebeten, die Quelle anzugeben, sofern das Muster nicht die eigene Kreation ist.',
+  termsRightsViolation:
+    'Wer der Ansicht ist, dass ein veröffentlichtes Muster seine Rechte verletzt, kann dies unter brettchen@krabe.lol melden. Das Muster wird dann geprüft und ggf. entfernt.',
 
   imprintHeading: 'Impressum',
-  imprintPlaceholder: 'Inhalt folgt.',
+  imprintOperatorNote: 'Diese Seite wird privat und nicht-kommerziell betrieben.',
+  imprintContact: 'Kontakt: brettchen@krabe.lol',
 
   loginHeading: 'Anmelden',
   loginUsername: 'Benutzername',
@@ -72,7 +79,8 @@ const de = {
   registerUsernameAvailable: 'Verfügbar',
   registerUsernameTaken: 'Bereits vergeben',
   registerUsernameTooShort: 'Mindestens 3 Zeichen',
-  registerPasswordHint: 'Mindestens 6 Zeichen',
+  registerPasswordHint: 'Mindestens {{min}} Zeichen, nicht dein Nutzername',
+  passwordContainsUsernameError: 'Das Passwort darf deinen Nutzernamen nicht enthalten.',
   registerEmail: 'E-Mail (optional)',
   registerEmailHint: 'Nur fürs Passwort zurücksetzen, kann leer bleiben.',
   registerSubmit: 'Registrieren',
@@ -91,6 +99,7 @@ const de = {
 
   resetPasswordHeading: 'Passwort zurücksetzen',
   resetPasswordNewPassword: 'Neues Passwort',
+  resetPasswordHint: 'Mindestens {{min}} Zeichen',
   resetPasswordConfirm: 'Passwort bestätigen',
   resetPasswordMismatch: 'Passwörter stimmen nicht überein.',
   resetPasswordSubmit: 'Passwort setzen',
@@ -124,15 +133,30 @@ const de = {
   accountSettingsHeading: 'Kontodetails',
   accountSettingsCurrentPassword: 'Aktuelles Passwort',
   accountSettingsNewPassword: 'Neues Passwort',
+  accountSettingsNewPasswordHint:
+    'Leer lassen, um das Passwort nicht zu ändern. Sonst mindestens {{min}} Zeichen, nicht dein Nutzername.',
   accountSettingsSave: 'Speichern',
+  accountSettingsSaving: 'Speichert…',
   accountSettingsSaved: 'Gespeichert.',
   accountSettingsError: 'Speichern fehlgeschlagen.',
-  accountSettingsDeleteHint: 'Konto unwiderruflich löschen. Tippe zur Bestätigung "{{username}}" ein.',
-  accountSettingsDeleteUsernameLabel: 'Benutzername zur Bestätigung',
+  accountSettingsConfirmHeading: 'Änderungen bestätigen',
+  accountSettingsConfirmHint: 'Gib dein aktuelles Passwort ein, um die Änderungen zu speichern.',
+  accountSettingsDeleteHeading: 'Konto löschen',
+  accountSettingsDeleteDescription:
+    'Löscht dein Konto unwiderruflich. Deine Muster und Sammlungen bleiben erhalten, verlieren aber den Bezug zu deinem Konto.',
+  accountSettingsDeleteConfirmHeading: 'Konto wirklich unwiderruflich löschen?',
+  accountSettingsDeleteConfirmExplanation:
+    'Diese Aktion kann nicht rückgängig gemacht werden. Dein Konto wird sofort und dauerhaft gelöscht. Gib zur Bestätigung dein aktuelles Passwort ein.',
+  accountSettingsDeleteContentLabel: 'Meine Muster und Sammlungen auch löschen',
+  accountSettingsDeleteContentOnHint: 'Alle deine Muster und Sammlungen werden zusammen mit deinem Konto gelöscht.',
+  accountSettingsDeleteContentOffHint:
+    'Deine Muster und Sammlungen bleiben erhalten, zeigen aber "Gelöschter Nutzer" statt deines Namens.',
   accountSettingsDelete: 'Konto löschen',
+  accountSettingsDeleting: 'Löscht…',
   toastAccountDeleted: 'Konto gelöscht.',
 
   patternListHeading: 'Alle Muster',
+  patternTabletCount: '{{count}} Brettchen',
   patternListPlaceholder: 'Noch keine veröffentlichten Muster.',
   myPatternListHeading: 'Meine Muster',
   myPatternListPlaceholder: 'Du hast noch keine Muster erstellt.',
@@ -241,8 +265,6 @@ const de = {
     'Zeigt das Drehmuster rückwärts (letzte Reihe zuerst, jede Drehung umgekehrt) – so, wie man das Muster webt, um es zu entdrillen.',
 
   highlightSettingsHeading: 'Hervorhebung & Untwist',
-  highlightSettingsSaveLabel: 'Für dieses Muster speichern',
-  highlightSettingsSaveUnavailable: 'Nur mit Login und bei einem bereits gespeicherten Muster verfügbar.',
 
   colorsHeading: 'Farben',
   colorsThreadCountTotalLabel: 'Insgesamt',
@@ -259,6 +281,7 @@ const de = {
   infoTitle: 'Titel',
   infoTitlePlaceholder: 'z. B. Chevron-Band',
   infoCreator: 'Ersteller',
+  deletedUserLabel: 'Gelöschter Nutzer',
   infoCreatedAt: 'Erstellt am',
   infoTwistNeutralLabel: 'Verdrillung',
   twistNeutralYes: 'Twist-neutral',
@@ -342,15 +365,22 @@ const en: Record<keyof typeof de, string> = {
   homeToKnowledge: 'To the knowledge base',
   homeToPatterns: 'To the pattern database',
 
-  footerDisclaimer: 'The rights to each pattern remain with the person who created it.',
+  footerDisclaimer: 'We claim no rights to the patterns shown here.',
   footerTerms: 'Terms of use',
   footerImprint: 'Imprint',
 
   termsHeading: 'Terms of use',
-  termsPlaceholder: 'Content coming soon.',
+  termsRightsHeading: 'Rights to the patterns',
+  termsRightsIntro:
+    "The operator of this site claims no copyright or other rights to the patterns published here. The site serves as a collection and showcase of tablet-weaving patterns from various origins - original creations, traditional patterns, and patterns from other sources.",
+  termsUploadNote:
+    'Anyone uploading a pattern affirms they are entitled to do so, and is asked to state the source unless the pattern is their own creation.',
+  termsRightsViolation:
+    'If you believe a published pattern infringes on your rights, you can report it to brettchen@krabe.lol. The pattern will then be reviewed and removed if necessary.',
 
   imprintHeading: 'Imprint',
-  imprintPlaceholder: 'Content coming soon.',
+  imprintOperatorNote: 'This site is run privately and non-commercially.',
+  imprintContact: 'Contact: brettchen@krabe.lol',
 
   loginHeading: 'Log in',
   loginUsername: 'Username',
@@ -367,7 +397,8 @@ const en: Record<keyof typeof de, string> = {
   registerUsernameAvailable: 'Available',
   registerUsernameTaken: 'Already taken',
   registerUsernameTooShort: 'At least 3 characters',
-  registerPasswordHint: 'At least 6 characters',
+  registerPasswordHint: 'At least {{min}} characters, not your username',
+  passwordContainsUsernameError: 'The password must not contain your username.',
   registerEmail: 'Email (optional)',
   registerEmailHint: 'Only used to reset your password, can be left empty.',
   registerSubmit: 'Register',
@@ -386,6 +417,7 @@ const en: Record<keyof typeof de, string> = {
 
   resetPasswordHeading: 'Reset password',
   resetPasswordNewPassword: 'New password',
+  resetPasswordHint: 'At least {{min}} characters',
   resetPasswordConfirm: 'Confirm password',
   resetPasswordMismatch: 'Passwords do not match.',
   resetPasswordSubmit: 'Set password',
@@ -419,15 +451,29 @@ const en: Record<keyof typeof de, string> = {
   accountSettingsHeading: 'Account details',
   accountSettingsCurrentPassword: 'Current password',
   accountSettingsNewPassword: 'New password',
+  accountSettingsNewPasswordHint:
+    'Leave empty to keep your current password. Otherwise at least {{min}} characters, not your username.',
   accountSettingsSave: 'Save',
+  accountSettingsSaving: 'Saving…',
   accountSettingsSaved: 'Saved.',
   accountSettingsError: 'Save failed.',
-  accountSettingsDeleteHint: 'Delete your account permanently. Type "{{username}}" to confirm.',
-  accountSettingsDeleteUsernameLabel: 'Username to confirm',
+  accountSettingsConfirmHeading: 'Confirm changes',
+  accountSettingsConfirmHint: 'Enter your current password to save these changes.',
+  accountSettingsDeleteHeading: 'Delete account',
+  accountSettingsDeleteDescription:
+    'Deletes your account permanently. Your patterns and collections stay, but lose their link to your account.',
+  accountSettingsDeleteConfirmHeading: 'Really delete your account permanently?',
+  accountSettingsDeleteConfirmExplanation:
+    'This action cannot be undone. Your account will be deleted immediately and permanently. Enter your current password to confirm.',
+  accountSettingsDeleteContentLabel: 'Also delete my patterns and collections',
+  accountSettingsDeleteContentOnHint: 'All your patterns and collections will be deleted along with your account.',
+  accountSettingsDeleteContentOffHint: 'Your patterns and collections stay, but show "Deleted user" instead of your name.',
   accountSettingsDelete: 'Delete account',
+  accountSettingsDeleting: 'Deleting…',
   toastAccountDeleted: 'Account deleted.',
 
   patternListHeading: 'All patterns',
+  patternTabletCount: '{{count}} tablets',
   patternListPlaceholder: 'No published patterns yet.',
   myPatternListHeading: 'My patterns',
   myPatternListPlaceholder: "You haven't created any patterns yet.",
@@ -535,8 +581,6 @@ const en: Record<keyof typeof de, string> = {
     'Shows the turning diagram in reverse (last row first, every turn flipped) – the way you weave to untwist the pattern.',
 
   highlightSettingsHeading: 'Highlighting & untwist',
-  highlightSettingsSaveLabel: 'Save for this pattern',
-  highlightSettingsSaveUnavailable: 'Only available when logged in and for an already-saved pattern.',
 
   colorsHeading: 'Colors',
   colorsThreadCountTotalLabel: 'Total',
@@ -553,6 +597,7 @@ const en: Record<keyof typeof de, string> = {
   infoTitle: 'Title',
   infoTitlePlaceholder: 'e.g. Chevron band',
   infoCreator: 'Creator',
+  deletedUserLabel: 'Deleted user',
   infoCreatedAt: 'Created on',
   infoTwistNeutralLabel: 'Twist',
   twistNeutralYes: 'Twist-neutral',
