@@ -9,10 +9,10 @@ export function Footer() {
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p>{t('footerDisclaimer')}</p>
         <div className="flex items-center gap-4">
-          <Link to="/nutzungsbedingungen" className="hover:text-foreground hover:underline">
+          <Link to="/terms" className="hover:text-foreground hover:underline">
             {t('footerTerms')}
           </Link>
-          <Link to="/impressum" className="hover:text-foreground hover:underline">
+          <Link to="/imprint" className="hover:text-foreground hover:underline">
             {t('footerImprint')}
           </Link>
         </div>
