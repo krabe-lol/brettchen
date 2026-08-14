@@ -285,14 +285,16 @@ export function CollectionDetailPage() {
               </div>
             </CardHeader>
             <CardContent className="flex flex-col gap-3">
-              {collection.owner?.username && (
-                <p className="text-sm text-muted-foreground">
-                  {t('infoCreator')}:{' '}
+              <p className="text-sm text-muted-foreground">
+                {t('infoCreator')}:{' '}
+                {collection.owner?.username ? (
                   <Link to={`/profil/${collection.owner.username}`} className="text-primary underline">
                     {collection.owner.username}
                   </Link>
-                </p>
-              )}
+                ) : (
+                  t('deletedUserLabel')
+                )}
+              </p>
               <div className="flex gap-4 text-sm text-muted-foreground">
                 <span>{t('collectionPatternCount', { count: String(collection.patterns.length) })}</span>
                 <span>{t('collectionSubscriberCount', { count: String(collection.subscribers.length) })}</span>

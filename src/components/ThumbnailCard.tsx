@@ -15,6 +15,8 @@ interface ThumbnailCardProps {
   titleBadges?: ReactNode
   /** Overlay button top-right on the thumbnail - "add to collection" for patterns, "subscribe" for collections. */
   cornerAction?: ReactNode
+  /** Overlay badge bottom-right on the thumbnail - e.g. the tablet count for patterns. */
+  thumbnailBadge?: ReactNode
   /** Creator/owner username, right below the title, links to their public profile. */
   ownerUsername?: string
   /** Line below the title (style for patterns, description for collections). */
@@ -36,6 +38,7 @@ export function ThumbnailCard({
   isPrivate,
   titleBadges,
   cornerAction,
+  thumbnailBadge,
   ownerUsername,
   subtitle,
   footer,
@@ -48,6 +51,7 @@ export function ThumbnailCard({
       <div className="relative">
         <Link to={href}>{thumbnail}</Link>
         {cornerAction && <div className="absolute top-2 right-2">{cornerAction}</div>}
+        {thumbnailBadge && <div className="absolute right-2 bottom-2">{thumbnailBadge}</div>}
       </div>
       <div className="flex flex-col gap-1 p-4">
         <div className="flex items-center gap-2">
@@ -62,10 +66,12 @@ export function ThumbnailCard({
           )}
           {titleBadges}
         </div>
-        {ownerUsername && (
+        {ownerUsername ? (
           <Link to={`/profil/${ownerUsername}`} className="text-xs text-muted-foreground hover:underline">
             {ownerUsername}
           </Link>
+        ) : (
+          <span className="text-xs text-muted-foreground">{t('deletedUserLabel')}</span>
         )}
         {subtitle}
         {footer}

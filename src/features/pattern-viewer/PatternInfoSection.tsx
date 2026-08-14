@@ -79,7 +79,7 @@ export function PatternInfoSection({
             {createdBy}
           </Link>
         ) : (
-          <span>{createdBy}</span>
+          <span>{t('deletedUserLabel')}</span>
         )}
       </div>
 

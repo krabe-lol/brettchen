@@ -28,7 +28,14 @@ export function CollectionThumbnail({ patterns, className }: CollectionThumbnail
 
   if (count === 1) {
     const pattern = patterns[0]
-    return <PatternThumbnail pattern={pattern} palette={pattern.defaultPalette} className={className} />
+    return (
+      <PatternThumbnail
+        pattern={pattern}
+        palette={pattern.defaultPalette}
+        weftColorSlotId={pattern.weftColorSlot}
+        className={className}
+      />
+    )
   }
 
   return (
@@ -38,6 +45,7 @@ export function CollectionThumbnail({ patterns, className }: CollectionThumbnail
           key={pattern.documentId}
           pattern={pattern}
           palette={pattern.defaultPalette}
+          weftColorSlotId={pattern.weftColorSlot}
           className="h-full w-full"
         />
       ))}

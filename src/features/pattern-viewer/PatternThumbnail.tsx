@@ -5,6 +5,8 @@ import type { Pattern, PaletteSlot } from './types'
 interface PatternThumbnailProps {
   pattern: Pick<Pattern, 'title' | 'threading' | 'turningSequence' | 'numTablets' | 'numRows' | 'repeatFromRow'>
   palette: PaletteSlot[]
+  /** Separate prop (not part of `pattern`) since Strapi records name this field `weftColorSlot`, not `weftColorSlotId`. */
+  weftColorSlotId: string | null
   className?: string
 }
 
@@ -57,10 +59,13 @@ const TARGET_ASPECT = 3
  * card better). The pattern's width (tablet count, in its original
  * orientation) always fills the preview's full height exactly - never
  * cropped; if the pattern (in rows) is too short to fill the preview
- * horizontally, it repeats like in WovenBandDiagram.
+ * horizontally, it repeats like in WovenBandDiagram. Unthreaded cells
+ * show no polygon at all, letting a weft-colored background through
+ * (same as WovenBandDiagram) instead of the gray fallback color.
  */
-export function PatternThumbnail({ pattern, palette, className }: PatternThumbnailProps) {
+export function PatternThumbnail({ pattern, palette, weftColorSlotId, className }: PatternThumbnailProps) {
   const colorBySlot = new Map(palette.map((slot) => [slot.slotId, slot.hex]))
+  const weftHex = (weftColorSlotId ? colorBySlot.get(weftColorSlotId) : undefined) ?? palette[0]?.hex ?? FALLBACK_COLOR
 
   const minDisplayRows = Math.max(40, pattern.numTablets * TARGET_ASPECT)
   const weaveGrid = computeDisplayWeaveGrid(pattern, minDisplayRows)
@@ -79,8 +84,11 @@ export function PatternThumbnail({ pattern, palette, className }: PatternThumbna
       className={className}
     >
       <g transform={`translate(0, ${contentWidth}) rotate(-90)`}>
+        <rect x={0} y={0} width={contentWidth} height={contentHeight} fill={weftHex} />
         {weaveGrid.map((row) =>
           row.map((cell) => {
+            if (!colorBySlot.has(cell.colorSlotId)) return null
+
             const cx = cell.tabletIndex * STEP + CELL / 2
             const cy = rowY(cell.rowIndex) + CELL / 2
             const previousTurn = weaveGrid[cell.rowIndex - 1]?.[cell.tabletIndex]?.turn
@@ -88,7 +96,7 @@ export function PatternThumbnail({ pattern, palette, className }: PatternThumbna
               <polygon
                 key={`${cell.rowIndex}-${cell.tabletIndex}`}
                 points={cellPoints(cell, previousTurn, cx, cy)}
-                fill={colorBySlot.get(cell.colorSlotId) ?? FALLBACK_COLOR}
+                fill={colorBySlot.get(cell.colorSlotId)}
               />
             )
           }),
