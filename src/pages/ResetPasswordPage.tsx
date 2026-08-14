@@ -3,10 +3,11 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/features/auth/AuthContext'
 import { useLanguage } from '@/features/i18n/LanguageContext'
 import { resetPassword } from '@/lib/strapi/auth'
+import { MIN_PASSWORD_LENGTH } from '@/lib/passwordPolicy'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { PasswordInput } from '@/components/ui/password-input'
 
 export function ResetPasswordPage() {
   const { setSession } = useAuth()
@@ -19,9 +20,12 @@ export function ResetPasswordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const passwordTooShort = password.length > 0 && password.length < MIN_PASSWORD_LENGTH
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     if (!code) return
+    if (password.length < MIN_PASSWORD_LENGTH) return
     if (password !== passwordConfirmation) {
       setError(t('resetPasswordMismatch'))
       return
@@ -52,30 +56,31 @@ export function ResetPasswordPage() {
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="password">{t('resetPasswordNewPassword')}</Label>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete="new-password"
-                  minLength={6}
+                  minLength={MIN_PASSWORD_LENGTH}
                   required
                 />
+                <p className={passwordTooShort ? 'text-xs text-destructive' : 'text-xs text-muted-foreground'}>
+                  {t('resetPasswordHint', { min: String(MIN_PASSWORD_LENGTH) })}
+                </p>
               </div>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="password-confirmation">{t('resetPasswordConfirm')}</Label>
-                <Input
+                <PasswordInput
                   id="password-confirmation"
-                  type="password"
                   value={passwordConfirmation}
                   onChange={(e) => setPasswordConfirmation(e.target.value)}
                   autoComplete="new-password"
-                  minLength={6}
+                  minLength={MIN_PASSWORD_LENGTH}
                   required
                 />
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting || password.length < MIN_PASSWORD_LENGTH}>
                 {isSubmitting ? t('resetPasswordSubmitting') : t('resetPasswordSubmit')}
               </Button>
             </form>

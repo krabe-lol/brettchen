@@ -1,6 +1,18 @@
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
+ * Password policy: length is the main defense (NIST 800-63B-style
+ * guidance), deliberately no character-class or dictionary rules - those
+ * push people toward predictable substitutions/reuse instead of actually
+ * stronger passwords. The one extra rule: must not contain the username.
+ */
+const MIN_PASSWORD_LENGTH = 16;
+
+function containsUsername(password: string, username: string): boolean {
+  return password.toLowerCase().includes(username.toLowerCase());
+}
+
+/**
  * Custom registration endpoint for username + password, email optional
  * (only used for later password reset, no confirmation requirement/2FA).
  * Strapi's built-in /api/auth/local/register stays untouched (requires
@@ -17,8 +29,11 @@ export default {
     if (typeof username !== 'string' || username.length < 3) {
       return ctx.badRequest('username must be at least 3 characters long.');
     }
-    if (typeof password !== 'string' || password.length < 6) {
-      return ctx.badRequest('password must be at least 6 characters long.');
+    if (typeof password !== 'string' || password.length < MIN_PASSWORD_LENGTH) {
+      return ctx.badRequest(`password must be at least ${MIN_PASSWORD_LENGTH} characters long.`);
+    }
+    if (containsUsername(password, username)) {
+      return ctx.badRequest('password must not contain the username.');
     }
 
     const normalizedEmail = typeof email === 'string' ? email.trim() : '';
@@ -123,7 +138,7 @@ export default {
 
     if (username !== record.username) {
       const existing = await strapi.db.query('plugin::users-permissions.user').findOne({ where: { username } });
-      if (existing) return ctx.badRequest('Username ist bereits vergeben.');
+      if (existing) return ctx.badRequest('Username is already taken.');
     }
 
     const updated = await strapi.documents('plugin::users-permissions.user').update({
@@ -137,13 +152,16 @@ export default {
     if (!ctx.state.user) return ctx.unauthorized();
 
     const { currentPassword, newPassword } = ctx.request.body ?? {};
-    if (typeof newPassword !== 'string' || newPassword.length < 6) {
-      return ctx.badRequest('newPassword must be at least 6 characters long.');
+    if (typeof newPassword !== 'string' || newPassword.length < MIN_PASSWORD_LENGTH) {
+      return ctx.badRequest(`newPassword must be at least ${MIN_PASSWORD_LENGTH} characters long.`);
     }
 
     const record = await strapi.db
       .query('plugin::users-permissions.user')
       .findOne({ where: { id: ctx.state.user.id } });
+    if (containsUsername(newPassword, record.username)) {
+      return ctx.badRequest('newPassword must not contain the username.');
+    }
     const valid = await strapi
       .plugin('users-permissions')
       .service('user')
@@ -179,7 +197,7 @@ export default {
       const existing = await strapi.db
         .query('plugin::users-permissions.user')
         .findOne({ where: { email: normalizedEmail } });
-      if (existing) return ctx.badRequest('E-Mail-Adresse ist bereits vergeben.');
+      if (existing) return ctx.badRequest('Email address is already taken.');
     }
 
     const updated = await strapi.documents('plugin::users-permissions.user').update({
@@ -189,11 +207,16 @@ export default {
     ctx.send({ id: updated!.id, documentId: updated!.documentId, username: updated!.username, email: updated!.email });
   },
 
-  /** Deletes the account permanently. Patterns/collections are kept but lose their author/owner. */
+  /**
+   * Deletes the account permanently. `deleteContent` decides what happens
+   * to the user's patterns/collections: false (default) keeps them - they
+   * just lose their author/owner (shown as "deleted user" in the
+   * frontend, see PatternInfoSection/ThumbnailCard); true deletes them too.
+   */
   async deleteAccount(ctx: any) {
     if (!ctx.state.user) return ctx.unauthorized();
 
-    const { currentPassword } = ctx.request.body ?? {};
+    const { currentPassword, deleteContent } = ctx.request.body ?? {};
     const record = await strapi.db
       .query('plugin::users-permissions.user')
       .findOne({ where: { id: ctx.state.user.id } });
@@ -202,6 +225,25 @@ export default {
       .service('user')
       .validatePassword(currentPassword ?? '', record.password);
     if (!valid) return ctx.badRequest('Current password is incorrect.');
+
+    if (deleteContent) {
+      const patterns = await strapi.documents('api::pattern.pattern').findMany({
+        filters: { author: ctx.state.user.id },
+        fields: ['documentId'],
+        status: 'draft',
+      });
+      for (const pattern of patterns) {
+        await strapi.documents('api::pattern.pattern').delete({ documentId: pattern.documentId });
+      }
+
+      const collections = await strapi.documents('api::collection.collection').findMany({
+        filters: { owner: ctx.state.user.id },
+        fields: ['documentId'],
+      });
+      for (const collection of collections) {
+        await strapi.documents('api::collection.collection').delete({ documentId: collection.documentId });
+      }
+    }
 
     await strapi.documents('plugin::users-permissions.user').delete({ documentId: ctx.state.user.documentId });
     ctx.send({ ok: true });

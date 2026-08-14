@@ -19,7 +19,7 @@
     },
     "password": {
       "type": "password",
-      "minLength": 6,
+      "minLength": 10,
       "configurable": false,
       "private": true,
       "searchable": false

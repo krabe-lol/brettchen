@@ -109,9 +109,13 @@ export function updateEmail(email: string, currentPassword: string, token: strin
   return authFetch<StrapiUser>('/auth/local/email', 'PUT', token, { email, currentPassword })
 }
 
-/** Deletes the account permanently - requires the current password. */
-export function deleteAccount(currentPassword: string, token: string): Promise<{ ok: true }> {
-  return authFetch<{ ok: true }>('/auth/local/account/delete', 'POST', token, { currentPassword })
+/**
+ * Deletes the account permanently - requires the current password.
+ * `deleteContent` decides whether the user's patterns/collections get
+ * deleted too (default false: they're kept, shown as "deleted user").
+ */
+export function deleteAccount(currentPassword: string, deleteContent: boolean, token: string): Promise<{ ok: true }> {
+  return authFetch<{ ok: true }>('/auth/local/account/delete', 'POST', token, { currentPassword, deleteContent })
 }
 
 /**

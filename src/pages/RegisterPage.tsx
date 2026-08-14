@@ -3,10 +3,12 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/features/auth/AuthContext'
 import { useLanguage } from '@/features/i18n/LanguageContext'
 import { checkUsernameAvailable, registerUsernameOnly } from '@/lib/strapi/auth'
+import { MIN_PASSWORD_LENGTH, passwordContainsUsername } from '@/lib/passwordPolicy'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { PasswordInput } from '@/components/ui/password-input'
 
 type UsernameStatus = 'idle' | 'checking' | 'available' | 'taken'
 
@@ -36,9 +38,17 @@ export function RegisterPage() {
     return () => clearTimeout(handle)
   }, [username])
 
+  // Checked in this order (contains-username takes priority over length) - see passwordHint below.
+  const passwordInvalid = passwordContainsUsername(password, username)
+    ? 'username'
+    : password.length < MIN_PASSWORD_LENGTH
+      ? 'length'
+      : null
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
     setError(null)
+    if (passwordInvalid) return
     setIsSubmitting(true)
     try {
       const result = await registerUsernameOnly(username.trim(), password, email.trim() || undefined)
@@ -89,16 +99,19 @@ export function RegisterPage() {
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="password">{t('loginPassword')}</Label>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="new-password"
-                minLength={6}
+                minLength={MIN_PASSWORD_LENGTH}
                 required
               />
-              <p className="text-xs text-muted-foreground">{t('registerPasswordHint')}</p>
+              <p className={password && passwordInvalid ? 'text-xs text-destructive' : 'text-xs text-muted-foreground'}>
+                {passwordInvalid === 'username'
+                  ? t('passwordContainsUsernameError')
+                  : t('registerPasswordHint', { min: String(MIN_PASSWORD_LENGTH) })}
+              </p>
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="email">{t('registerEmail')}</Label>
@@ -112,7 +125,7 @@ export function RegisterPage() {
               <p className="text-xs text-muted-foreground">{t('registerEmailHint')}</p>
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" disabled={isSubmitting || usernameStatus === 'taken'}>
+            <Button type="submit" disabled={isSubmitting || usernameStatus === 'taken' || Boolean(passwordInvalid)}>
               {isSubmitting ? t('registerSubmitting') : t('registerSubmit')}
             </Button>
             <p className="text-center text-sm text-muted-foreground">
