@@ -58,7 +58,7 @@ function ToggleGroupItem({
       data-size={context.size || size}
       className={cn(
         toggleVariants({ variant: context.variant || variant, size: context.size || size }),
-        'min-w-0 shrink-0 focus:z-10 focus-visible:z-10',
+        'px-4 min-w-0 shrink-0 focus:z-10 focus-visible:z-10',
         'group-data-[spacing=none]/toggle-group:rounded-none group-data-[spacing=none]/toggle-group:shadow-none group-data-[spacing=none]/toggle-group:first:rounded-l-md group-data-[spacing=none]/toggle-group:last:rounded-r-md group-data-[spacing=none]/toggle-group:data-[variant=outline]:border-l-0 group-data-[spacing=none]/toggle-group:data-[variant=outline]:first:border-l',
         context.stretch === 'stretched' && 'flex-1',
         className,

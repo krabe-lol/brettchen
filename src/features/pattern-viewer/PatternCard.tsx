@@ -2,6 +2,7 @@ import { Pencil } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { CollectionBookmarkButton } from '@/features/library/CollectionBookmarkButton'
 import { PatternThumbnail } from './PatternThumbnail'
+import { countUsedColors } from './render/threadCounts'
 import { useLanguage } from '@/features/i18n/LanguageContext'
 import { ThumbnailCard } from '@/components/ThumbnailCard'
 import { Button } from '@/components/ui/button'
@@ -35,6 +36,7 @@ export function PatternCard({
 }: PatternCardProps) {
   const { t } = useLanguage()
   const isOwner = Boolean(currentUsername) && pattern.author?.username === currentUsername
+  const colorCount = countUsedColors(pattern)
 
   return (
     <ThumbnailCard
@@ -52,9 +54,14 @@ export function PatternCard({
       isPrivate={pattern.moderationStatus !== 'published'}
       ownerUsername={pattern.author?.username}
       thumbnailBadge={
-        <span className="rounded bg-background/80 px-1.5 py-0.5 text-xs font-medium text-foreground shadow-sm backdrop-blur">
-          {t('patternTabletCount', { count: String(pattern.numTablets) })}
-        </span>
+        <div className="flex gap-1">
+          <span className="rounded bg-background/80 px-1.5 py-0.5 text-xs font-medium text-foreground shadow-sm backdrop-blur">
+            {t('patternTabletCount', { count: String(pattern.numTablets) })}
+          </span>
+          <span className="rounded bg-background/80 px-1.5 py-0.5 text-xs font-medium text-foreground shadow-sm backdrop-blur">
+            {t('patternColorCount', { count: String(colorCount) })}
+          </span>
+        </div>
       }
       cornerAction={
         (isOwner || (collections && token && onCollectionsChanged)) && (

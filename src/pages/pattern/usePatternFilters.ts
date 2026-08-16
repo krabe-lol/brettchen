@@ -1,14 +1,19 @@
 import { useMemo, useState } from 'react'
 import { collectStyleTags, type StrapiPatternRecord } from '@/lib/strapi/patterns'
+import { countUsedColors } from '@/features/pattern-viewer/render/threadCounts'
 
 export type TwistFilter = 'all' | 'neutral' | 'not-neutral'
+export type StyleMatchMode = 'and' | 'or'
 
-/** Shared tablet-count/style-tag/twist filtering for PatternListPage and MyPatternListPage. */
+/** Shared tablet-count/style-tag/color-count/twist filtering for PatternListPage and MyPatternListPage. */
 export function usePatternFilters(patterns: StrapiPatternRecord[], initialStyleFilter: string[] = []) {
   const [twistFilter, setTwistFilter] = useState<TwistFilter>('all')
   const [minTablets, setMinTablets] = useState('')
   const [maxTablets, setMaxTablets] = useState('')
   const [styleFilter, setStyleFilter] = useState<string[]>(initialStyleFilter)
+  const [styleMatchMode, setStyleMatchMode] = useState<StyleMatchMode>('or')
+  const [minColors, setMinColors] = useState('')
+  const [maxColors, setMaxColors] = useState('')
 
   const styleSuggestions = useMemo(() => collectStyleTags(patterns), [patterns])
 
@@ -17,8 +22,16 @@ export function usePatternFilters(patterns: StrapiPatternRecord[], initialStyleF
     if (twistFilter === 'not-neutral' && pattern.isTwistNeutral) return false
     if (minTablets !== '' && pattern.numTablets < Number(minTablets)) return false
     if (maxTablets !== '' && pattern.numTablets > Number(maxTablets)) return false
-    // Patterns matching at least one selected style tag (not all of them).
-    if (styleFilter.length > 0 && !styleFilter.some((tag) => pattern.style?.includes(tag))) return false
+    if (styleFilter.length > 0) {
+      // AND: the pattern must have every selected style tag. OR: at least one of them.
+      const matches =
+        styleMatchMode === 'and'
+          ? styleFilter.every((tag) => pattern.style?.includes(tag))
+          : styleFilter.some((tag) => pattern.style?.includes(tag))
+      if (!matches) return false
+    }
+    if (minColors !== '' && countUsedColors(pattern) < Number(minColors)) return false
+    if (maxColors !== '' && countUsedColors(pattern) > Number(maxColors)) return false
     return true
   })
 
@@ -32,6 +45,12 @@ export function usePatternFilters(patterns: StrapiPatternRecord[], initialStyleF
     styleFilter,
     setStyleFilter,
     styleSuggestions,
+    styleMatchMode,
+    setStyleMatchMode,
+    minColors,
+    setMinColors,
+    maxColors,
+    setMaxColors,
     filteredPatterns,
   }
 }

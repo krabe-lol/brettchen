@@ -22,3 +22,8 @@ export function computeThreadCounts(pattern: Pick<Pattern, 'threading'>): Thread
   }
   return { total, bySlot }
 }
+
+/** Number of distinct colors actually threaded somewhere - an unused palette slot doesn't count. */
+export function countUsedColors(pattern: Pick<Pattern, 'threading'>): number {
+  return Object.keys(computeThreadCounts(pattern).bySlot).length
+}

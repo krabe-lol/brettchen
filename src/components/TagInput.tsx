@@ -11,6 +11,8 @@ interface TagInputProps {
   suggestions?: string[]
   placeholder?: string
   className?: string
+  /** Merged into the bordered input box itself (not the outer wrapper) - e.g. to flatten a corner when attaching a button group, see PatternFilterBar. */
+  inputClassName?: string
 }
 
 /**
@@ -19,7 +21,7 @@ interface TagInputProps {
  * input removes the last tag. Shows an autocomplete dropdown of matching,
  * not-yet-added `suggestions` below the field - clicking one adds it too.
  */
-export function TagInput({ id, value, onChange, suggestions = [], placeholder, className }: TagInputProps) {
+export function TagInput({ id, value, onChange, suggestions = [], placeholder, className, inputClassName }: TagInputProps) {
   const { t } = useLanguage()
   const [inputValue, setInputValue] = useState('')
   const [isOpen, setIsOpen] = useState(false)
@@ -72,7 +74,12 @@ export function TagInput({ id, value, onChange, suggestions = [], placeholder, c
 
   return (
     <div ref={containerRef} className={cn('relative', className)}>
-      <div className="border-input focus-within:border-ring focus-within:ring-ring/50 flex flex-wrap items-center gap-1.5 rounded-md border bg-transparent px-2 py-1.5 focus-within:ring-[3px]">
+      <div
+        className={cn(
+          'border-input focus-within:border-ring focus-within:ring-ring/50 flex flex-wrap items-center gap-1.5 rounded-md border bg-transparent px-2 py-1.5 focus-within:ring-[3px]',
+          inputClassName,
+        )}
+      >
         {value.map((tag) => (
           <span key={tag} className="bg-muted flex items-center gap-1 rounded-full px-2 py-0.5 text-xs">
             {tag}

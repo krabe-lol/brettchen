@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { Filter } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthContext'
 import { useLanguage } from '@/features/i18n/LanguageContext'
 import { PatternCard } from '@/features/pattern-viewer/PatternCard'
@@ -7,6 +8,8 @@ import { PatternFilterBar } from './PatternFilterBar'
 import { usePatternFilters } from './usePatternFilters'
 import { fetchPublishedPatterns, type StrapiPatternRecord } from '@/lib/strapi/patterns'
 import { fetchMyCollections, type StrapiCollectionRecord } from '@/lib/strapi/collections'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 
 export function PatternListPage() {
   const { t } = useLanguage()
@@ -49,22 +52,46 @@ export function PatternListPage() {
     loadCollections()
   }, [loadCollections])
 
+  const filterBar = (
+    <PatternFilterBar
+      idPrefix="pattern"
+      minTablets={filters.minTablets}
+      onMinTabletsChange={filters.setMinTablets}
+      maxTablets={filters.maxTablets}
+      onMaxTabletsChange={filters.setMaxTablets}
+      styleFilter={filters.styleFilter}
+      onStyleFilterChange={filters.setStyleFilter}
+      styleSuggestions={filters.styleSuggestions}
+      styleMatchMode={filters.styleMatchMode}
+      onStyleMatchModeChange={filters.setStyleMatchMode}
+      minColors={filters.minColors}
+      onMinColorsChange={filters.setMinColors}
+      maxColors={filters.maxColors}
+      onMaxColorsChange={filters.setMaxColors}
+      twistFilter={filters.twistFilter}
+      onTwistFilterChange={filters.setTwistFilter}
+    />
+  )
+
   return (
     <div className="py-12">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-3xl font-semibold tracking-tight">{t('patternListHeading')}</h1>
-        <PatternFilterBar
-          idPrefix="pattern"
-          minTablets={filters.minTablets}
-          onMinTabletsChange={filters.setMinTablets}
-          maxTablets={filters.maxTablets}
-          onMaxTabletsChange={filters.setMaxTablets}
-          styleFilter={filters.styleFilter}
-          onStyleFilterChange={filters.setStyleFilter}
-          styleSuggestions={filters.styleSuggestions}
-          twistFilter={filters.twistFilter}
-          onTwistFilterChange={filters.setTwistFilter}
-        />
+      <h1 className="text-3xl font-semibold tracking-tight">{t('patternListHeading')}</h1>
+
+      {/* From 1000px up: filter row directly below the title. Below 1000px: collapsed behind a button+overlay instead. */}
+      <div className="mt-4 hidden min-[1000px]:block">{filterBar}</div>
+      <div className="mt-4 min-[1000px]:hidden">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button type="button" variant="outline">
+              <Filter />
+              {t('patternFilterButtonLabel')}
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogTitle className="sr-only">{t('patternFilterHeading')}</DialogTitle>
+            {filterBar}
+          </DialogContent>
+        </Dialog>
       </div>
 
       {isLoading ? (
