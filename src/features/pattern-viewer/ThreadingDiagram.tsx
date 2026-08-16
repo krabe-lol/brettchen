@@ -1,15 +1,20 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { GripHorizontal } from 'lucide-react'
 import {
-  CELL,
+  angleForOrientation,
+  CELL_HEIGHT,
+  CELL_WIDTH,
   COL_LABEL_HEIGHT,
   DELETE_ROW_HEIGHT,
+  ELLIPSE_RX,
+  ELLIPSE_RY,
   FALLBACK_COLOR,
   LABEL_FONT_SIZE,
   SPACE_DELETE,
   ORIENTATION_ROW_HEIGHT,
   ROW_LABEL_WIDTH,
   STEP,
+  STEP_X,
 } from './render/gridLayout'
 import { DEFAULT_DISPLAY_SETTINGS, displayHoleLetter, displayOrientation } from './render/orientationDisplay'
 import { useLanguage } from '@/features/i18n/LanguageContext'
@@ -65,7 +70,7 @@ export function ThreadingDiagram({
     }
   }, [activeTablet])
 
-  const gridWidth = pattern.numTablets * STEP
+  const gridWidth = pattern.numTablets * STEP_X
   const gridHeight = pattern.holesPerTablet * STEP
   const totalWidth = ROW_LABEL_WIDTH + gridWidth
   const totalHeight = COL_LABEL_HEIGHT + gridHeight + ORIENTATION_ROW_HEIGHT + (onRemoveTablet ? SPACE_DELETE + DELETE_ROW_HEIGHT : 0)
@@ -85,7 +90,7 @@ export function ThreadingDiagram({
 
   /** Converts a screen X coordinate to the tablet index under the pointer. */
   function tabletIndexAtClientX(clientX: number): number {
-    const index = Math.floor((svgXAtClientX(clientX) - ROW_LABEL_WIDTH) / STEP)
+    const index = Math.floor((svgXAtClientX(clientX) - ROW_LABEL_WIDTH) / STEP_X)
     return Math.max(0, Math.min(pattern.numTablets - 1, index))
   }
 
@@ -132,9 +137,9 @@ export function ThreadingDiagram({
   function columnShift(tabletIndex: number): number {
     if (draggedIndex === null || dropIndex === null || tabletIndex === draggedIndex) return 0
     if (dropIndex > draggedIndex) {
-      return tabletIndex > draggedIndex && tabletIndex <= dropIndex ? -STEP : 0
+      return tabletIndex > draggedIndex && tabletIndex <= dropIndex ? -STEP_X : 0
     }
-    return tabletIndex >= dropIndex && tabletIndex < draggedIndex ? STEP : 0
+    return tabletIndex >= dropIndex && tabletIndex < draggedIndex ? STEP_X : 0
   }
 
   return (
@@ -151,7 +156,7 @@ export function ThreadingDiagram({
         <text
           key={`row-${holeIndex}`}
           x={ROW_LABEL_WIDTH / 2}
-          y={COL_LABEL_HEIGHT + (pattern.holesPerTablet - 1 - holeIndex) * STEP + CELL / 2}
+          y={COL_LABEL_HEIGHT + (pattern.holesPerTablet - 1 - holeIndex) * STEP + CELL_HEIGHT / 2}
           textAnchor="middle"
           dominantBaseline="central"
           fontSize={LABEL_FONT_SIZE}
@@ -164,7 +169,7 @@ export function ThreadingDiagram({
       {tabletOrder.map((tabletIndex) => {
         const tablet = pattern.threading[tabletIndex]
         const isDragged = draggedIndex === tabletIndex
-        const colX = ROW_LABEL_WIDTH + tabletIndex * STEP
+        const colX = ROW_LABEL_WIDTH + tabletIndex * STEP_X
         const orientationY = COL_LABEL_HEIGHT + gridHeight
         const shift = isDragged ? dragOffsetX : columnShift(tabletIndex)
 
@@ -178,7 +183,7 @@ export function ThreadingDiagram({
               <rect
                 x={colX}
                 y={0}
-                width={CELL}
+                width={CELL_WIDTH}
                 height={COL_LABEL_HEIGHT}
                 rx={2}
                 fill="var(--background)"
@@ -187,7 +192,7 @@ export function ThreadingDiagram({
               />
               {onMoveTablet && (
                 <g
-                  transform={`translate(${colX + CELL / 2 - GRIP_SIZE / 2}, ${COL_LABEL_HEIGHT / 2 - GRIP_SIZE / 2})`}
+                  transform={`translate(${colX + CELL_WIDTH / 2 - GRIP_SIZE / 2}, ${COL_LABEL_HEIGHT / 2 - GRIP_SIZE / 2})`}
                   pointerEvents="none"
                   className={cn('opacity-0 group-hover:opacity-80', isDragged && 'opacity-80')}
                 >
@@ -195,7 +200,7 @@ export function ThreadingDiagram({
                 </g>
               )}
               <text
-                x={colX + CELL / 2}
+                x={colX + CELL_WIDTH / 2}
                 y={COL_LABEL_HEIGHT / 2}
                 textAnchor="middle"
                 dominantBaseline="central"
@@ -211,24 +216,43 @@ export function ThreadingDiagram({
             {tablet.holes.map((hole, holeIndex) => {
               const isEmpty = !colorBySlot.has(hole.colorSlotId)
               const y = COL_LABEL_HEIGHT + (pattern.holesPerTablet - 1 - holeIndex) * STEP
+              const cx = colX + CELL_WIDTH / 2
+              const cy = y + CELL_HEIGHT / 2
               return (
-                <g key={holeIndex}>
+                <g key={holeIndex} className={onCellClick ? 'group' : undefined}>
                   <rect
                     x={colX}
                     y={y}
-                    width={CELL}
-                    height={CELL}
-                    rx={1}
-                    fill={isEmpty ? FALLBACK_COLOR : colorOf(hole.colorSlotId)}
-                    fillOpacity={isEmpty ? 0.3 : undefined}
+                    width={CELL_WIDTH}
+                    height={CELL_HEIGHT}
+                    fill="transparent"
                     onClick={onCellClick ? () => onCellClick(tabletIndex, holeIndex) : undefined}
-                    className={onCellClick ? 'cursor-pointer hover:opacity-70' : undefined}
+                    className={onCellClick ? 'cursor-pointer' : undefined}
                   />
-                  {isEmpty && (
-                    <g pointerEvents="none">
-                      <line x1={colX} y1={y} x2={colX + CELL} y2={y + CELL} stroke="var(--background)" strokeWidth={1} />
-                      <line x1={colX + CELL} y1={y} x2={colX} y2={y + CELL} stroke="var(--background)" strokeWidth={1} />
-                    </g>
+                  {isEmpty ? (
+                    // No thread here - a corner-to-corner diagonal instead of a shape, same as WeaveDiagram.
+                    <line
+                      x1={colX}
+                      y1={y}
+                      x2={colX + CELL_WIDTH}
+                      y2={y + CELL_HEIGHT}
+                      stroke="var(--foreground)"
+                      strokeWidth={1.5}
+                      pointerEvents="none"
+                    />
+                  ) : (
+                    <ellipse
+                      cx={cx}
+                      cy={cy}
+                      rx={ELLIPSE_RX}
+                      ry={ELLIPSE_RY}
+                      fill={colorOf(hole.colorSlotId)}
+                      stroke="var(--border)"
+                      strokeWidth={1}
+                      transform={`rotate(${angleForOrientation(tablet.orientation)} ${cx} ${cy})`}
+                      pointerEvents="none"
+                      className={onCellClick ? 'group-hover:opacity-70' : undefined}
+                    />
                   )}
                 </g>
               )
@@ -238,14 +262,14 @@ export function ThreadingDiagram({
               <rect
                 x={colX}
                 y={orientationY}
-                width={CELL}
+                width={CELL_WIDTH}
                 height={ORIENTATION_ROW_HEIGHT}
                 rx={2}
                 className={cn('fill-muted', onOrientationClick && 'cursor-pointer hover:fill-accent')}
                 onClick={onOrientationClick ? () => onOrientationClick(tabletIndex) : undefined}
               />
               <text
-                x={colX + CELL / 2}
+                x={colX + CELL_WIDTH / 2}
                 y={orientationY + ORIENTATION_ROW_HEIGHT / 2}
                 textAnchor="middle"
                 dominantBaseline="central"
@@ -263,12 +287,12 @@ export function ThreadingDiagram({
                 <rect
                   x={colX}
                   y={orientationY + ORIENTATION_ROW_HEIGHT + SPACE_DELETE}
-                  width={CELL}
+                  width={CELL_WIDTH}
                   height={DELETE_ROW_HEIGHT}
                   fill="transparent"
                 />
                 <text
-                  x={colX + CELL / 2}
+                  x={colX + CELL_WIDTH / 2}
                   y={orientationY + ORIENTATION_ROW_HEIGHT + SPACE_DELETE + DELETE_ROW_HEIGHT / 2}
                   textAnchor="middle"
                   dominantBaseline="central"
@@ -287,9 +311,9 @@ export function ThreadingDiagram({
       {activeTablet != null && (
         <rect
           ref={activeTabletRef}
-          x={ROW_LABEL_WIDTH + activeTablet * STEP}
+          x={ROW_LABEL_WIDTH + activeTablet * STEP_X}
           y={0}
-          width={STEP}
+          width={STEP_X}
           height={totalHeight}
           rx={2}
           fill="none"

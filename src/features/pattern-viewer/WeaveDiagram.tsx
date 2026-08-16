@@ -3,7 +3,20 @@ import type { PointerEvent as ReactPointerEvent } from 'react'
 import { ArrowUpDown, GripVertical } from 'lucide-react'
 import { applyUntwistOrder, computeWeaveGrid } from './render/weaveGrid'
 import { computeTwistByTablet, hasDirectionChange } from './render/twist'
-import { CELL, COL_LABEL_HEIGHT, FALLBACK_COLOR, LABEL_FONT_SIZE, ROW_LABEL_WIDTH, STEP } from './render/gridLayout'
+import {
+  CELL_HEIGHT,
+  CELL_WIDTH,
+  COL_LABEL_HEIGHT,
+  ELLIPSE_RX,
+  ELLIPSE_RY,
+  FALLBACK_COLOR,
+  LABEL_FONT_SIZE,
+  LEFT_ANGLE,
+  RIGHT_ANGLE,
+  ROW_LABEL_WIDTH,
+  STEP,
+  STEP_X,
+} from './render/gridLayout'
 import { DEFAULT_DISPLAY_SETTINGS } from './render/orientationDisplay'
 import { useLanguage } from '@/features/i18n/LanguageContext'
 import { cn } from '@/lib/utils'
@@ -29,18 +42,13 @@ interface WeaveDiagramProps {
   untwistMode?: boolean
 }
 
-const ELLIPSE_RX = 8
-const ELLIPSE_RY = 13
-const RIGHT_ANGLE = -40
-const LEFT_ANGLE = 40
-
-const SQUARE_SIZE = CELL
+const SQUARE_SIZE = CELL_WIDTH
 
 const FORWARD_BG = 'var(--background)'
 const BACKWARD_BG = 'var(--foreground)'
 
 /** Reserved column at the right for the per-row invert button. */
-const INVERT_ROW_WIDTH = STEP
+const INVERT_ROW_WIDTH = STEP_X
 const INVERT_ICON_SIZE = 14
 
 const GRIP_SIZE = 12
@@ -161,7 +169,7 @@ export function WeaveDiagram({
   const twistByTablet = computeTwistByTablet(pattern)
   const formatTwist = (twist: number) => (twist > 0 ? `+${twist}` : `${twist}`)
 
-  const gridWidth = pattern.numTablets * STEP
+  const gridWidth = pattern.numTablets * STEP_X
   const gridHeight = pattern.numRows * STEP
   const totalWidth = ROW_LABEL_WIDTH + gridWidth + (onInvertRow ? INVERT_ROW_WIDTH : 0)
   const totalHeight = COL_LABEL_HEIGHT + gridHeight + COL_LABEL_HEIGHT
@@ -255,9 +263,9 @@ export function WeaveDiagram({
           <g key={`col-top-${tabletIndex}`}>
             {isExempt && (
               <rect
-                x={ROW_LABEL_WIDTH + tabletIndex * STEP}
+                x={ROW_LABEL_WIDTH + tabletIndex * STEP_X}
                 y={0}
-                width={CELL}
+                width={CELL_WIDTH}
                 height={COL_LABEL_HEIGHT}
                 rx={2}
                 fill="var(--ring)"
@@ -268,9 +276,9 @@ export function WeaveDiagram({
               <>
                 <title>{t('weaveToggleTwistExemptLabel', { number: String(tabletIndex + 1) })}</title>
                 <rect
-                  x={ROW_LABEL_WIDTH + tabletIndex * STEP}
+                  x={ROW_LABEL_WIDTH + tabletIndex * STEP_X}
                   y={0}
-                  width={CELL}
+                  width={CELL_WIDTH}
                   height={COL_LABEL_HEIGHT}
                   fill="transparent"
                   className="cursor-pointer"
@@ -279,7 +287,7 @@ export function WeaveDiagram({
               </>
             )}
             <text
-              x={ROW_LABEL_WIDTH + tabletIndex * STEP + CELL / 2}
+              x={ROW_LABEL_WIDTH + tabletIndex * STEP_X + CELL_WIDTH / 2}
               y={COL_LABEL_HEIGHT / 2}
               textAnchor="middle"
               dominantBaseline="central"
@@ -296,7 +304,7 @@ export function WeaveDiagram({
       {pattern.threading.map((_, tabletIndex) => (
         <text
           key={`col-bottom-${tabletIndex}`}
-          x={ROW_LABEL_WIDTH + tabletIndex * STEP + CELL / 2}
+          x={ROW_LABEL_WIDTH + tabletIndex * STEP_X + CELL_WIDTH / 2}
           y={COL_LABEL_HEIGHT + gridHeight + COL_LABEL_HEIGHT / 2}
           textAnchor="middle"
           dominantBaseline="central"
@@ -331,7 +339,7 @@ export function WeaveDiagram({
               />
               {onMoveRow && (
                 <g
-                  transform={`translate(${ROW_LABEL_WIDTH / 2 - GRIP_SIZE / 2}, ${rowY(rowIndex) + CELL / 2 - GRIP_SIZE / 2})`}
+                  transform={`translate(${ROW_LABEL_WIDTH / 2 - GRIP_SIZE / 2}, ${rowY(rowIndex) + CELL_HEIGHT / 2 - GRIP_SIZE / 2})`}
                   pointerEvents="none"
                   className={cn('opacity-0 group-hover:opacity-80', isRowDragged && 'opacity-80')}
                 >
@@ -340,7 +348,7 @@ export function WeaveDiagram({
               )}
               <text
                 x={ROW_LABEL_WIDTH / 2}
-                y={rowY(rowIndex) + CELL / 2}
+                y={rowY(rowIndex) + CELL_HEIGHT / 2}
                 textAnchor="middle"
                 dominantBaseline="central"
                 fontSize={LABEL_FONT_SIZE}
@@ -376,8 +384,8 @@ export function WeaveDiagram({
             )}
 
             {row.map((cell) => {
-              const cx = ROW_LABEL_WIDTH + cell.tabletIndex * STEP + CELL / 2
-              const cy = rowY(cell.rowIndex) + CELL / 2
+              const cx = ROW_LABEL_WIDTH + cell.tabletIndex * STEP_X + CELL_WIDTH / 2
+              const cy = rowY(cell.rowIndex) + CELL_HEIGHT / 2
               const angle = angleForEffectiveDirection(cell.effectiveDirection)
               const isEmpty = !colorBySlot.has(cell.colorSlotId)
               const previousTurn = weaveGrid[cell.rowIndex - 1]?.[cell.tabletIndex]?.turn
@@ -388,10 +396,10 @@ export function WeaveDiagram({
               return (
                 <g key={`${cell.rowIndex}-${cell.tabletIndex}`}>
                   <rect
-                    x={cx - CELL / 2}
-                    y={cy - CELL / 2}
-                    width={CELL}
-                    height={CELL}
+                    x={cx - CELL_WIDTH / 2}
+                    y={cy - CELL_HEIGHT / 2}
+                    width={CELL_WIDTH}
+                    height={CELL_HEIGHT}
                     rx={2}
                     {...backgroundForTurn(cell.turn, displaySettings.backwardContrast)}
                     onPointerDown={
@@ -401,10 +409,10 @@ export function WeaveDiagram({
                   />
                   {isClickable && (
                     <rect
-                      x={cx - CELL / 2 + DRAG_HIT_INSET}
-                      y={cy - CELL / 2 + DRAG_HIT_INSET}
-                      width={CELL - DRAG_HIT_INSET * 2}
-                      height={CELL - DRAG_HIT_INSET * 2}
+                      x={cx - CELL_WIDTH / 2 + DRAG_HIT_INSET}
+                      y={cy - CELL_HEIGHT / 2 + DRAG_HIT_INSET}
+                      width={CELL_WIDTH - DRAG_HIT_INSET * 2}
+                      height={CELL_HEIGHT - DRAG_HIT_INSET * 2}
                       fill="transparent"
                       className="cursor-pointer"
                       // Sits on top of the full cell rect above, so it also needs its own
@@ -418,10 +426,10 @@ export function WeaveDiagram({
                     // No thread here - a corner-to-corner diagonal instead of a shape, leaning the
                     // same way the ellipse/square would have tilted (see angleForEffectiveDirection).
                     <line
-                      x1={cx - CELL / 2}
-                      y1={cell.effectiveDirection < 0 ? cy - CELL / 2 : cy + CELL / 2}
-                      x2={cx + CELL / 2}
-                      y2={cell.effectiveDirection < 0 ? cy + CELL / 2 : cy - CELL / 2}
+                      x1={cx - CELL_WIDTH / 2}
+                      y1={cell.effectiveDirection < 0 ? cy - CELL_HEIGHT / 2 : cy + CELL_HEIGHT / 2}
+                      x2={cx + CELL_WIDTH / 2}
+                      y2={cell.effectiveDirection < 0 ? cy + CELL_HEIGHT / 2 : cy - CELL_HEIGHT / 2}
                       stroke="var(--foreground)"
                       strokeWidth={1.5}
                       pointerEvents="none"
@@ -470,10 +478,10 @@ export function WeaveDiagram({
                   )}
                   {isDirectionChange && (
                     <line
-                      x1={cx - CELL / 2}
-                      y1={cy + CELL / 2}
-                      x2={cx + CELL / 2}
-                      y2={cy + CELL / 2}
+                      x1={cx - CELL_WIDTH / 2}
+                      y1={cy + CELL_HEIGHT / 2}
+                      x2={cx + CELL_WIDTH / 2}
+                      y2={cy + CELL_HEIGHT / 2}
                       stroke="#23C2F1"
                       strokeWidth={3}
                       pointerEvents="none"

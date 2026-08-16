@@ -1,6 +1,16 @@
 import { useEffect, useRef } from 'react'
 import { applyUntwistOrder, computeDisplayWeaveGrid } from './render/weaveGrid'
-import { CELL, COL_LABEL_HEIGHT, FALLBACK_COLOR, LABEL_FONT_SIZE, ROW_LABEL_WIDTH, STEP, WEFT_HEIGHT } from './render/gridLayout'
+import {
+  CELL_HEIGHT,
+  CELL_WIDTH,
+  COL_LABEL_HEIGHT,
+  FALLBACK_COLOR,
+  LABEL_FONT_SIZE,
+  ROW_LABEL_WIDTH,
+  STEP,
+  STEP_X,
+  WEFT_HEIGHT,
+} from './render/gridLayout'
 import { useLanguage } from '@/features/i18n/LanguageContext'
 import type { Pattern, PaletteSlot } from './types'
 
@@ -57,7 +67,7 @@ export function WovenBandDiagram({
   const weaveGrid = computeDisplayWeaveGrid(untwistMode ? applyUntwistOrder(pattern) : pattern, MIN_DISPLAY_ROWS)
   const displayNumRows = weaveGrid.length
 
-  const gridWidth = pattern.numTablets * STEP
+  const gridWidth = pattern.numTablets * STEP_X
   const gridHeight = displayNumRows * STEP
   const totalWidth = ROW_LABEL_WIDTH + gridWidth
   const totalHeight = COL_LABEL_HEIGHT + gridHeight
@@ -77,7 +87,7 @@ export function WovenBandDiagram({
       {pattern.threading.map((_, tabletIndex) => (
         <text
           key={`col-${tabletIndex}`}
-          x={ROW_LABEL_WIDTH + tabletIndex * STEP + CELL / 2}
+          x={ROW_LABEL_WIDTH + tabletIndex * STEP_X + CELL_WIDTH / 2}
           y={COL_LABEL_HEIGHT / 2}
           textAnchor="middle"
           dominantBaseline="central"
@@ -92,7 +102,7 @@ export function WovenBandDiagram({
         <text
           key={`row-${rowIndex}`}
           x={ROW_LABEL_WIDTH / 2}
-          y={rowY(rowIndex) + CELL / 2}
+          y={rowY(rowIndex) + CELL_HEIGHT / 2}
           textAnchor="middle"
           dominantBaseline="central"
           fontSize={LABEL_FONT_SIZE}
@@ -107,7 +117,7 @@ export function WovenBandDiagram({
         <rect
           key={`weft-${rowIndex}`}
           x={ROW_LABEL_WIDTH - 2}
-          y={rowY(rowIndex) + (CELL - WEFT_HEIGHT) / 2}
+          y={rowY(rowIndex) + (CELL_HEIGHT - WEFT_HEIGHT) / 2}
           width={gridWidth + 4}
           height={WEFT_HEIGHT}
           fill={weftHex}
@@ -118,10 +128,10 @@ export function WovenBandDiagram({
         row.map((cell) => {
           if (!colorBySlot.has(cell.colorSlotId)) return null
 
-          const cx = ROW_LABEL_WIDTH + cell.tabletIndex * STEP + CELL / 2
-          const cy = rowY(cell.rowIndex) + CELL / 2
-          const xLeft = cx - CELL / 2
-          const xRight = cx + CELL / 2
+          const cx = ROW_LABEL_WIDTH + cell.tabletIndex * STEP_X + CELL_WIDTH / 2
+          const cy = rowY(cell.rowIndex) + CELL_HEIGHT / 2
+          const xLeft = cx - CELL_WIDTH / 2
+          const xRight = cx + CELL_WIDTH / 2
           const fill = colorOf(cell.colorSlotId)
 
           const previousTurn = weaveGrid[cell.rowIndex - 1]?.[cell.tabletIndex]?.turn
@@ -135,10 +145,15 @@ export function WovenBandDiagram({
             points = `${xLeft},${yTop} ${xRight},${yTop} ${xRight},${yBottom} ${xLeft},${yBottom}`
           } else {
             const leaningLeft = cell.effectiveDirection > 0
-            const yTopExtreme = cy - STEP
-            const yBottomExtreme = cy + STEP
-            const yTopShoulder = yTopExtreme + CELL
-            const yBottomShoulder = yBottomExtreme - CELL
+            // Spans 2 * CELL_HEIGHT (48px) tip to tip - the diagonal edges are the
+            // corner-to-corner diagonal of one CELL_WIDTH x CELL_HEIGHT cell (18x24,
+            // hypotenuse 30), giving the acute/obtuse angles 36.87°/143.13° their
+            // exact values. The shoulder offset equals CELL_HEIGHT, which lands it
+            // exactly on cy - the vertical center of the 48px shape.
+            const yTopExtreme = cy - CELL_HEIGHT
+            const yBottomExtreme = cy + CELL_HEIGHT
+            const yTopShoulder = yTopExtreme + CELL_HEIGHT
+            const yBottomShoulder = yBottomExtreme - CELL_HEIGHT
 
             const topLeft = leaningLeft ? yTopShoulder : yTopExtreme
             const topRight = leaningLeft ? yTopExtreme : yTopShoulder

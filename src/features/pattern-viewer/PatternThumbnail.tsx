@@ -1,5 +1,5 @@
 import { computeDisplayWeaveGrid, type WeaveCell } from './render/weaveGrid'
-import { CELL, FALLBACK_COLOR, STEP } from './render/gridLayout'
+import { CELL_HEIGHT, CELL_WIDTH, FALLBACK_COLOR, STEP, STEP_X } from './render/gridLayout'
 import type { Pattern, PaletteSlot } from './types'
 
 interface PatternThumbnailProps {
@@ -11,14 +11,15 @@ interface PatternThumbnailProps {
 }
 
 /**
- * Cell corner points as a parallelogram (straight vertical sides, slanted
- * 45°/135° top/bottom edges, two rows tall), or a triangle at a direction
- * change (the blunt top corner drops out) - same geometry as
+ * Cell corner points as a parallelogram (straight vertical sides, two
+ * CELL_HEIGHTs tall, diagonal top/bottom edges - the corner-to-corner
+ * diagonal of one CELL_WIDTH x CELL_HEIGHT cell), or a triangle at a
+ * direction change (the blunt top corner drops out) - same geometry as
  * WovenBandDiagram, see there for the derivation.
  */
 function cellPoints(cell: WeaveCell, previousTurn: number | undefined, cx: number, cy: number): string {
-  const xLeft = cx - CELL / 2
-  const xRight = cx + CELL / 2
+  const xLeft = cx - CELL_WIDTH / 2
+  const xRight = cx + CELL_WIDTH / 2
 
   if (cell.effectiveDirection === 0) {
     const yTop = cy - STEP / 2
@@ -27,10 +28,10 @@ function cellPoints(cell: WeaveCell, previousTurn: number | undefined, cx: numbe
   }
 
   const leaningLeft = cell.effectiveDirection > 0
-  const yTopExtreme = cy - STEP
-  const yBottomExtreme = cy + STEP
-  const yTopShoulder = yTopExtreme + CELL
-  const yBottomShoulder = yBottomExtreme - CELL
+  const yTopExtreme = cy - CELL_HEIGHT
+  const yBottomExtreme = cy + CELL_HEIGHT
+  const yTopShoulder = yTopExtreme + CELL_HEIGHT
+  const yBottomShoulder = yBottomExtreme - CELL_HEIGHT
 
   const topLeft = leaningLeft ? yTopShoulder : yTopExtreme
   const topRight = leaningLeft ? yTopExtreme : yTopShoulder
@@ -71,7 +72,7 @@ export function PatternThumbnail({ pattern, palette, weftColorSlotId, className 
   const weaveGrid = computeDisplayWeaveGrid(pattern, minDisplayRows)
   const displayNumRows = weaveGrid.length
 
-  const contentWidth = pattern.numTablets * STEP
+  const contentWidth = pattern.numTablets * STEP_X
   const contentHeight = displayNumRows * STEP
   const rowY = (rowIndex: number) => (displayNumRows - 1 - rowIndex) * STEP
 
@@ -89,8 +90,8 @@ export function PatternThumbnail({ pattern, palette, weftColorSlotId, className 
           row.map((cell) => {
             if (!colorBySlot.has(cell.colorSlotId)) return null
 
-            const cx = cell.tabletIndex * STEP + CELL / 2
-            const cy = rowY(cell.rowIndex) + CELL / 2
+            const cx = cell.tabletIndex * STEP_X + CELL_WIDTH / 2
+            const cy = rowY(cell.rowIndex) + CELL_HEIGHT / 2
             const previousTurn = weaveGrid[cell.rowIndex - 1]?.[cell.tabletIndex]?.turn
             return (
               <polygon
