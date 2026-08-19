@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { CollectionBookmarkButton } from '@/features/library/CollectionBookmarkButton'
 import { PatternThumbnail } from './PatternThumbnail'
 import { countUsedColors } from './render/threadCounts'
+import { computeDifficulty } from './render/difficulty'
+import { difficultyLabel } from './render/difficultyLabel'
 import { useLanguage } from '@/features/i18n/LanguageContext'
 import { ThumbnailCard } from '@/components/ThumbnailCard'
 import { Button } from '@/components/ui/button'
@@ -37,6 +39,7 @@ export function PatternCard({
   const { t } = useLanguage()
   const isOwner = Boolean(currentUsername) && pattern.author?.username === currentUsername
   const colorCount = countUsedColors(pattern)
+  const difficulty = computeDifficulty(pattern)
 
   return (
     <ThumbnailCard
@@ -60,6 +63,9 @@ export function PatternCard({
           </span>
           <span className="rounded bg-background/80 px-1.5 py-0.5 text-xs font-medium text-foreground shadow-sm backdrop-blur">
             {t('patternColorCount', { count: String(colorCount) })}
+          </span>
+          <span className="rounded bg-background/80 px-1.5 py-0.5 text-xs font-medium text-foreground shadow-sm backdrop-blur">
+            {difficultyLabel(t, difficulty)}
           </span>
         </div>
       }

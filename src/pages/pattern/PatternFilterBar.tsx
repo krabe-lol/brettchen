@@ -1,14 +1,17 @@
 import { useLanguage } from '@/features/i18n/LanguageContext'
+import { cn } from '@/lib/utils'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { Toggle } from '@/components/ui/toggle'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { TagInput } from '@/components/TagInput'
-import type { StyleMatchMode, TwistFilter } from './usePatternFilters'
+import type { DifficultyFilter, StyleMatchMode, TwistFilter } from './usePatternFilters'
 
 interface PatternFilterBarProps {
   /** Prefixes the input ids so PatternListPage and MyPatternListPage can both render this on the same page without colliding. */
   idPrefix: string
+  /** "row" (default): filters wrap in a row, for the inline placement. "column": always stacked, one per line - used in the overlay. */
+  layout?: 'row' | 'column'
   minTablets: string
   onMinTabletsChange: (value: string) => void
   maxTablets: string
@@ -22,6 +25,8 @@ interface PatternFilterBarProps {
   onMinColorsChange: (value: string) => void
   maxColors: string
   onMaxColorsChange: (value: string) => void
+  difficultyFilter: DifficultyFilter
+  onDifficultyFilterChange: (value: DifficultyFilter) => void
   twistFilter: TwistFilter
   onTwistFilterChange: (value: TwistFilter) => void
 }
@@ -29,6 +34,7 @@ interface PatternFilterBarProps {
 /** Shared filter controls for PatternListPage and MyPatternListPage: tablet count range, style tags, colors, twist-neutral toggle. */
 export function PatternFilterBar({
   idPrefix,
+  layout = 'row',
   minTablets,
   onMinTabletsChange,
   maxTablets,
@@ -42,13 +48,15 @@ export function PatternFilterBar({
   onMinColorsChange,
   maxColors,
   onMaxColorsChange,
+  difficultyFilter,
+  onDifficultyFilterChange,
   twistFilter,
   onTwistFilterChange,
 }: PatternFilterBarProps) {
   const { t } = useLanguage()
 
   return (
-    <div className="flex flex-wrap items-center gap-8">
+    <div className={cn('flex', layout === 'column' ? 'flex-col items-start gap-4' : 'flex-wrap items-center gap-8')}>
       <ToggleGroup
         type="single"
         spacing="none"
@@ -134,7 +142,18 @@ export function PatternFilterBar({
           className="h-8 w-20 text-xs"
         />
       </div>
-      
+
+      <ToggleGroup
+        type="single"
+        spacing="none"
+        value={difficultyFilter}
+        onValueChange={(value) => value && onDifficultyFilterChange(value as DifficultyFilter)}
+      >
+        <ToggleGroupItem value="all">{t('patternFilterAll')}</ToggleGroupItem>
+        <ToggleGroupItem value="easy">{t('difficultyEasy')}</ToggleGroupItem>
+        <ToggleGroupItem value="medium">{t('difficultyMedium')}</ToggleGroupItem>
+        <ToggleGroupItem value="hard">{t('difficultyHard')}</ToggleGroupItem>
+      </ToggleGroup>
     </div>
   )
 }

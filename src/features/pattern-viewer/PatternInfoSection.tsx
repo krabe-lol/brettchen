@@ -4,6 +4,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { TagInput } from '@/components/TagInput'
+import { difficultyLabel } from './render/difficultyLabel'
+import type { Difficulty } from './render/difficulty'
 
 /** Always dd.mm.yyyy, regardless of UI language. */
 function formatCreatedAt(iso: string): string {
@@ -25,6 +27,8 @@ interface PatternInfoSectionProps {
   createdAt?: string
   /** Computed live from the current (even unsaved) turning sequence, see render/twist.ts. */
   isTwistNeutral: boolean
+  /** Computed live from the current (even unsaved) threading/turning sequence, see render/difficulty.ts. */
+  difficulty: Difficulty
   /** Style tags already used elsewhere, as autocomplete suggestions. */
   styleSuggestions?: string[]
   editable?: boolean
@@ -49,6 +53,7 @@ export function PatternInfoSection({
   remixOf,
   createdAt,
   isTwistNeutral,
+  difficulty,
   styleSuggestions,
   editable = false,
   onTitleChange,
@@ -93,6 +98,11 @@ export function PatternInfoSection({
       <div>
         <span className="block text-xs font-medium text-muted-foreground">{t('infoTwistNeutralLabel')}</span>
         <span>{isTwistNeutral ? t('twistNeutralYes') : t('twistNeutralNo')}</span>
+      </div>
+
+      <div>
+        <span className="block text-xs font-medium text-muted-foreground">{t('infoDifficultyLabel')}</span>
+        <span>{difficultyLabel(t, difficulty)}</span>
       </div>
 
       {remixOf && (

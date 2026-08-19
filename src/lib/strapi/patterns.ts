@@ -28,6 +28,8 @@ export interface StrapiPatternRecord {
   createdAt: string
   /** Set automatically on save (see pattern.ts backend controller): true if turning nets to zero twist for every tablet. */
   isTwistNeutral: boolean
+  /** Set automatically on save (see pattern.ts backend controller and render/difficulty.ts) - only used for filtering, live display recomputes via computeDifficulty instead. */
+  difficulty: 'easy' | 'medium' | 'hard'
   /** 1-based row number where the turning sequence starts repeating (optional), see WovenBandDiagram. */
   repeatFromRow: number | null
   /** Weft color slot (optional) - counts as used even without a threading hole referencing it. */

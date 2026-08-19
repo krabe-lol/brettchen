@@ -55,33 +55,38 @@ export function MyPatternListPage() {
   if (isAuthLoading) return null
   if (!user || !token) return <Navigate to="/login" replace />
 
-  const filterBar = (
-    <PatternFilterBar
-      idPrefix="my-pattern"
-      minTablets={filters.minTablets}
-      onMinTabletsChange={filters.setMinTablets}
-      maxTablets={filters.maxTablets}
-      onMaxTabletsChange={filters.setMaxTablets}
-      styleFilter={filters.styleFilter}
-      onStyleFilterChange={filters.setStyleFilter}
-      styleSuggestions={filters.styleSuggestions}
-      styleMatchMode={filters.styleMatchMode}
-      onStyleMatchModeChange={filters.setStyleMatchMode}
-      minColors={filters.minColors}
-      onMinColorsChange={filters.setMinColors}
-      maxColors={filters.maxColors}
-      onMaxColorsChange={filters.setMaxColors}
-      twistFilter={filters.twistFilter}
-      onTwistFilterChange={filters.setTwistFilter}
-    />
-  )
+  function renderFilterBar(layout: 'row' | 'column') {
+    return (
+      <PatternFilterBar
+        idPrefix="my-pattern"
+        layout={layout}
+        minTablets={filters.minTablets}
+        onMinTabletsChange={filters.setMinTablets}
+        maxTablets={filters.maxTablets}
+        onMaxTabletsChange={filters.setMaxTablets}
+        styleFilter={filters.styleFilter}
+        onStyleFilterChange={filters.setStyleFilter}
+        styleSuggestions={filters.styleSuggestions}
+        styleMatchMode={filters.styleMatchMode}
+        onStyleMatchModeChange={filters.setStyleMatchMode}
+        minColors={filters.minColors}
+        onMinColorsChange={filters.setMinColors}
+        maxColors={filters.maxColors}
+        onMaxColorsChange={filters.setMaxColors}
+        difficultyFilter={filters.difficultyFilter}
+        onDifficultyFilterChange={filters.setDifficultyFilter}
+        twistFilter={filters.twistFilter}
+        onTwistFilterChange={filters.setTwistFilter}
+      />
+    )
+  }
 
   return (
     <div className="py-12">
       <h1 className="text-3xl font-semibold tracking-tight">{t('myPatternListHeading')}</h1>
 
       {/* From 1000px up: filter row directly below the title. Below 1000px: collapsed behind a button+overlay instead. */}
-      <div className="mt-4 hidden min-[1000px]:block">{filterBar}</div>
+      <div className="mt-4 hidden min-[1000px]:block">{renderFilterBar('row')}</div>
       <div className="mt-4 min-[1000px]:hidden">
         <Dialog>
           <DialogTrigger asChild>
@@ -92,7 +97,7 @@ export function MyPatternListPage() {
           </DialogTrigger>
           <DialogContent className="max-w-2xl">
             <DialogTitle className="sr-only">{t('patternFilterHeading')}</DialogTitle>
-            {filterBar}
+            {renderFilterBar('column')}
           </DialogContent>
         </Dialog>
       </div>

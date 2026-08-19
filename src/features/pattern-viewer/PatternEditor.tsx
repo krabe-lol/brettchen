@@ -9,6 +9,7 @@ import { PatternInfoSection } from './PatternInfoSection'
 import { useDisplaySettings, useSaveDisplaySettingsAsDefault } from './DisplaySettingsContext'
 import { applyPatternFile, downloadPatternFile, parsePatternFile, PatternFileError } from './patternFile'
 import { isTwistNeutral } from './render/twist'
+import { computeDifficulty } from './render/difficulty'
 import { usePatternEditor } from './usePatternEditor'
 import { useLanguage } from '@/features/i18n/LanguageContext'
 import { useToast } from '@/features/toast/ToastContext'
@@ -331,6 +332,7 @@ export function PatternEditor({
           remixOf={pattern.remixOf}
           createdAt={pattern.createdAt}
           isTwistNeutral={isTwistNeutral(pattern)}
+          difficulty={computeDifficulty(pattern)}
           styleSuggestions={styleSuggestions}
           editable
           onTitleChange={setTitle}
@@ -441,6 +443,7 @@ export function PatternEditor({
               remixOf={pattern.remixOf}
               createdAt={pattern.createdAt}
               isTwistNeutral={isTwistNeutral(pattern)}
+              difficulty={computeDifficulty(pattern)}
               styleSuggestions={styleSuggestions}
               editable
               onTitleChange={setTitle}

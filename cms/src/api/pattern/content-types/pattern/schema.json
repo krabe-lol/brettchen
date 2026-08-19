@@ -71,6 +71,12 @@
       "required": true,
       "default": false
     },
+    "difficulty": {
+      "type": "enumeration",
+      "enum": ["easy", "medium", "hard"],
+      "required": true,
+      "default": "easy"
+    },
     "repeatFromRow": {
       "type": "integer",
       "min": 1

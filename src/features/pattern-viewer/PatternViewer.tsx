@@ -8,6 +8,7 @@ import { useDisplaySettings, useSaveDisplaySettingsAsDefault } from './DisplaySe
 import { usePatternHighlightSettings } from './usePatternHighlightSettings'
 import { downloadPatternFile } from './patternFile'
 import { isTwistNeutral } from './render/twist'
+import { computeDifficulty } from './render/difficulty'
 import { useDisplayState } from './useDisplayState'
 import { useLanguage } from '@/features/i18n/LanguageContext'
 import { Button } from '@/components/ui/button'
@@ -129,6 +130,7 @@ export function PatternViewer({
           remixOf={pattern.remixOf}
           createdAt={pattern.createdAt}
           isTwistNeutral={isTwistNeutral(pattern)}
+          difficulty={computeDifficulty(pattern)}
         />
       </div>
 
@@ -187,6 +189,7 @@ export function PatternViewer({
               remixOf={pattern.remixOf}
               createdAt={pattern.createdAt}
               isTwistNeutral={isTwistNeutral(pattern)}
+              difficulty={computeDifficulty(pattern)}
             />
           </div>
         </div>

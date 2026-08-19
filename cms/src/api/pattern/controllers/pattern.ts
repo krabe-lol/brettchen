@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { factories } from '@strapi/strapi';
+import { computeDifficulty, hasDirectionChange } from '../../../utils/difficulty';
 
 /**
  * `/patterns/mine` and `/patterns/:slug` (findOne, because of draft
@@ -15,20 +16,6 @@ function noStore(ctx: any) {
 /** Purely random string, same as randomSlug() in the frontend (src/lib/strapi/patterns.ts). */
 function randomSlug(): string {
   return randomUUID().replace(/-/g, '').slice(0, 12);
-}
-
-/**
- * Whether a tablet's turn direction ever flips across the rows - same
- * comparison as hasDirectionChange in the frontend (render/twist.ts).
- */
-function hasDirectionChange(turningSequence: number[][], tabletIndex: number): boolean {
-  let previousSign: number | undefined;
-  for (const row of turningSequence) {
-    const sign = Math.sign(row[tabletIndex] ?? 0);
-    if (previousSign !== undefined && sign !== previousSign) return true;
-    previousSign = sign;
-  }
-  return false;
 }
 
 /**
@@ -138,6 +125,7 @@ export default factories.createCoreController('api::pattern.pattern', ({ strapi 
         ...data,
         author: ctx.state.user.id,
         isTwistNeutral: computeIsTwistNeutral(data.turningSequence, data.twistExemptTablets),
+        difficulty: computeDifficulty(data.threading, data.turningSequence),
       },
       populate: ctx.query.populate as never,
     });
@@ -245,6 +233,7 @@ export default factories.createCoreController('api::pattern.pattern', ({ strapi 
 
     const { author, ...data } = ctx.request.body?.data ?? {};
     data.isTwistNeutral = computeIsTwistNeutral(data.turningSequence, data.twistExemptTablets);
+    data.difficulty = computeDifficulty(data.threading, data.turningSequence);
 
     const breakRemixLink =
       Boolean((existing as any).remixOf) &&
@@ -307,6 +296,10 @@ export default factories.createCoreController('api::pattern.pattern', ({ strapi 
         isTwistNeutral: computeIsTwistNeutral(
           original.turningSequence as number[][] | undefined,
           original.twistExemptTablets as number[] | undefined,
+        ),
+        difficulty: computeDifficulty(
+          original.threading as any[] | undefined,
+          original.turningSequence as number[][] | undefined,
         ),
         defaultPalette: (original.defaultPalette ?? []).map(({ id, ...slot }: any) => slot),
         style: original.style,

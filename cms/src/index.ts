@@ -1,4 +1,5 @@
 import type { Core } from '@strapi/strapi';
+import { computeDifficulty } from './utils/difficulty';
 
 /**
  * Permissions logged-in users need out of the box to create and see their
@@ -143,6 +144,26 @@ async function renameDefaultCollections(strapi: Core.Strapi) {
   }
 }
 
+/**
+ * One-time backfill for patterns saved before the `difficulty` field
+ * existed (it's set automatically on every create/update from then on,
+ * see pattern.ts controller) - idempotent, becomes a no-op once every row
+ * has a value. Uses the raw query engine (not the document service) since
+ * this is just a column backfill, not a new draft/published version.
+ */
+async function backfillPatternDifficulty(strapi: Core.Strapi) {
+  const patterns = await strapi.db.query('api::pattern.pattern').findMany({
+    where: { difficulty: null },
+    select: ['id', 'threading', 'turningSequence'],
+  });
+  for (const pattern of patterns as any[]) {
+    await strapi.db.query('api::pattern.pattern').update({
+      where: { id: pattern.id },
+      data: { difficulty: computeDifficulty(pattern.threading, pattern.turningSequence) },
+    });
+  }
+}
+
 export default {
   /**
    * An asynchronous register function that runs before
@@ -165,5 +186,6 @@ export default {
     await ensureResetPasswordUrl(strapi);
     await ensureResetPasswordEmailSender(strapi);
     await renameDefaultCollections(strapi);
+    await backfillPatternDifficulty(strapi);
   },
 };

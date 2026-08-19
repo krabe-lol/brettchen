@@ -1,11 +1,13 @@
 import { useMemo, useState } from 'react'
 import { collectStyleTags, type StrapiPatternRecord } from '@/lib/strapi/patterns'
 import { countUsedColors } from '@/features/pattern-viewer/render/threadCounts'
+import type { Difficulty } from '@/features/pattern-viewer/render/difficulty'
 
 export type TwistFilter = 'all' | 'neutral' | 'not-neutral'
 export type StyleMatchMode = 'and' | 'or'
+export type DifficultyFilter = 'all' | Difficulty
 
-/** Shared tablet-count/style-tag/color-count/twist filtering for PatternListPage and MyPatternListPage. */
+/** Shared tablet-count/style-tag/color-count/difficulty/twist filtering for PatternListPage and MyPatternListPage. */
 export function usePatternFilters(patterns: StrapiPatternRecord[], initialStyleFilter: string[] = []) {
   const [twistFilter, setTwistFilter] = useState<TwistFilter>('all')
   const [minTablets, setMinTablets] = useState('')
@@ -14,6 +16,7 @@ export function usePatternFilters(patterns: StrapiPatternRecord[], initialStyleF
   const [styleMatchMode, setStyleMatchMode] = useState<StyleMatchMode>('or')
   const [minColors, setMinColors] = useState('')
   const [maxColors, setMaxColors] = useState('')
+  const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>('all')
 
   const styleSuggestions = useMemo(() => collectStyleTags(patterns), [patterns])
 
@@ -32,6 +35,7 @@ export function usePatternFilters(patterns: StrapiPatternRecord[], initialStyleF
     }
     if (minColors !== '' && countUsedColors(pattern) < Number(minColors)) return false
     if (maxColors !== '' && countUsedColors(pattern) > Number(maxColors)) return false
+    if (difficultyFilter !== 'all' && pattern.difficulty !== difficultyFilter) return false
     return true
   })
 
@@ -51,6 +55,8 @@ export function usePatternFilters(patterns: StrapiPatternRecord[], initialStyleF
     setMinColors,
     maxColors,
     setMaxColors,
+    difficultyFilter,
+    setDifficultyFilter,
     filteredPatterns,
   }
 }
