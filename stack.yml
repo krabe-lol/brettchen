@@ -15,8 +15,8 @@ services:
       retries: 10
 
   strapi:
-    build:
-      context: ./cms
+    image: git.krabe.lol/krabe-lol/brettchen-cms:latest
+    pull_policy: always
     restart: unless-stopped
     depends_on:
       postgres:
@@ -56,13 +56,11 @@ services:
       - "1337:1337"
 
   frontend:
-    build:
-      context: .
-      args:
-        # Vite-Build-Time-Variable - siehe Kommentar im Dockerfile. Muss die
-        # von außen erreichbare Strapi-URL sein (nicht "strapi:1337", das
-        # läuft nur im internen Compose-Netzwerk, nicht im Browser).
-        VITE_STRAPI_URL: ${VITE_STRAPI_URL}
+    # VITE_STRAPI_URL is baked in at build time by the Gitea Action (see
+    # .gitea/workflows/build.yml), not at deploy time - Vite compiles it
+    # straight into the JS bundle, so it can't be an env var here.
+    image: git.krabe.lol/krabe-lol/brettchen:latest
+    pull_policy: always
     restart: unless-stopped
     depends_on:
       - strapi
