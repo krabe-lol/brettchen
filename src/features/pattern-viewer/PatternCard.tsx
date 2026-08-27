@@ -31,7 +31,8 @@ interface PatternCardProps {
    * just the selected ones - keeps the grid focused on the bulk toolbar.
    */
   selected?: boolean
-  onToggleSelected?: () => void
+  /** `shiftKey` is true for a shift-click - see usePatternSelection.toggle for the range-select behavior that triggers. */
+  onToggleSelected?: (shiftKey: boolean) => void
   selectionActive?: boolean
   className?: string
 }
@@ -61,12 +62,23 @@ export function PatternCard({
       selected={selected}
       topLeftAction={
         onToggleSelected && (
-          <Checkbox
-            checked={selected}
-            onCheckedChange={() => onToggleSelected()}
-            className="bg-background/80 shadow-sm backdrop-blur data-[state=checked]:bg-primary/80"
-            aria-label={t('patternSelectLabel', { title: pattern.title })}
-          />
+          // -m-2/p-2 enlarge the click target well beyond the checkbox's own
+          // size-4 without growing it visually - the negative margin cancels
+          // the padding out again for layout/positioning purposes. The click
+          // handler lives here (not on the Checkbox's onCheckedChange) so it
+          // catches clicks anywhere in the padded area AND gets the native
+          // event, which onCheckedChange doesn't provide - needed for
+          // shiftKey (see usePatternSelection.toggle's range-select).
+          <div
+            className="-m-2 flex cursor-pointer items-center justify-center p-2"
+            onClick={(e) => onToggleSelected(e.shiftKey)}
+          >
+            <Checkbox
+              checked={selected}
+              className="bg-background/80 shadow-sm backdrop-blur data-[state=checked]:bg-primary/80"
+              aria-label={t('patternSelectLabel', { title: pattern.title })}
+            />
+          </div>
         )
       }
       thumbnail={
