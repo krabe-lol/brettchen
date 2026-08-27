@@ -19,7 +19,7 @@ jobs:
         run: |
           cd /tmp
           rm -rf brettchen || true
-          git clone http://server:3000/krabe-lol/brettchen.git
+          git clone http://git.krabe.lol/krabe-lol/brettchen.git
           cd brettchen
           git checkout dev
 
