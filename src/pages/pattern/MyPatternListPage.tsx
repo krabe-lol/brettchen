@@ -10,10 +10,11 @@ import { PatternFilterBar } from './PatternFilterBar'
 import { usePatternFilters } from './usePatternFilters'
 import { usePatternSelection } from './usePatternSelection'
 import { PatternBulkActionsBar } from './PatternBulkActionsBar'
-import { deletePattern, fetchMyPatterns, toPattern, type StrapiPatternRecord } from '@/lib/strapi/patterns'
+import { deletePattern, fetchMyPatterns, toPattern, updatePattern, type StrapiPatternRecord } from '@/lib/strapi/patterns'
 import { fetchMyCollections, type StrapiCollectionRecord } from '@/lib/strapi/collections'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { errorMessage } from '@/lib/utils'
 
 /** Same as PatternListPage ("all patterns"), but only the user's own patterns (including unpublished drafts). */
 export function MyPatternListPage() {
@@ -25,6 +26,7 @@ export function MyPatternListPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [isBulkDeleting, setIsBulkDeleting] = useState(false)
+  const [visibilityAction, setVisibilityAction] = useState<'draft' | 'published' | null>(null)
   const filters = usePatternFilters(patterns)
   const selection = usePatternSelection()
 
@@ -41,7 +43,7 @@ export function MyPatternListPage() {
     setLoadError(null)
     fetchMyPatterns(token)
       .then(setPatterns)
-      .catch((err) => setLoadError(err instanceof Error ? err.message : t('profileLoadError')))
+      .catch((err) => setLoadError(errorMessage(err, t('profileLoadError'))))
       .finally(() => setIsLoading(false))
   }, [token, t])
 
@@ -71,9 +73,23 @@ export function MyPatternListPage() {
       selection.clear()
       loadPatterns()
     } catch (err) {
-      toast(err instanceof Error ? err.message : t('patternDeleteError'), { variant: 'error' })
+      toast(errorMessage(err, t('patternDeleteError')), { variant: 'error' })
     } finally {
       setIsBulkDeleting(false)
+    }
+  }
+
+  async function handleSetVisibility(status: 'draft' | 'published') {
+    if (!token) return
+    setVisibilityAction(status)
+    try {
+      await Promise.all(selectedRecords.map((record) => updatePattern(record.documentId, toPattern(record), status, token)))
+      selection.clear()
+      loadPatterns()
+    } catch (err) {
+      toast(errorMessage(err, t('patternSaveError')), { variant: 'error' })
+    } finally {
+      setVisibilityAction(null)
     }
   }
 
@@ -142,6 +158,9 @@ export function MyPatternListPage() {
             onCollectionsChanged={loadCollections}
             onDeleteAll={handleDeleteSelected}
             isDeleting={isBulkDeleting}
+            onPublishAll={() => handleSetVisibility('published')}
+            onSetDraftAll={() => handleSetVisibility('draft')}
+            visibilityAction={visibilityAction}
           />
         </div>
       )}
@@ -164,7 +183,13 @@ export function MyPatternListPage() {
               noStyleLabel={t('profileNoStyle')}
               currentUsername={user.username}
               selected={selection.selected.has(pattern.documentId)}
-              onToggleSelected={() => selection.toggle(pattern.documentId)}
+              onToggleSelected={(shiftKey) =>
+                selection.toggle(
+                  pattern.documentId,
+                  filters.filteredPatterns.map((p) => p.documentId),
+                  shiftKey,
+                )
+              }
               selectionActive={selection.isActive}
             />
           ))}

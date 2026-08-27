@@ -1,4 +1,4 @@
-import { CheckCheck, Download, Trash, X } from 'lucide-react'
+import { CheckCheck, Download, Globe, Lock, Trash, X } from 'lucide-react'
 import { BulkAddToCollectionButton } from './BulkAddToCollectionButton'
 import { useLanguage } from '@/features/i18n/LanguageContext'
 import { Button } from '@/components/ui/button'
@@ -18,6 +18,11 @@ interface PatternBulkActionsBarProps {
   /** Omitted entirely on pages where bulk delete doesn't make sense (patterns not owned by the viewer), see MyPatternListPage vs. PatternListPage. */
   onDeleteAll?: () => void
   isDeleting?: boolean
+  /** Publish/draft toggle - same ownership restriction as onDeleteAll, so always set together (MyPatternListPage only). */
+  onPublishAll?: () => void
+  onSetDraftAll?: () => void
+  /** Which visibility change (if any) is in flight - disables both buttons and relabels whichever was clicked. */
+  visibilityAction?: 'draft' | 'published' | null
 }
 
 /** Shown above the pattern grid once 1+ cards are checked (see usePatternSelection/PatternCard). */
@@ -32,6 +37,9 @@ export function PatternBulkActionsBar({
   onCollectionsChanged,
   onDeleteAll,
   isDeleting,
+  onPublishAll,
+  onSetDraftAll,
+  visibilityAction,
 }: PatternBulkActionsBarProps) {
   const { t } = useLanguage()
 
@@ -54,6 +62,18 @@ export function PatternBulkActionsBar({
             token={token}
             onChanged={onCollectionsChanged}
           />
+        )}
+        {onPublishAll && onSetDraftAll && (
+          <>
+            <Button type="button" variant="outline" onClick={onPublishAll} disabled={Boolean(visibilityAction)}>
+              <Globe />
+              {visibilityAction === 'published' ? t('patternBulkChangingVisibility') : t('patternBulkPublishAll')}
+            </Button>
+            <Button type="button" variant="outline" onClick={onSetDraftAll} disabled={Boolean(visibilityAction)}>
+              <Lock />
+              {visibilityAction === 'draft' ? t('patternBulkChangingVisibility') : t('patternBulkSetDraftAll')}
+            </Button>
+          </>
         )}
         {onDeleteAll && (
           <Button type="button" variant="destructive" onClick={onDeleteAll} disabled={isDeleting}>
