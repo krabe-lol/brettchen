@@ -15,6 +15,8 @@ interface ThumbnailCardProps {
   titleBadges?: ReactNode
   /** Overlay button top-right on the thumbnail - "add to collection" for patterns, "subscribe" for collections. */
   cornerAction?: ReactNode
+  /** Overlay control top-left on the thumbnail - the bulk-select checkbox on pattern cards. */
+  topLeftAction?: ReactNode
   /** Overlay badge bottom-right on the thumbnail - e.g. the tablet count for patterns. */
   thumbnailBadge?: ReactNode
   /** Creator/owner username, right below the title, links to their public profile. */
@@ -23,6 +25,8 @@ interface ThumbnailCardProps {
   subtitle?: ReactNode
   /** Extra line below that (e.g. a collection's pattern count). */
   footer?: ReactNode
+  /** Marked for a bulk action (see PatternCard/usePatternSelection) - thicker primary-colored border and a tinted background instead of the default look. */
+  selected?: boolean
   className?: string
 }
 
@@ -38,18 +42,21 @@ export function ThumbnailCard({
   isPrivate,
   titleBadges,
   cornerAction,
+  topLeftAction,
   thumbnailBadge,
   ownerUsername,
   subtitle,
   footer,
+  selected,
   className,
 }: ThumbnailCardProps) {
   const { t } = useLanguage()
 
   return (
-    <Card className={cn('gap-0 overflow-hidden py-0', className)}>
+    <Card className={cn('gap-0 overflow-hidden py-0', selected && 'border-2 border-primary bg-primary/10', className)}>
       <div className="relative">
         <Link to={href}>{thumbnail}</Link>
+        {topLeftAction && <div className="absolute top-2 left-2">{topLeftAction}</div>}
         {cornerAction && <div className="absolute top-2 right-2">{cornerAction}</div>}
         {thumbnailBadge && <div className="absolute right-2 bottom-2">{thumbnailBadge}</div>}
       </div>

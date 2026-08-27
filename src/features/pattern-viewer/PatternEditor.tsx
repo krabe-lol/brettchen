@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ChangeEvent } from 'react'
+import { useEffect, useState } from 'react'
 import { useBlocker } from 'react-router-dom'
 import { CountControl } from './CountControl'
 import { DisplaySettingsCard } from './DisplaySettingsCard'
@@ -7,12 +7,11 @@ import { PatternColorEditorCard } from './PatternColorEditorCard'
 import { PatternDiagrams } from './PatternDiagrams'
 import { PatternInfoSection } from './PatternInfoSection'
 import { useDisplaySettings, useSaveDisplaySettingsAsDefault } from './DisplaySettingsContext'
-import { applyPatternFile, downloadPatternFile, parsePatternFile, PatternFileError } from './patternFile'
+import { downloadPatternFile } from './patternFile'
 import { isTwistNeutral } from './render/twist'
 import { computeDifficulty } from './render/difficulty'
 import { usePatternEditor } from './usePatternEditor'
 import { useLanguage } from '@/features/i18n/LanguageContext'
-import { useToast } from '@/features/toast/ToastContext'
 import { collectStyleTags, fetchPublishedPatterns } from '@/lib/strapi/patterns'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -20,7 +19,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import type { Pattern } from './types'
-import { Download, LoaderCircle, Trash, Upload } from 'lucide-react'
+import { Download, LoaderCircle, Trash } from 'lucide-react'
 
 /**
  * Removes palette entries no hole references anymore - only applied on
@@ -73,10 +72,8 @@ export function PatternEditor({
   moderationStatus,
 }: PatternEditorProps) {
   const { t } = useLanguage()
-  const { toast } = useToast()
   const {
     pattern,
-    loadPattern,
     numTablets,
     numRows,
     minTablets,
@@ -109,7 +106,6 @@ export function PatternEditor({
     setRepeatFromRow,
     setWeftColorSlotId,
   } = usePatternEditor(initialPattern)
-  const importInputRef = useRef<HTMLInputElement>(null)
 
   const [activeColorSlotId, setActiveColorSlotId] = useState<string | null>(null)
   const effectiveActiveSlotId = activeColorSlotId ?? palette[0]?.slotId ?? null
@@ -161,24 +157,6 @@ export function PatternEditor({
     downloadPatternFile(pattern)
   }
 
-  function handleImportClick() {
-    if (window.confirm(t('editorImportConfirm'))) {
-      importInputRef.current?.click()
-    }
-  }
-
-  async function handleImportFile(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    e.target.value = ''
-    if (!file) return
-    try {
-      const parsed = parsePatternFile(await file.text())
-      loadPattern(applyPatternFile(pattern, parsed))
-      toast(t('toastPatternImported'))
-    } catch (err) {
-      toast(t(err instanceof PatternFileError ? err.messageKey : 'patternFileInvalidFormat'), { variant: 'error' })
-    }
-  }
 
   /**
    * Removes unused colors locally too (so `pattern` matches the saved
@@ -260,23 +238,6 @@ export function PatternEditor({
           )}
         </h1>
         <div className="flex w-full flex-wrap items-center gap-4 lg:w-auto">
-          <input
-            ref={importInputRef}
-            type="file"
-            accept="application/json,.json"
-            className="hidden"
-            onChange={handleImportFile}
-          />
-          <Button
-            type="button"
-            size="icon"
-            variant="outline"
-            title={t('editorImport')}
-            aria-label={t('editorImport')}
-            onClick={handleImportClick}
-          >
-            <Upload />
-          </Button>
           <Button
             type="button"
             size="icon"

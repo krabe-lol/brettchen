@@ -1,3 +1,4 @@
+import { strFromU8, strToU8, unzipSync, zipSync } from 'fflate'
 import { hasDirectionChange } from './render/twist'
 import type { TranslationKey } from '@/features/i18n/translations'
 import type { PaletteSlot, Pattern, TabletThreading, TurnValue } from './types'
@@ -9,7 +10,7 @@ const FORMAT_VERSION = 1
  * colors, ...), not server/instance metadata like id, author or remix
  * lineage - those don't make sense outside the app they came from.
  */
-interface PatternFile {
+export interface PatternFile {
   formatVersion: number
   title: string
   holesPerTablet: number
@@ -61,7 +62,33 @@ export function downloadPatternFile(pattern: Pattern) {
   URL.revokeObjectURL(url)
 }
 
-/** Thrown by parsePatternFile; `messageKey` is a translation key, not user-facing text directly. */
+/**
+ * Downloads several patterns as a single .zip file, one .json entry per
+ * pattern (each in the exact format downloadPatternFile/parsePatternFile
+ * already use) - see parsePatternFileBundle for the matching bulk-import
+ * side.
+ */
+export function downloadPatternFileBundle(patterns: Pattern[]) {
+  const usedNames = new Set<string>()
+  const entries: Record<string, Uint8Array> = {}
+  for (const pattern of patterns) {
+    const base = toFilenameSlug(pattern.title)
+    let name = `${base}.json`
+    for (let i = 2; usedNames.has(name); i++) name = `${base}-${i}.json`
+    usedNames.add(name)
+    entries[name] = strToU8(JSON.stringify(toPatternFile(pattern), null, 2))
+  }
+
+  const blob = new Blob([zipSync(entries)], { type: 'application/zip' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `muster-export-${patterns.length}.zip`
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
+/** Thrown by parseAnyPatternFile; `messageKey` is a translation key, not user-facing text directly. */
 export class PatternFileError extends Error {
   readonly messageKey: TranslationKey
 
@@ -82,14 +109,8 @@ function isTabletThreading(value: unknown, holesPerTablet: number): value is Tab
   )
 }
 
-/** Parses and validates a previously exported pattern file. Throws PatternFileError if the file doesn't look like a pattern export. */
-export function parsePatternFile(text: string): PatternFile {
-  let raw: unknown
-  try {
-    raw = JSON.parse(text)
-  } catch {
-    throw new PatternFileError('patternFileInvalidJson')
-  }
+/** Validates a single already-JSON-parsed pattern entry - shared by both branches of parseAnyPatternFile. */
+function parsePatternFileEntry(raw: unknown): PatternFile {
   if (!raw || typeof raw !== 'object') throw new PatternFileError('patternFileInvalidFormat')
   const data = raw as Record<string, unknown>
 
@@ -121,24 +142,75 @@ export function parsePatternFile(text: string): PatternFile {
   }
 }
 
-/** Applies an imported file's content onto an existing pattern, keeping id/author/remix lineage etc. */
-export function applyPatternFile(base: Pattern, file: PatternFile): Pattern {
+/**
+ * Parses and validates an imported pattern file, auto-detecting the
+ * format: a .zip bundle (see downloadPatternFileBundle, one .json entry
+ * per pattern) or a single plain .json pattern file (see
+ * downloadPatternFile) - either way, always returns an array (one entry
+ * for a single file). Tries unzipping first; anything that isn't a
+ * readable zip falls back to being parsed as one plain JSON pattern.
+ * Throws PatternFileError if neither works, or if a genuine zip has no
+ * .json entries, or if ANY entry doesn't look like a pattern -
+ * all-or-nothing, so a partly-broken file never silently imports half
+ * its patterns.
+ */
+export function parseAnyPatternFile(data: Uint8Array): PatternFile[] {
+  let zipEntries: Record<string, Uint8Array> | null
+  try {
+    zipEntries = unzipSync(data)
+  } catch {
+    zipEntries = null
+  }
+
+  if (zipEntries) {
+    const jsonEntries = Object.entries(zipEntries).filter(([name]) => name.toLowerCase().endsWith('.json'))
+    if (jsonEntries.length === 0) throw new PatternFileError('patternFileInvalidFormat')
+    return jsonEntries.map(([, bytes]) => {
+      let raw: unknown
+      try {
+        raw = JSON.parse(strFromU8(bytes))
+      } catch {
+        throw new PatternFileError('patternFileInvalidJson')
+      }
+      return parsePatternFileEntry(raw)
+    })
+  }
+
+  let raw: unknown
+  try {
+    raw = JSON.parse(strFromU8(data))
+  } catch {
+    throw new PatternFileError('patternFileInvalidJson')
+  }
+  return [parsePatternFileEntry(raw)]
+}
+
+/**
+ * Builds a brand-new pattern from an imported file (bulk import - unlike
+ * applyPatternFile, there's no existing pattern to merge onto). `id`/`slug`
+ * are placeholders: createPattern (see lib/strapi/patterns.ts) never sends
+ * them, Strapi assigns its own.
+ */
+export function patternFromFile(file: PatternFile, createdBy: string): Pattern {
   return {
-    ...base,
-    title: file.title || base.title,
-    holesPerTablet: file.holesPerTablet,
+    id: '',
+    slug: '',
+    title: file.title || 'Muster',
+    summary: '',
     numTablets: file.threading.length,
+    holesPerTablet: file.holesPerTablet,
     numRows: file.turningSequence.length,
     threading: file.threading,
     turningSequence: file.turningSequence,
     defaultPalette: file.defaultPalette,
+    defaultNomenclatureId: null,
+    createdBy,
     style: file.style,
     notes: file.notes,
     sourceUrl: file.sourceUrl,
+    remixOf: null,
     repeatFromRow: file.repeatFromRow,
     weftColorSlotId: file.weftColorSlotId,
-    // Re-validated against the imported turningSequence, same rule as toggling exemption by hand -
-    // an imported index only carries over if that tablet still hasn't changed direction in the new data.
     twistExemptTablets: file.twistExemptTablets.filter(
       (t) => t >= 0 && t < file.threading.length && !hasDirectionChange(file.turningSequence, t),
     ),

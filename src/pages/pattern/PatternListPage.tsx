@@ -4,9 +4,12 @@ import { Filter } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthContext'
 import { useLanguage } from '@/features/i18n/LanguageContext'
 import { PatternCard } from '@/features/pattern-viewer/PatternCard'
+import { downloadPatternFileBundle } from '@/features/pattern-viewer/patternFile'
 import { PatternFilterBar } from './PatternFilterBar'
 import { usePatternFilters } from './usePatternFilters'
-import { fetchPublishedPatterns, type StrapiPatternRecord } from '@/lib/strapi/patterns'
+import { usePatternSelection } from './usePatternSelection'
+import { PatternBulkActionsBar } from './PatternBulkActionsBar'
+import { fetchPublishedPatterns, toPattern, type StrapiPatternRecord } from '@/lib/strapi/patterns'
 import { fetchMyCollections, type StrapiCollectionRecord } from '@/lib/strapi/collections'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
@@ -21,6 +24,7 @@ export function PatternListPage() {
   const [searchParams] = useSearchParams()
   const initialStyle = searchParams.get('style')
   const filters = usePatternFilters(patterns, initialStyle ? [initialStyle] : [])
+  const selection = usePatternSelection()
 
   const loadCollections = useCallback(() => {
     if (!token) return
@@ -51,6 +55,11 @@ export function PatternListPage() {
   useEffect(() => {
     loadCollections()
   }, [loadCollections])
+
+  function handleExportSelected() {
+    const selectedRecords = patterns.filter((pattern) => selection.selected.has(pattern.documentId))
+    downloadPatternFileBundle(selectedRecords.map(toPattern))
+  }
 
   function renderFilterBar(layout: 'row' | 'column') {
     return (
@@ -99,6 +108,21 @@ export function PatternListPage() {
         </Dialog>
       </div>
 
+      {selection.isActive && (
+        <div className="mt-4">
+          <PatternBulkActionsBar
+            count={selection.selected.size}
+            onClearSelection={selection.clear}
+            onSelectAll={() => selection.selectAll(filters.filteredPatterns.map((pattern) => pattern.documentId))}
+            onExportAll={handleExportSelected}
+            collections={user ? collections : undefined}
+            patternIds={[...selection.selected]}
+            token={token}
+            onCollectionsChanged={loadCollections}
+          />
+        </div>
+      )}
+
       {isLoading ? (
         <p className="mt-4 text-muted-foreground">{t('profileLoading')}</p>
       ) : loadError ? (
@@ -116,6 +140,9 @@ export function PatternListPage() {
               onCollectionsChanged={loadCollections}
               noStyleLabel={t('profileNoStyle')}
               currentUsername={user?.username}
+              selected={selection.selected.has(pattern.documentId)}
+              onToggleSelected={() => selection.toggle(pattern.documentId)}
+              selectionActive={selection.isActive}
             />
           ))}
         </div>

@@ -7,6 +7,7 @@ import { LanguageSwitcher } from '@/features/i18n/LanguageSwitcher'
 import { useTheme } from '@/features/theme/ThemeContext'
 import { ThemeToggle } from '@/features/theme/ThemeToggle'
 import { updateUserPreferences } from '@/lib/strapi/auth'
+import { ImportPatternsMenuItem, useImportPatterns } from '@/features/pattern-viewer/ImportPatternsMenuItem'
 import { Button } from '@/components/ui/button'
 import { SearchBar } from './SearchBar'
 import {
@@ -24,6 +25,19 @@ export function Header() {
   const { language, setLanguage, t } = useLanguage()
   const { theme, setTheme } = useTheme()
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  /**
+   * Called unconditionally (rules of hooks) even when logged out - the
+   * import menu item itself only renders while logged in. Its dialog/file
+   * input render below, OUTSIDE the user-menu's DropdownMenuContent:
+   * Radix unmounts that content the instant the menu closes (which
+   * happens right when the item is clicked), so anything stateful inside
+   * it - the file input, the preview dialog - would never get a chance
+   * to do anything.
+   */
+  const { openPicker: openImportPicker, dialogAndInput: importDialogAndInput } = useImportPatterns(
+    token ?? '',
+    user?.username ?? '',
+  )
 
   function handleSelectLanguage(next: Language) {
     setLanguage(next)
@@ -156,6 +170,7 @@ export function Header() {
                 <DropdownMenuItem asChild>
                   <Link to="/meine-muster">{t('myPatternListHeading')}</Link>
                 </DropdownMenuItem>
+                {token && <ImportPatternsMenuItem onSelect={openImportPicker} />}
                 <DropdownMenuItem asChild>
                   <Link to="/meine-sammlungen">{t('myCollectionListHeading')}</Link>
                 </DropdownMenuItem>
@@ -197,6 +212,8 @@ export function Header() {
           )}
         </div>
       )}
+
+      {token && importDialogAndInput}
     </header>
   )
 }

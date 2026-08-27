@@ -8,6 +8,7 @@ import { difficultyLabel } from './render/difficultyLabel'
 import { useLanguage } from '@/features/i18n/LanguageContext'
 import { ThumbnailCard } from '@/components/ThumbnailCard'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import type { StrapiCollectionRecord } from '@/lib/strapi/collections'
 import type { StrapiPatternRecord } from '@/lib/strapi/patterns'
 
@@ -23,6 +24,15 @@ interface PatternCardProps {
   noStyleLabel: string
   /** Logged-in user; if it matches the pattern's creator, shows an edit icon on the thumbnail. */
   currentUsername?: string
+  /**
+   * Bulk-selection checkbox top-left (see usePatternSelection) - omitted
+   * entirely unless the calling page opted into it. While any card is
+   * selected, every card's own corner actions (edit/bookmark) hide, not
+   * just the selected ones - keeps the grid focused on the bulk toolbar.
+   */
+  selected?: boolean
+  onToggleSelected?: () => void
+  selectionActive?: boolean
   className?: string
 }
 
@@ -34,6 +44,9 @@ export function PatternCard({
   onCollectionsChanged,
   noStyleLabel,
   currentUsername,
+  selected,
+  onToggleSelected,
+  selectionActive,
   className,
 }: PatternCardProps) {
   const { t } = useLanguage()
@@ -45,6 +58,17 @@ export function PatternCard({
     <ThumbnailCard
       href={`/pattern/${pattern.slug}`}
       className={className}
+      selected={selected}
+      topLeftAction={
+        onToggleSelected && (
+          <Checkbox
+            checked={selected}
+            onCheckedChange={() => onToggleSelected()}
+            className="bg-background/80 shadow-sm backdrop-blur data-[state=checked]:bg-primary/80"
+            aria-label={t('patternSelectLabel', { title: pattern.title })}
+          />
+        )
+      }
       thumbnail={
         <PatternThumbnail
           pattern={pattern}
@@ -70,6 +94,7 @@ export function PatternCard({
         </div>
       }
       cornerAction={
+        !selectionActive &&
         (isOwner || (collections && token && onCollectionsChanged)) && (
           <div className="flex gap-1">
             {isOwner && (

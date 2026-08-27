@@ -35,7 +35,7 @@ export function usePatternEditor(initialPattern: Pattern) {
   const { language } = useLanguage()
   const [threading, setThreading] = useState<TabletThreading[]>(initialPattern.threading)
   const [turningSequence, setTurningSequence] = useState<number[][]>(initialPattern.turningSequence)
-  const [holesPerTablet, setHolesPerTablet] = useState(initialPattern.holesPerTablet)
+  const [holesPerTablet] = useState(initialPattern.holesPerTablet)
   const [palette, setPalette] = useState<PaletteSlot[]>(initialPattern.defaultPalette)
   const [title, setTitle] = useState(initialPattern.title)
   const [style, setStyle] = useState<string[]>(initialPattern.style)
@@ -259,25 +259,6 @@ export function usePatternEditor(initialPattern: Pattern) {
     setWeftColorSlotId((prev) => (prev === slotId ? null : prev))
   }
 
-  /**
-   * Replaces the entire editable content with an imported pattern (used by
-   * the export/import feature) - unlike the mutators above, this is a
-   * deliberate full overwrite of the current draft.
-   */
-  function loadPattern(source: Pattern) {
-    setThreading(source.threading)
-    setTurningSequence(source.turningSequence)
-    setHolesPerTablet(source.holesPerTablet)
-    setPalette(source.defaultPalette)
-    setTitle(source.title)
-    setStyle(source.style)
-    setNotes(source.notes)
-    setSourceUrl(source.sourceUrl)
-    setRepeatFromRow(source.repeatFromRow)
-    setWeftColorSlotId(source.weftColorSlotId)
-    setTwistExempt(source.threading.map((_, i) => source.twistExemptTablets.includes(i)))
-  }
-
   const twistExemptTablets = twistExempt.flatMap((exempt, i) => (exempt ? [i] : []))
 
   const pattern: Pattern = {
@@ -299,7 +280,6 @@ export function usePatternEditor(initialPattern: Pattern) {
 
   return {
     pattern,
-    loadPattern,
     numTablets,
     numRows,
     minTablets: MIN_TABLETS,

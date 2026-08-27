@@ -3,10 +3,14 @@ import { Navigate } from 'react-router-dom'
 import { Filter } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthContext'
 import { useLanguage } from '@/features/i18n/LanguageContext'
+import { useToast } from '@/features/toast/ToastContext'
 import { PatternCard } from '@/features/pattern-viewer/PatternCard'
+import { downloadPatternFileBundle } from '@/features/pattern-viewer/patternFile'
 import { PatternFilterBar } from './PatternFilterBar'
 import { usePatternFilters } from './usePatternFilters'
-import { fetchMyPatterns, type StrapiPatternRecord } from '@/lib/strapi/patterns'
+import { usePatternSelection } from './usePatternSelection'
+import { PatternBulkActionsBar } from './PatternBulkActionsBar'
+import { deletePattern, fetchMyPatterns, toPattern, type StrapiPatternRecord } from '@/lib/strapi/patterns'
 import { fetchMyCollections, type StrapiCollectionRecord } from '@/lib/strapi/collections'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
@@ -14,12 +18,15 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/
 /** Same as PatternListPage ("all patterns"), but only the user's own patterns (including unpublished drafts). */
 export function MyPatternListPage() {
   const { t } = useLanguage()
+  const { toast } = useToast()
   const { user, token, isLoading: isAuthLoading } = useAuth()
   const [patterns, setPatterns] = useState<StrapiPatternRecord[]>([])
   const [collections, setCollections] = useState<StrapiCollectionRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false)
   const filters = usePatternFilters(patterns)
+  const selection = usePatternSelection()
 
   const loadCollections = useCallback(() => {
     if (!token) return
@@ -28,25 +35,19 @@ export function MyPatternListPage() {
       .catch(() => {})
   }, [token])
 
-  useEffect(() => {
+  const loadPatterns = useCallback(() => {
     if (!token) return
-    let cancelled = false
     setIsLoading(true)
     setLoadError(null)
     fetchMyPatterns(token)
-      .then((data) => {
-        if (!cancelled) setPatterns(data)
-      })
-      .catch((err) => {
-        if (!cancelled) setLoadError(err instanceof Error ? err.message : t('profileLoadError'))
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
+      .then(setPatterns)
+      .catch((err) => setLoadError(err instanceof Error ? err.message : t('profileLoadError')))
+      .finally(() => setIsLoading(false))
   }, [token, t])
+
+  useEffect(() => {
+    loadPatterns()
+  }, [loadPatterns])
 
   useEffect(() => {
     loadCollections()
@@ -54,6 +55,27 @@ export function MyPatternListPage() {
 
   if (isAuthLoading) return null
   if (!user || !token) return <Navigate to="/login" replace />
+
+  const selectedRecords = patterns.filter((pattern) => selection.selected.has(pattern.documentId))
+
+  function handleExportSelected() {
+    downloadPatternFileBundle(selectedRecords.map(toPattern))
+  }
+
+  async function handleDeleteSelected() {
+    if (!token) return
+    if (!window.confirm(t('patternBulkDeleteConfirm', { count: String(selection.selected.size) }))) return
+    setIsBulkDeleting(true)
+    try {
+      await Promise.all([...selection.selected].map((documentId) => deletePattern(documentId, token)))
+      selection.clear()
+      loadPatterns()
+    } catch (err) {
+      toast(err instanceof Error ? err.message : t('patternDeleteError'), { variant: 'error' })
+    } finally {
+      setIsBulkDeleting(false)
+    }
+  }
 
   function renderFilterBar(layout: 'row' | 'column') {
     return (
@@ -102,6 +124,23 @@ export function MyPatternListPage() {
         </Dialog>
       </div>
 
+      {selection.isActive && (
+        <div className="mt-4">
+          <PatternBulkActionsBar
+            count={selection.selected.size}
+            onClearSelection={selection.clear}
+            onSelectAll={() => selection.selectAll(filters.filteredPatterns.map((pattern) => pattern.documentId))}
+            onExportAll={handleExportSelected}
+            collections={collections}
+            patternIds={[...selection.selected]}
+            token={token}
+            onCollectionsChanged={loadCollections}
+            onDeleteAll={handleDeleteSelected}
+            isDeleting={isBulkDeleting}
+          />
+        </div>
+      )}
+
       {isLoading ? (
         <p className="mt-4 text-muted-foreground">{t('profileLoading')}</p>
       ) : loadError ? (
@@ -119,6 +158,9 @@ export function MyPatternListPage() {
               onCollectionsChanged={loadCollections}
               noStyleLabel={t('profileNoStyle')}
               currentUsername={user.username}
+              selected={selection.selected.has(pattern.documentId)}
+              onToggleSelected={() => selection.toggle(pattern.documentId)}
+              selectionActive={selection.isActive}
             />
           ))}
         </div>
