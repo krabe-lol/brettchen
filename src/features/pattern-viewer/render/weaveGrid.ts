@@ -4,6 +4,12 @@ export interface WeaveCell {
   tabletIndex: number
   rowIndex: number
   colorSlotId: string
+  /**
+   * The color visible on the BACK of the band at this same row/tablet -
+   * the hole diagonally opposite `colorSlotId`'s hole on the card (same
+   * rotational moment, opposite face). See WovenBandDiagram's back view.
+   */
+  backColorSlotId: string
   turn: TurnValue
   /**
    * Sign of the actual movement through the hole sequence (threading x
@@ -55,6 +61,12 @@ function sign(n: number): -1 | 0 | 1 {
  * show the same color sequence. `orientation` only affects
  * `effectiveDirection` - i.e. how the ellipse is drawn tilted, not which
  * color it shows.
+ *
+ * `backColorSlotId` is the hole diagonally opposite the front-facing one
+ * (+half the hole count, wrapped) - geometrically the hole on the other
+ * side of the card at that same rotational moment, since a card is a flat
+ * square rotating about the thread axis: the point 180° around is the one
+ * facing the opposite direction.
  */
 export function computeWeaveGrid(pattern: Pick<Pattern, 'threading' | 'turningSequence'>): WeaveCell[][] {
   const faceIndex = pattern.threading.map((tablet, tabletIndex) => {
@@ -68,6 +80,7 @@ export function computeWeaveGrid(pattern: Pick<Pattern, 'threading' | 'turningSe
       const tablet = pattern.threading[tabletIndex]
       const holeCount = tablet.holes.length || 1
       const colorSlotId = tablet.holes[faceIndex[tabletIndex]]?.colorSlotId ?? ''
+      const backColorSlotId = tablet.holes[mod(faceIndex[tabletIndex] + Math.floor(holeCount / 2), holeCount)]?.colorSlotId ?? ''
       const direction = tablet.orientation === 'Z' ? 1 : -1
 
       const nextTurn = pattern.turningSequence[rowIndex + 1]?.[tabletIndex]
@@ -75,17 +88,19 @@ export function computeWeaveGrid(pattern: Pick<Pattern, 'threading' | 'turningSe
       const appliedStep = isTurnaround ? 0 : turn
 
       faceIndex[tabletIndex] = mod(faceIndex[tabletIndex] + appliedStep, holeCount)
-      return { tabletIndex, rowIndex, colorSlotId, turn, effectiveDirection: sign(direction * turn) }
+      return { tabletIndex, rowIndex, colorSlotId, backColorSlotId, turn, effectiveDirection: sign(direction * turn) }
     }),
   )
 }
 
 /**
- * Like `computeWeaveGrid`, but repeated so even short patterns fill a band
- * preview of at least `minDisplayRows` rows (see WovenBandDiagram/
- * PatternThumbnail). If `repeatFromRow` is set (1-based), everything before
- * it (the "lead-in") appears once, and only the unit from that row on
- * repeats; without `repeatFromRow`, the whole pattern repeats (no lead-in).
+ * Like `computeWeaveGrid`, but repeated at least once - always, not just
+ * when the pattern would otherwise be too short - and more often only if
+ * that's still not enough to fill a band preview of at least
+ * `minDisplayRows` rows (see WovenBandDiagram/PatternThumbnail). If
+ * `repeatFromRow` is set (1-based), everything before it (the "lead-in")
+ * appears once, and only the unit from that row on repeats; without
+ * `repeatFromRow`, the whole pattern repeats (no lead-in).
  *
  * Each repeat is an EXACT copy of the unit's once-computed cells, not
  * recomputed: `computeWeaveGrid` carries the hole position forward across
@@ -106,7 +121,7 @@ export function computeDisplayWeaveGrid(
   const repeatingUnit = pattern.turningSequence.slice(repeatStartIndex)
   const repeatCount =
     repeatingUnit.length > 0
-      ? Math.max(1, Math.ceil((minDisplayRows - leadInRows.length) / repeatingUnit.length))
+      ? Math.max(2, Math.ceil((minDisplayRows - leadInRows.length) / repeatingUnit.length))
       : 1
 
   const singlePassGrid = computeWeaveGrid({

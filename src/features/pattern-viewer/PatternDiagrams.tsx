@@ -38,7 +38,7 @@ interface PatternDiagramsProps {
   onHighlightSettingsChange?: (settings: PatternHighlightSettings) => void
 }
 
-type WeaveView = 'turning' | 'band'
+type WeaveView = 'turning' | 'band-front' | 'band-back'
 
 function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value))
@@ -169,7 +169,8 @@ export function PatternDiagrams({
           onValueChange={(value) => value && setWeaveView(value as WeaveView)}
         >
           <ToggleGroupItem value="turning">{t('weaveViewTurning')}</ToggleGroupItem>
-          <ToggleGroupItem value="band">{t('weaveViewBand')}</ToggleGroupItem>
+          <ToggleGroupItem value="band-front">{t('weaveViewFront')}</ToggleGroupItem>
+          <ToggleGroupItem value="band-back">{t('weaveViewBack')}</ToggleGroupItem>
         </ToggleGroup>
         {weaveView === 'turning' ? (
           <WeaveDiagram
@@ -190,6 +191,7 @@ export function PatternDiagrams({
             activeRow={highlightSettings.highlightRow ? highlightSettings.activeRow - 1 : null}
             untwistMode={highlightSettings.untwistMode}
             showCenterLine={displaySettings.showCenterLine}
+            back={weaveView === 'band-back'}
           />
         )}
       </div>

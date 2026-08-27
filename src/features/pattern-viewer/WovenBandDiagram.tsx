@@ -23,6 +23,16 @@ interface WovenBandDiagramProps {
   untwistMode?: boolean
   /** Shows a vertical guide line through the tablet centers. See DisplaySettings.showCenterLine. */
   showCenterLine?: boolean
+  /**
+   * Shows the back of the band instead of the front: the diagonally
+   * opposite hole's color (see backColorSlotId in render/weaveGrid.ts) and
+   * tablets mirrored left-right (as if flipping the band over like a book
+   * page - row order stays the same). Each column's own lean direction is
+   * unaffected - a tablet's turn direction doesn't change just because
+   * you're looking at the other side of it, only its left-right position
+   * does.
+   */
+  back?: boolean
 }
 
 /** Minimum row count in the band preview - shorter turning sequences repeat to fill it. */
@@ -45,7 +55,9 @@ const PARALLELOGRAM_STROKE = '#808080'
  * all, showing a background bar in the weft color through the gap
  * instead - same as in a real band, where the weft only shows through
  * where a warp thread is missing. Defaults to the first palette color
- * until a weft color is explicitly set (see WeftColorSelector). Read-only, not clickable.
+ * until a weft color is explicitly set (see WeftColorSelector). Read-only,
+ * not clickable. Shows the front of the band by default; see the `back`
+ * prop for the mirrored, opposite-hole back view.
  */
 export function WovenBandDiagram({
   pattern,
@@ -53,6 +65,7 @@ export function WovenBandDiagram({
   activeRow = null,
   untwistMode = false,
   showCenterLine = false,
+  back = false,
 }: WovenBandDiagramProps) {
   const { t } = useLanguage()
   const colorBySlot = new Map(palette.map((slot) => [slot.slotId, slot.hex]))
@@ -74,11 +87,13 @@ export function WovenBandDiagram({
 
   /** Row 0 (woven first) at the bottom, higher rows further up - same as the turning diagram. */
   const rowY = (rowIndex: number) => COL_LABEL_HEIGHT + (displayNumRows - 1 - rowIndex) * STEP
+  /** Back view mirrors tablet order left-right (row order stays put) - see the `back` prop doc above. */
+  const displayTabletIndex = (tabletIndex: number) => (back ? pattern.numTablets - 1 - tabletIndex : tabletIndex)
 
   return (
     <svg
       role="img"
-      aria-label={t('weaveBandAriaLabel', { title: pattern.title })}
+      aria-label={t(back ? 'weaveBandBackAriaLabel' : 'weaveBandFrontAriaLabel', { title: pattern.title })}
       viewBox={`0 0 ${totalWidth} ${totalHeight}`}
       width="100%"
       className="text-foreground"
@@ -87,7 +102,7 @@ export function WovenBandDiagram({
       {pattern.threading.map((_, tabletIndex) => (
         <text
           key={`col-${tabletIndex}`}
-          x={ROW_LABEL_WIDTH + tabletIndex * STEP_X + CELL_WIDTH / 2}
+          x={ROW_LABEL_WIDTH + displayTabletIndex(tabletIndex) * STEP_X + CELL_WIDTH / 2}
           y={COL_LABEL_HEIGHT / 2}
           textAnchor="middle"
           dominantBaseline="central"
@@ -126,13 +141,14 @@ export function WovenBandDiagram({
 
       {weaveGrid.map((row) =>
         row.map((cell) => {
-          if (!colorBySlot.has(cell.colorSlotId)) return null
+          const colorSlotId = back ? cell.backColorSlotId : cell.colorSlotId
+          if (!colorBySlot.has(colorSlotId)) return null
 
-          const cx = ROW_LABEL_WIDTH + cell.tabletIndex * STEP_X + CELL_WIDTH / 2
+          const cx = ROW_LABEL_WIDTH + displayTabletIndex(cell.tabletIndex) * STEP_X + CELL_WIDTH / 2
           const cy = rowY(cell.rowIndex) + CELL_HEIGHT / 2
           const xLeft = cx - CELL_WIDTH / 2
           const xRight = cx + CELL_WIDTH / 2
-          const fill = colorOf(cell.colorSlotId)
+          const fill = colorOf(colorSlotId)
 
           const previousTurn = weaveGrid[cell.rowIndex - 1]?.[cell.tabletIndex]?.turn
           const isDirectionChange = previousTurn !== undefined && Math.sign(previousTurn) !== Math.sign(cell.turn)
@@ -144,6 +160,7 @@ export function WovenBandDiagram({
             const yBottom = cy + STEP / 2
             points = `${xLeft},${yTop} ${xRight},${yTop} ${xRight},${yBottom} ${xLeft},${yBottom}`
           } else {
+            // A column's own lean stays as-is on the back - only its position moves (see displayTabletIndex).
             const leaningLeft = cell.effectiveDirection > 0
             // Spans 2 * CELL_HEIGHT (48px) tip to tip - the diagonal edges are the
             // corner-to-corner diagonal of one CELL_WIDTH x CELL_HEIGHT cell (18x24,
