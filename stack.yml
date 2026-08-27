@@ -53,7 +53,7 @@ services:
     volumes:
       - strapi-uploads:/opt/app/public/uploads
     ports:
-      - "1337:1337"
+      - "5001:1337"
 
   frontend:
     # VITE_STRAPI_URL is baked in at build time by the Gitea Action (see
@@ -67,7 +67,7 @@ services:
     ports:
       # Not 80:80 - Nginx Proxy Manager already owns host port 80/443,
       # so the frontend gets its own host port and NPM forwards to it.
-      - "8080:80"
+      - "5000:80"
 
 volumes:
   postgres-data:
