@@ -52,7 +52,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             className={cn(
               'pointer-events-auto flex items-center gap-3 rounded-md border px-4 py-3 text-sm shadow-md',
               item.variant === 'error'
-                ? 'border-destructive/50 bg-destructive text-white'
+                ? 'border-destructive/50 bg-destructive text-destructive-foreground'
                 : 'border-border bg-card text-card-foreground',
             )}
           >

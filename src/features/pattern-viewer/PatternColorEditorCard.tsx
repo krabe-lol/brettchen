@@ -82,14 +82,23 @@ export function PatternColorEditorCard({
             }
           }}
           className={cn(
-            'flex cursor-pointer items-center gap-2 rounded-md border px-2 py-1.5 text-sm transition-colors',
+            'group flex cursor-pointer items-center gap-2 rounded-md border px-2 py-1.5 text-sm transition-colors',
             activeSlotId === EMPTY_SLOT_ID ? 'border-ring ring-2 ring-ring/50' : 'border-transparent hover:bg-accent',
           )}
         >
-          <span className="flex size-6 shrink-0 items-center justify-center rounded border text-muted-foreground">
+          <span
+            className={cn(
+              'flex size-6 shrink-0 items-center justify-center rounded border text-muted-foreground',
+              activeSlotId !== EMPTY_SLOT_ID && 'group-hover:text-accent-foreground',
+            )}
+          >
             <Ban className="size-3.5" />
           </span>
-          <span className="text-muted-foreground">{t('colorsEmptyLabel')}</span>
+          <span
+            className={cn('text-muted-foreground', activeSlotId !== EMPTY_SLOT_ID && 'group-hover:text-accent-foreground')}
+          >
+            {t('colorsEmptyLabel')}
+          </span>
         </div>
         {palette.map((slot) => (
           <div key={slot.slotId} className="flex items-center gap-1">
@@ -105,7 +114,7 @@ export function PatternColorEditorCard({
                 }
               }}
               className={cn(
-                'flex flex-1 cursor-pointer items-center gap-2 rounded-md border px-2 py-1.5 text-sm transition-colors',
+                'group flex flex-1 cursor-pointer items-center gap-2 rounded-md border px-2 py-1.5 text-sm transition-colors',
                 slot.slotId === activeSlotId
                   ? 'border-ring ring-2 ring-ring/50'
                   : 'border-transparent hover:bg-accent',
@@ -117,9 +126,14 @@ export function PatternColorEditorCard({
                 onChange={(e) => onColorHexChange(slot.slotId, e.target.value)}
                 className="size-6 shrink-0 cursor-pointer appearance-none rounded border p-0 [&::-moz-color-swatch]:rounded-[3px] [&::-moz-color-swatch]:border-none [&::-webkit-color-swatch]:rounded-[3px] [&::-webkit-color-swatch]:border-none [&::-webkit-color-swatch-wrapper]:p-0"
               />
-              <span className="flex flex-1 flex-col truncate">
+              <span
+                className={cn(
+                  'flex flex-1 flex-col truncate',
+                  slot.slotId !== activeSlotId && 'group-hover:text-accent-foreground',
+                )}
+              >
                 <span className="truncate">{slot.name}</span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs text-muted-foreground group-hover:text-inherit">
                   {formatThreadCount(threadCounts.bySlot[slot.slotId] ?? 0)}
                 </span>
               </span>
@@ -143,14 +157,21 @@ export function PatternColorEditorCard({
             onClick={() => setAddOpen((open) => !open)}
             aria-expanded={addOpen}
             className={cn(
-              'flex w-full cursor-pointer items-center gap-2 rounded-md border border-dashed px-2 py-1.5 text-sm transition-colors',
+              'group flex w-full cursor-pointer items-center gap-2 rounded-md border border-dashed px-2 py-1.5 text-sm transition-colors',
               addOpen ? 'border-ring ring-2 ring-ring/50' : 'border-muted-foreground/30 hover:bg-accent',
             )}
           >
-            <span className="flex size-6 shrink-0 items-center justify-center rounded border text-muted-foreground">
+            <span
+              className={cn(
+                'flex size-6 shrink-0 items-center justify-center rounded border text-muted-foreground',
+                !addOpen && 'group-hover:text-accent-foreground',
+              )}
+            >
               <Plus className="size-3.5" />
             </span>
-            <span className="text-muted-foreground">{t('colorsAddHeading')}</span>
+            <span className={cn('text-muted-foreground', !addOpen && 'group-hover:text-accent-foreground')}>
+              {t('colorsAddHeading')}
+            </span>
           </button>
 
           {addOpen && (

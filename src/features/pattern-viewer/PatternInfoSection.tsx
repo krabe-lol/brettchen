@@ -131,7 +131,7 @@ export function PatternInfoSection({
                 <Link
                   key={tag}
                   to={`/pattern?style=${encodeURIComponent(tag)}`}
-                  className="bg-muted hover:bg-accent hover:text-accent-foreground rounded-full px-2 py-0.5 text-xs"
+                  className="bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-full px-2 py-0.5 text-xs"
                 >
                   {tag}
                 </Link>

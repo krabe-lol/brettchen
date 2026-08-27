@@ -47,7 +47,9 @@ export function WeftColorSelector({ palette, weftColorSlotId, onChange }: WeftCo
             aria-pressed={weftColorSlotId === null}
             className={cn(
               'flex size-7 shrink-0 items-center justify-center rounded-full border text-xs text-muted-foreground',
-              weftColorSlotId === null ? 'border-ring ring-2 ring-ring/50' : 'border-dashed hover:bg-accent',
+              weftColorSlotId === null
+                ? 'border-ring ring-2 ring-ring/50'
+                : 'border-dashed hover:bg-accent hover:text-accent-foreground',
             )}
           >
             ×

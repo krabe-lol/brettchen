@@ -26,6 +26,9 @@ export function TagInput({ id, value, onChange, suggestions = [], placeholder, c
   const [inputValue, setInputValue] = useState('')
   const [isOpen, setIsOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+  /** -1 = no suggestion highlighted (Enter then adds the typed text as-is). */
+  const [highlightedIndex, setHighlightedIndex] = useState(-1)
+  const suggestionRefs = useRef<(HTMLButtonElement | null)[]>([])
 
   useEffect(() => {
     if (!isOpen) return
@@ -46,6 +49,15 @@ export function TagInput({ id, value, onChange, suggestions = [], placeholder, c
       .slice(0, 8)
   }, [suggestions, value, inputValue])
 
+  // Typing or opening/closing the dropdown drops any prior arrow-key selection.
+  useEffect(() => {
+    setHighlightedIndex(-1)
+  }, [inputValue, isOpen])
+
+  useEffect(() => {
+    if (highlightedIndex >= 0) suggestionRefs.current[highlightedIndex]?.scrollIntoView({ block: 'nearest' })
+  }, [highlightedIndex])
+
   function addTag(raw: string) {
     const tag = raw.trim()
     if (!tag) return
@@ -62,9 +74,16 @@ export function TagInput({ id, value, onChange, suggestions = [], placeholder, c
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key === 'Enter') {
+    if (e.key === 'ArrowDown' && isOpen && filteredSuggestions.length > 0) {
       e.preventDefault()
-      addTag(inputValue)
+      setHighlightedIndex((i) => (i + 1) % filteredSuggestions.length)
+    } else if (e.key === 'ArrowUp' && isOpen && filteredSuggestions.length > 0) {
+      e.preventDefault()
+      setHighlightedIndex((i) => (i <= 0 ? filteredSuggestions.length - 1 : i - 1))
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+      const highlighted = filteredSuggestions[highlightedIndex]
+      addTag(highlighted ?? inputValue)
     } else if (e.key === 'Backspace' && inputValue === '' && value.length > 0) {
       removeTag(value[value.length - 1])
     } else if (e.key === 'Escape') {
@@ -81,7 +100,7 @@ export function TagInput({ id, value, onChange, suggestions = [], placeholder, c
         )}
       >
         {value.map((tag) => (
-          <span key={tag} className="bg-muted flex items-center gap-1 rounded-full px-2 py-0.5 text-xs">
+          <span key={tag} className="bg-muted text-muted-foreground flex items-center gap-1 rounded-full px-2 py-0.5 text-xs">
             {tag}
             <button
               type="button"
@@ -109,15 +128,24 @@ export function TagInput({ id, value, onChange, suggestions = [], placeholder, c
 
       {isOpen && filteredSuggestions.length > 0 && (
         <div className="bg-popover text-popover-foreground absolute top-full left-0 z-10 mt-1 max-h-48 w-full overflow-auto rounded-md border p-1 shadow-md">
-          {filteredSuggestions.map((suggestion) => (
+          {filteredSuggestions.map((suggestion, index) => (
             <button
               key={suggestion}
+              ref={(el) => {
+                suggestionRefs.current[index] = el
+              }}
               type="button"
+              onMouseEnter={() => setHighlightedIndex(index)}
               onMouseDown={(e) => {
                 e.preventDefault()
                 addTag(suggestion)
               }}
-              className="hover:bg-accent block w-full rounded px-2 py-1 text-left text-sm"
+              className={cn(
+                'block w-full rounded px-2 py-1 text-left text-sm',
+                index === highlightedIndex
+                  ? 'bg-accent text-accent-foreground'
+                  : 'hover:bg-accent hover:text-accent-foreground',
+              )}
             >
               {suggestion}
             </button>
