@@ -9,12 +9,14 @@ import {
   deletePattern,
   fetchPatternBySlug,
   remixPattern,
+  removeRemixLink,
   toPattern,
   updatePattern,
   type StrapiPatternRecord,
 } from '@/lib/strapi/patterns'
 import { fetchMyCollections, type StrapiCollectionRecord } from '@/lib/strapi/collections'
 import type { Pattern } from '@/features/pattern-viewer/types'
+import { errorMessage } from '@/lib/utils'
 
 export function PatternDetailPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -29,6 +31,7 @@ export function PatternDetailPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [isRemixing, setIsRemixing] = useState(false)
+  const [isRemovingRemixLink, setIsRemovingRemixLink] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [collections, setCollections] = useState<StrapiCollectionRecord[]>([])
@@ -63,7 +66,7 @@ export function PatternDetailPage() {
         }
       })
       .catch((err) => {
-        if (!cancelled) setLoadError(err instanceof Error ? err.message : t('patternDetailNotFound'))
+        if (!cancelled) setLoadError(errorMessage(err, t('patternDetailNotFound')))
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false)
@@ -92,7 +95,7 @@ export function PatternDetailPage() {
       setRecord(saved)
       toast(status === 'published' ? t('toastPatternPublished') : t('toastPatternSaved'))
     } catch (err) {
-      setSaveError(err instanceof Error ? err.message : t('patternSaveError'))
+      setSaveError(errorMessage(err, t('patternSaveError')))
     } finally {
       setIsSaving(false)
     }
@@ -106,9 +109,24 @@ export function PatternDetailPage() {
       toast(t('toastPatternDeleted'))
       navigate('/profil')
     } catch (err) {
-      toast(err instanceof Error ? err.message : t('patternDeleteError'), { variant: 'error' })
+      toast(errorMessage(err, t('patternDeleteError')), { variant: 'error' })
     } finally {
       setIsDeleting(false)
+    }
+  }
+
+  async function handleRemoveRemixLink() {
+    if (!record || !token) return
+    if (!window.confirm(t('infoRemixRemoveLinkConfirm'))) return
+    setIsRemovingRemixLink(true)
+    try {
+      const updated = await removeRemixLink(record.documentId, token)
+      setRecord(updated)
+      toast(t('toastRemixLinkRemoved'))
+    } catch (err) {
+      toast(errorMessage(err, t('patternSaveError')), { variant: 'error' })
+    } finally {
+      setIsRemovingRemixLink(false)
     }
   }
 
@@ -120,7 +138,7 @@ export function PatternDetailPage() {
       toast(t('toastPatternRemixed'))
       navigate(`/pattern/${remixed.slug}`, { state: { openInEdit: true } })
     } catch (err) {
-      toast(err instanceof Error ? err.message : t('patternRemixError'), { variant: 'error' })
+      toast(errorMessage(err, t('patternRemixError')), { variant: 'error' })
     } finally {
       setIsRemixing(false)
     }
@@ -144,6 +162,8 @@ export function PatternDetailPage() {
             onDelete={handleDelete}
             isDeleting={isDeleting}
             moderationStatus={record?.moderationStatus === 'published' ? 'published' : 'draft'}
+            onRemoveRemixLink={handleRemoveRemixLink}
+            isRemovingRemixLink={isRemovingRemixLink}
           />
         </>
       ) : (

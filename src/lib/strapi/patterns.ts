@@ -156,9 +156,24 @@ export function toPattern(record: StrapiPatternRecord): Pattern {
   }
 }
 
-/** Copies a pattern as a new draft of your own (see pattern.remix in the backend): threading, turning sequence, palette and style tags carry over, linked back to the original via `remixOf`. The link breaks automatically once enough has changed on save. */
+/** Copies a pattern as a new draft of your own (see pattern.remix in the backend): threading, turning sequence, palette and style tags carry over, linked back to the original via `remixOf` - stays linked until removed via `removeRemixLink`. */
 export async function remixPattern(documentId: string, token: string): Promise<StrapiPatternRecord> {
   const response = await fetch(`${strapiConfig.baseUrl}/api/patterns/${documentId}/remix`, {
+    method: 'POST',
+    headers: authHeaders(token),
+  })
+  const data = await readJsonOrThrow(response)
+  return data.data as StrapiPatternRecord
+}
+
+/**
+ * Removes the remix-of link - only allowed once the pattern has diverged
+ * enough from the source (see hasEnoughRemixDivergence in the backend
+ * pattern controller), which the server enforces; throws with a
+ * user-facing message otherwise.
+ */
+export async function removeRemixLink(documentId: string, token: string): Promise<StrapiPatternRecord> {
+  const response = await fetch(`${strapiConfig.baseUrl}/api/patterns/${documentId}/remove-remix-link`, {
     method: 'POST',
     headers: authHeaders(token),
   })

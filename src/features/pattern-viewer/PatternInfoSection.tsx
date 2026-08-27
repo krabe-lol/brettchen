@@ -3,6 +3,7 @@ import { useLanguage } from '@/features/i18n/LanguageContext'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@/components/ui/button'
 import { TagInput } from '@/components/TagInput'
 import { difficultyLabel } from './render/difficultyLabel'
 import type { Difficulty } from './render/difficulty'
@@ -21,8 +22,17 @@ interface PatternInfoSectionProps {
   style: string[]
   notes: string
   sourceUrl: string
-  /** Set as long as this pattern is a remix and the link to the original hasn't broken yet. */
+  /** Set as long as this pattern is a remix and the link to the original hasn't been removed yet. */
   remixOf?: { title: string; slug: string } | null
+  /**
+   * Shown next to the remix link, editable mode only - removes the link,
+   * but the server only allows it once the pattern has diverged enough
+   * from the source (see removeRemixLink in lib/strapi/patterns.ts); a
+   * click that's too early surfaces the server's rejection message via
+   * the caller's own error handling, not a client-side pre-check.
+   */
+  onRemoveRemixLink?: () => void
+  isRemovingRemixLink?: boolean
   /** ISO timestamp; absent for a new, not-yet-saved pattern. */
   createdAt?: string
   /** Computed live from the current (even unsaved) turning sequence, see render/twist.ts. */
@@ -51,6 +61,8 @@ export function PatternInfoSection({
   notes,
   sourceUrl,
   remixOf,
+  onRemoveRemixLink,
+  isRemovingRemixLink,
   createdAt,
   isTwistNeutral,
   difficulty,
@@ -108,9 +120,23 @@ export function PatternInfoSection({
       {remixOf && (
         <div>
           <span className="block text-xs font-medium text-muted-foreground">{t('infoRemixOf')}</span>
-          <Link to={`/pattern/${remixOf.slug}`} className="text-primary underline">
-            {remixOf.title}
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link to={`/pattern/${remixOf.slug}`} className="text-primary underline">
+              {remixOf.title}
+            </Link>
+            {editable && onRemoveRemixLink && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-auto p-0 text-xs text-muted-foreground underline hover:text-destructive"
+                onClick={onRemoveRemixLink}
+                disabled={isRemovingRemixLink}
+              >
+                {isRemovingRemixLink ? t('infoRemixRemoving') : t('infoRemixRemoveLink')}
+              </Button>
+            )}
+          </div>
         </div>
       )}
 

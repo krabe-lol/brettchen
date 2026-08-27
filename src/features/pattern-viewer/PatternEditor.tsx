@@ -41,6 +41,9 @@ interface PatternEditorProps {
    * "save changes", and is the starting value of the public/private toggle.
    */
   moderationStatus?: 'draft' | 'published'
+  /** Removes the remix-of link (see PatternInfoSection) - omitted for a new, not-yet-saved pattern, same as onDelete. */
+  onRemoveRemixLink?: () => void
+  isRemovingRemixLink?: boolean
 }
 
 /**
@@ -59,6 +62,8 @@ export function PatternEditor({
   onDelete,
   isDeleting,
   moderationStatus,
+  onRemoveRemixLink,
+  isRemovingRemixLink,
 }: PatternEditorProps) {
   const { t } = useLanguage()
   const {
@@ -280,6 +285,8 @@ export function PatternEditor({
           notes={notes}
           sourceUrl={sourceUrl}
           remixOf={pattern.remixOf}
+          onRemoveRemixLink={onRemoveRemixLink}
+          isRemovingRemixLink={isRemovingRemixLink}
           createdAt={pattern.createdAt}
           isTwistNeutral={isTwistNeutral(pattern)}
           difficulty={computeDifficulty(pattern)}
@@ -391,6 +398,8 @@ export function PatternEditor({
               notes={notes}
               sourceUrl={sourceUrl}
               remixOf={pattern.remixOf}
+              onRemoveRemixLink={onRemoveRemixLink}
+              isRemovingRemixLink={isRemovingRemixLink}
               createdAt={pattern.createdAt}
               isTwistNeutral={isTwistNeutral(pattern)}
               difficulty={computeDifficulty(pattern)}

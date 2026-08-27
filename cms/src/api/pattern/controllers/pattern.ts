@@ -147,7 +147,7 @@ export default factories.createCoreController('api::pattern.pattern', ({ strapi 
     const entities = await strapi.documents('api::pattern.pattern').findMany({
       filters: { author: ctx.state.user.id },
       sort: { createdAt: 'desc' },
-      populate: { defaultPalette: true, author: { fields: ['username'] } },
+      populate: { defaultPalette: true, author: { fields: ['username'] }, remixOf: { fields: ['title', 'slug'] } },
       status: 'draft',
     });
 
@@ -170,7 +170,7 @@ export default factories.createCoreController('api::pattern.pattern', ({ strapi 
     const entities = await strapi.documents('api::pattern.pattern').findMany({
       filters: { moderationStatus: 'published' },
       sort: { createdAt: 'desc' },
-      populate: { defaultPalette: true, author: { fields: ['username'] } },
+      populate: { defaultPalette: true, author: { fields: ['username'] }, remixOf: { fields: ['title', 'slug'] } },
       status: 'draft',
     });
 
@@ -212,14 +212,54 @@ export default factories.createCoreController('api::pattern.pattern', ({ strapi 
    * Custom `update` action instead of `super.update(ctx)`: only the
    * creator may change a pattern (Strapi's standard `update` does NOT
    * check this automatically - without this check, any logged-in user
-   * could overwrite any pattern). `author` is stripped from the body
-   * before it's used as update data - same reason as in `create`, it
-   * should never be client-settable. If the pattern is a remix and
-   * diverges enough from the source (see `hasEnoughRemixDivergence`),
-   * `remixOf` is cleared automatically - the link to the original then
-   * breaks on its own, without the user having to do anything.
+   * could overwrite any pattern). `author` and `remixOf` are stripped from
+   * the body before it's used as update data - `author` for the same
+   * reason as in `create` (never client-settable), `remixOf` because a
+   * remix link is only ever removed through the dedicated
+   * `removeRemixLink` action below, which enforces the divergence rule
+   * server-side - it deliberately does NOT break automatically just from
+   * saving normal edits, so the user always has to choose to remove it.
    */
   async update(ctx) {
+    if (!ctx.state.user) return ctx.unauthorized();
+
+    const existing = await strapi.documents('api::pattern.pattern').findOne({
+      documentId: ctx.params.id,
+      populate: { author: { fields: ['id'] } },
+      status: 'draft',
+    });
+
+    if (!existing) return ctx.notFound();
+    if (existing.author?.id !== ctx.state.user.id) return ctx.forbidden();
+
+    const { author, remixOf, ...data } = ctx.request.body?.data ?? {};
+    data.isTwistNeutral = computeIsTwistNeutral(data.turningSequence, data.twistExemptTablets);
+    data.difficulty = computeDifficulty(data.threading, data.turningSequence);
+
+    const entity = await strapi.documents('api::pattern.pattern').update({
+      documentId: ctx.params.id,
+      data,
+      populate: {
+        defaultPalette: true,
+        author: { fields: ['username'] },
+        remixOf: { fields: ['title', 'slug'] },
+      },
+    });
+    if (!entity) return ctx.notFound();
+
+    const sanitized = await strapi.contentAPI.sanitize.output(entity, strapi.getModel('api::pattern.pattern'));
+    ctx.body = { data: sanitized, meta: {} };
+  },
+
+  /**
+   * Explicitly removes the remix-of link, but only once the pattern has
+   * diverged enough from the source (see `hasEnoughRemixDivergence`) - the
+   * same rule that used to break the link automatically on save (see
+   * `update`), now gated behind the user's own choice instead of firing
+   * silently. Irreversible: once cleared, there's no source link left to
+   * measure divergence against again.
+   */
+  async removeRemixLink(ctx) {
     if (!ctx.state.user) return ctx.unauthorized();
 
     const existing = await strapi.documents('api::pattern.pattern').findOne({
@@ -230,30 +270,23 @@ export default factories.createCoreController('api::pattern.pattern', ({ strapi 
 
     if (!existing) return ctx.notFound();
     if (existing.author?.id !== ctx.state.user.id) return ctx.forbidden();
+    if (!(existing as any).remixOf) return ctx.badRequest('Dieses Muster ist kein Remix.');
 
-    const { author, ...data } = ctx.request.body?.data ?? {};
-    data.isTwistNeutral = computeIsTwistNeutral(data.turningSequence, data.twistExemptTablets);
-    data.difficulty = computeDifficulty(data.threading, data.turningSequence);
-
-    const breakRemixLink =
-      Boolean((existing as any).remixOf) &&
-      hasEnoughRemixDivergence(
-        data.threading,
-        data.turningSequence,
-        (existing as any).remixSourceThreading,
-        (existing as any).remixSourceTurningSequence,
-      );
+    const diverged = hasEnoughRemixDivergence(
+      existing.threading as any[] | undefined,
+      existing.turningSequence as number[][] | undefined,
+      (existing as any).remixSourceThreading,
+      (existing as any).remixSourceTurningSequence,
+    );
+    if (!diverged) {
+      return ctx.badRequest('Das Muster unterscheidet sich noch nicht genug vom Original, um die Verknüpfung zu entfernen.');
+    }
 
     const entity = await strapi.documents('api::pattern.pattern').update({
       documentId: ctx.params.id,
-      data: breakRemixLink ? { ...data, remixOf: null } : data,
-      populate: {
-        defaultPalette: true,
-        author: { fields: ['username'] },
-        remixOf: { fields: ['title', 'slug'] },
-      },
+      data: { remixOf: null } as any,
+      populate: { defaultPalette: true, author: { fields: ['username'] }, remixOf: { fields: ['title', 'slug'] } },
     });
-    if (!entity) return ctx.notFound();
 
     const sanitized = await strapi.contentAPI.sanitize.output(entity, strapi.getModel('api::pattern.pattern'));
     ctx.body = { data: sanitized, meta: {} };

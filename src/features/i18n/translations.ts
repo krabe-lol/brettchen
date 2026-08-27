@@ -167,6 +167,9 @@ const de = {
   patternBulkSelectAll: 'Alle auswählen',
   patternBulkExportAll: 'Alle exportieren',
   patternBulkAddToCollection: 'Alle zu Sammlung hinzufügen',
+  patternBulkPublishAll: 'Alle veröffentlichen',
+  patternBulkSetDraftAll: 'Alle auf Entwurf setzen',
+  patternBulkChangingVisibility: 'Ändert…',
   patternBulkDeleteAll: 'Alle löschen',
   patternBulkDeleting: 'Löscht…',
   patternBulkDeleteConfirm: '{{count}} Muster wirklich unwiderruflich löschen?',
@@ -220,9 +223,14 @@ const de = {
   patternDeleteError: 'Löschen fehlgeschlagen.',
   toastPatternDeleted: 'Muster gelöscht.',
   infoRemixOf: 'Remix von',
+  infoRemixRemoveLink: 'Verknüpfung entfernen',
+  infoRemixRemoving: 'Entfernt…',
+  infoRemixRemoveLinkConfirm:
+    'Verknüpfung zum Original wirklich entfernen? Das geht nicht rückgängig zu machen und funktioniert nur, wenn sich dieses Muster schon genug vom Original unterscheidet.',
+  toastRemixLinkRemoved: 'Verknüpfung zum Original entfernt.',
 
   articleListHeading: 'Wissensdatenbank',
-  articleListPlaceholder: 'Artikelliste folgt.',
+  articleListPlaceholder: 'Einträge kommen bald.',
   articleDetailHeading: 'Artikel: {{slug}}',
   articleDetailPlaceholder: 'Inhalt folgt.',
 
@@ -512,6 +520,9 @@ const en: Record<keyof typeof de, string> = {
   patternBulkSelectAll: 'Select all',
   patternBulkExportAll: 'Export all',
   patternBulkAddToCollection: 'Add all to collection',
+  patternBulkPublishAll: 'Publish all',
+  patternBulkSetDraftAll: 'Set all to draft',
+  patternBulkChangingVisibility: 'Changing…',
   patternBulkDeleteAll: 'Delete all',
   patternBulkDeleting: 'Deleting…',
   patternBulkDeleteConfirm: 'Really delete {{count}} patterns permanently?',
@@ -565,9 +576,14 @@ const en: Record<keyof typeof de, string> = {
   patternDeleteError: 'Delete failed.',
   toastPatternDeleted: 'Pattern deleted.',
   infoRemixOf: 'Remix of',
+  infoRemixRemoveLink: 'Remove link',
+  infoRemixRemoving: 'Removing…',
+  infoRemixRemoveLinkConfirm:
+    "Really remove the link to the original? This can't be undone, and only works once this pattern has diverged enough from the original.",
+  toastRemixLinkRemoved: 'Link to the original removed.',
 
   articleListHeading: 'Knowledge base',
-  articleListPlaceholder: 'Article list coming soon.',
+  articleListPlaceholder: 'Articles are coming soon.',
   articleDetailHeading: 'Article: {{slug}}',
   articleDetailPlaceholder: 'Content coming soon.',
 

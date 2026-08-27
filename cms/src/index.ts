@@ -18,6 +18,7 @@ const AUTHENTICATED_ACTIONS = [
   'api::pattern.pattern.find',
   'api::pattern.pattern.findOne',
   'api::pattern.pattern.remix',
+  'api::pattern.pattern.removeRemixLink',
   'api::collection.collection.create',
   'api::collection.collection.mine',
   'api::collection.collection.find',
