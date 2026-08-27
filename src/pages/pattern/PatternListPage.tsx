@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useLocation, useSearchParams } from 'react-router-dom'
 import { Filter } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthContext'
 import { useLanguage } from '@/features/i18n/LanguageContext'
@@ -13,6 +13,7 @@ import { fetchPublishedPatterns, toPattern, type StrapiPatternRecord } from '@/l
 import { fetchMyCollections, type StrapiCollectionRecord } from '@/lib/strapi/collections'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { errorMessage } from '@/lib/utils'
 
 export function PatternListPage() {
   const { t } = useLanguage()
@@ -21,6 +22,8 @@ export function PatternListPage() {
   const [collections, setCollections] = useState<StrapiCollectionRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
+  /** This component is also the "/" index route (see router.tsx) - only shows the welcome greeting there, not on the dedicated /pattern URL. */
+  const isHome = useLocation().pathname === '/'
   const [searchParams] = useSearchParams()
   const initialStyle = searchParams.get('style')
   const filters = usePatternFilters(patterns, initialStyle ? [initialStyle] : [])
@@ -42,7 +45,7 @@ export function PatternListPage() {
         if (!cancelled) setPatterns(data)
       })
       .catch((err) => {
-        if (!cancelled) setLoadError(err instanceof Error ? err.message : t('profileLoadError'))
+        if (!cancelled) setLoadError(errorMessage(err, t('profileLoadError')))
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false)
@@ -87,14 +90,23 @@ export function PatternListPage() {
     )
   }
 
+  /** The welcome greeting takes over as page h1 on the home route - the pattern heading below steps down to h2 there so there's still only one h1. */
+  const PatternHeadingTag = isHome ? 'h2' : 'h1'
+
   return (
     <div className="py-12">
-      <h1 className="text-3xl font-semibold tracking-tight">
+      {isHome && (
+        <div className="mb-8">
+          <h1 className="text-4xl font-semibold tracking-tight">{t('homeWelcomeHeading')}</h1>
+          <p className="mt-2 text-muted-foreground">{t('homeWelcomeSubtitle')}</p>
+        </div>
+      )}
+      <PatternHeadingTag className="text-3xl font-semibold tracking-tight">
         {t('patternListHeading')}
         {!isLoading && !loadError && (
           <span className="ml-2 text-xl font-normal text-muted-foreground">({filters.filteredPatterns.length})</span>
         )}
-      </h1>
+      </PatternHeadingTag>
 
       {/* From 1000px up: filter row directly below the title. Below 1000px: collapsed behind a button+overlay instead. */}
       <div className="mt-4 hidden min-[1000px]:block">{renderFilterBar('row')}</div>
@@ -146,7 +158,13 @@ export function PatternListPage() {
               noStyleLabel={t('profileNoStyle')}
               currentUsername={user?.username}
               selected={selection.selected.has(pattern.documentId)}
-              onToggleSelected={() => selection.toggle(pattern.documentId)}
+              onToggleSelected={(shiftKey) =>
+                selection.toggle(
+                  pattern.documentId,
+                  filters.filteredPatterns.map((p) => p.documentId),
+                  shiftKey,
+                )
+              }
               selectionActive={selection.isActive}
             />
           ))}

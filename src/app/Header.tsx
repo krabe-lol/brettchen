@@ -59,9 +59,6 @@ export function Header() {
       )}
 
       <nav className="hidden items-center gap-4 md:flex">
-        <Link to="/wissen" className="text-sm text-muted-foreground hover:text-foreground">
-          {t('headerKnowledge')}
-        </Link>
         <Link to="/pattern" className="text-sm text-muted-foreground hover:text-foreground">
           {t('headerPatterns')}
         </Link>
@@ -84,9 +81,6 @@ export function Header() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
-            <DropdownMenuItem asChild>
-              <Link to="/wissen">{t('headerKnowledge')}</Link>
-            </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/pattern">{t('headerPatterns')}</Link>
             </DropdownMenuItem>
@@ -170,13 +164,13 @@ export function Header() {
                 <DropdownMenuItem asChild>
                   <Link to="/meine-muster">{t('myPatternListHeading')}</Link>
                 </DropdownMenuItem>
-                {token && <ImportPatternsMenuItem onSelect={openImportPicker} />}
                 <DropdownMenuItem asChild>
                   <Link to="/meine-sammlungen">{t('myCollectionListHeading')}</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/einstellungen">{t('headerSettings')}</Link>
                 </DropdownMenuItem>
+                {token && <ImportPatternsMenuItem onSelect={openImportPicker} />}
 
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel>{t('languageSwitcherLabel')}</DropdownMenuLabel>

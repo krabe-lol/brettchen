@@ -43,9 +43,8 @@ const de = {
   settingsPreviewHeading: 'Vorschau',
   settingsPreviewShuffle: 'Anderes Muster',
 
-  homeSubtitle: 'Wissens- und Musterdatenbank rund ums Brettchenweben.',
-  homeToKnowledge: 'Zur Wissensdatenbank',
-  homeToPatterns: 'Zur Musterdatenbank',
+  homeWelcomeHeading: 'Willkommen bei Brettchenweben',
+  homeWelcomeSubtitle: 'Entdecke Muster fürs Brettchenweben.',
 
   footerDisclaimer: 'Wir beanspruchen keine Rechte an den hier gezeigten Mustern.',
   footerTerms: 'Nutzungsbedingungen',
@@ -397,9 +396,8 @@ const en: Record<keyof typeof de, string> = {
   settingsPreviewHeading: 'Preview',
   settingsPreviewShuffle: 'Another pattern',
 
-  homeSubtitle: 'Knowledge base and pattern database for tablet weaving.',
-  homeToKnowledge: 'To the knowledge base',
-  homeToPatterns: 'To the pattern database',
+  homeWelcomeHeading: 'Welcome to Brettchenweben',
+  homeWelcomeSubtitle: 'Discover tablet weaving patterns.',
 
   footerDisclaimer: 'We claim no rights to the patterns shown here.',
   footerTerms: 'Terms of use',
