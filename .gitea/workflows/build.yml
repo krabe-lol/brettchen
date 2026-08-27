@@ -1,6 +1,7 @@
 ame: Build and Push to Gitea Registry
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
