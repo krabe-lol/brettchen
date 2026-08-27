@@ -24,13 +24,27 @@ export function usePatternHighlightSettings(patternDocumentId: string | null | u
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const canSave = Boolean(patternDocumentId && token)
 
+  /**
+   * `token` is read through a ref instead of being a dependency below - the
+   * background token refresh in AuthContext replaces it every ~8 minutes,
+   * which would otherwise re-run the load effect and silently overwrite
+   * the live highlight position (and untwistMode, causing the whole
+   * diagram to flip) with the last-saved server value. Safe to read the
+   * latest token without reacting to it here: this hook only ever mounts
+   * after auth has already settled (see PatternDetailPage), so `token` is
+   * already correct on the first render.
+   */
+  const tokenRef = useRef(token)
+  tokenRef.current = token
+
   useEffect(() => {
-    if (!patternDocumentId || !token) {
+    const currentToken = tokenRef.current
+    if (!patternDocumentId || !currentToken) {
       setSettingsState(DEFAULT_PATTERN_HIGHLIGHT_SETTINGS)
       return
     }
     let cancelled = false
-    fetchPatternHighlightSettings(patternDocumentId, token)
+    fetchPatternHighlightSettings(patternDocumentId, currentToken)
       .then((saved) => {
         if (cancelled) return
         setSettingsState({ ...DEFAULT_PATTERN_HIGHLIGHT_SETTINGS, ...saved })
@@ -39,7 +53,8 @@ export function usePatternHighlightSettings(patternDocumentId: string | null | u
     return () => {
       cancelled = true
     }
-  }, [patternDocumentId, token])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- token deliberately excluded, see tokenRef comment above
+  }, [patternDocumentId])
 
   function setSettings(next: PatternHighlightSettings) {
     const previous = settings
