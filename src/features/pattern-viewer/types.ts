@@ -62,7 +62,7 @@ export interface Pattern {
   repeatFromRow: number | null
   /**
    * Weft color slot, optional. Counts as used even if no threading hole
-   * references it - see pruneUnusedColors in PatternEditor.tsx.
+   * references it - see pruneUnusedColors in patternFile.ts.
    */
   weftColorSlotId: string | null
   /**

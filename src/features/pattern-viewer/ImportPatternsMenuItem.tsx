@@ -67,7 +67,7 @@ export function useImportPatterns(token: string, createdBy: string) {
       <input
         ref={inputRef}
         type="file"
-        accept=".json,.zip,application/json,application/zip"
+        accept=".json,.zip,.twt,application/json,application/zip"
         className="hidden"
         onChange={handleFileChange}
       />

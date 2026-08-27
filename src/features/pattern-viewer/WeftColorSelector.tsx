@@ -15,7 +15,7 @@ interface WeftColorSelectorProps {
  * threads (threading), the weft has no fixed assignment to individual
  * holes, hence this separate, simple selector instead of a threading
  * chart cell. Always counts as a used color on save (see
- * pruneUnusedColors in PatternEditor.tsx), even if it doesn't otherwise
+ * pruneUnusedColors in patternFile.ts), even if it doesn't otherwise
  * appear in the threading.
  */
 export function WeftColorSelector({ palette, weftColorSlotId, onChange }: WeftColorSelectorProps) {

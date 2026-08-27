@@ -7,7 +7,7 @@ import { PatternColorEditorCard } from './PatternColorEditorCard'
 import { PatternDiagrams } from './PatternDiagrams'
 import { PatternInfoSection } from './PatternInfoSection'
 import { useDisplaySettings, useSaveDisplaySettingsAsDefault } from './DisplaySettingsContext'
-import { downloadPatternFile } from './patternFile'
+import { downloadPatternFile, pruneUnusedColors } from './patternFile'
 import { isTwistNeutral } from './render/twist'
 import { computeDifficulty } from './render/difficulty'
 import { usePatternEditor } from './usePatternEditor'
@@ -20,17 +20,6 @@ import { Label } from '@/components/ui/label'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import type { Pattern } from './types'
 import { Download, LoaderCircle, Trash } from 'lucide-react'
-
-/**
- * Removes palette entries no hole references anymore - only applied on
- * save, not while editing. The weft color (weftColorSlotId) always counts
- * as used, even without a threading hole referencing it.
- */
-function pruneUnusedColors(pattern: Pattern): Pattern {
-  const usedSlotIds = new Set(pattern.threading.flatMap((tablet) => tablet.holes.map((hole) => hole.colorSlotId)))
-  if (pattern.weftColorSlotId) usedSlotIds.add(pattern.weftColorSlotId)
-  return { ...pattern, defaultPalette: pattern.defaultPalette.filter((slot) => usedSlotIds.has(slot.slotId)) }
-}
 
 interface PatternEditorProps {
   initialPattern: Pattern
