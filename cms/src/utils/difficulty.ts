@@ -14,8 +14,10 @@ export function hasDirectionChange(turningSequence: number[][], tabletIndex: num
   return false;
 }
 
-/** More than this many direction "blocks" at the median row pushes a pattern from medium to hard - see computeDifficulty in the frontend (render/difficulty.ts) for the full rationale. */
-const HARD_BLOCK_THRESHOLD = 5;
+/** Tablet count's weight relative to a block, and the easy/medium and medium/hard score thresholds - see computeDifficulty in the frontend (render/difficulty.ts) for the full rationale. */
+const TABLET_COUNT_WEIGHT = 1 / 4;
+const EASY_SCORE_THRESHOLD = 4;
+const HARD_SCORE_THRESHOLD = 10;
 
 function reversalRows(turningSequence: number[][], tabletIndex: number): number[] {
   const rows: number[] = [];
@@ -45,10 +47,13 @@ export function computeDifficulty(threading: any[] | undefined, turningSequence:
   const patternTablets = Array.from({ length: numTablets }, (_, i) => i).filter((i) =>
     hasDirectionChange(turningSequence, i),
   );
-  if (patternTablets.length === 0) return 'easy';
 
-  const signatures = patternTablets.map((tabletIndex) => reversalRows(turningSequence, tabletIndex));
-  if (signatures.every((rows) => sameRows(rows, signatures[0]))) return 'easy';
+  const isSynchronized =
+    patternTablets.length === 0 ||
+    (() => {
+      const signatures = patternTablets.map((tabletIndex) => reversalRows(turningSequence, tabletIndex));
+      return signatures.every((rows) => sameRows(rows, signatures[0]));
+    })();
 
   const blockCounts = turningSequence.map((row) => {
     let blocks = 0;
@@ -60,7 +65,9 @@ export function computeDifficulty(threading: any[] | undefined, turningSequence:
     }
     return blocks;
   });
-  const medianBlocks = [...blockCounts].sort((a, b) => a - b)[Math.floor(blockCounts.length / 2)];
+  const medianBlocks = [...blockCounts].sort((a, b) => a - b)[Math.floor(blockCounts.length / 2)] ?? 0;
+  const score = medianBlocks + numTablets * TABLET_COUNT_WEIGHT;
 
-  return medianBlocks > HARD_BLOCK_THRESHOLD ? 'hard' : 'medium';
+  if (isSynchronized) return score <= EASY_SCORE_THRESHOLD ? 'easy' : 'medium';
+  return score > HARD_SCORE_THRESHOLD ? 'hard' : 'medium';
 }
