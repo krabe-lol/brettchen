@@ -10,14 +10,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        run: git clone http://server:3000/krabe-lol/brettchen.git . && git checkout ${{ github.ref_name }}
+      - uses: actions/checkout@v4
 
-      - name: Build
+      - name: Build Docker image
         run: docker build -t git.krabe.lol/krabe-lol/brettchen:latest .
 
-      - name: Login
+      - name: Login to registry
         run: docker login -u ${{ secrets.REGISTRY_USER }} -p ${{ secrets.REGISTRY_PASSWORD }} git.krabe.lol
 
-      - name: Push
+      - name: Push image
         run: docker push git.krabe.lol/krabe-lol/brettchen:latest
