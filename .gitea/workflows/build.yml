@@ -10,13 +10,26 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Install tools
+        run: |
+          apt-get update
+          apt-get install -y git curl
+
+      - name: Clone repository
+        run: |
+          cd /tmp
+          rm -rf brettchen || true
+          git clone http://server:3000/krabe-lol/brettchen.git
+          cd brettchen
+          git checkout dev
 
       - name: Build Docker image
-        run: docker build -t git.krabe.lol/krabe-lol/brettchen:latest .
+        run: |
+          cd /tmp/brettchen
+          docker build -t git.krabe.lol/krabe-lol/brettchen:latest .
 
-      - name: Login to registry
-        run: docker login -u ${{ secrets.REGISTRY_USER }} -p ${{ secrets.REGISTRY_PASSWORD }} git.krabe.lol
-
-      - name: Push image
-        run: docker push git.krabe.lol/krabe-lol/brettchen:latest
+      - name: Push to registry
+        run: |
+          docker login -u krabe.lol -p ${{ secrets.REGISTRY_PASSWORD }} git.krabe.lol
+          docker push git.krabe.lol/krabe-lol/brettchen:latest
+          docker logout git.krabe.lol || true
