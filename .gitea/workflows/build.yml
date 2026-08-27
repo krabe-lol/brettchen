@@ -13,7 +13,7 @@ jobs:
       - name: Install tools
         run: |
           apt-get update
-          apt-get install -y git curl
+          apt-get install -y git curl docker.io
 
       - name: Clone repository
         run: |
@@ -21,7 +21,7 @@ jobs:
           rm -rf brettchen || true
           git clone http://git.krabe.lol/krabe-lol/brettchen.git
           cd brettchen
-          git checkout dev
+          git checkout main
 
       - name: Build Docker image
         run: |
