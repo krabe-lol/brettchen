@@ -1,3 +1,4 @@
+yaml
 name: Build and Push Docker
 
 on:
@@ -13,7 +14,7 @@ jobs:
     steps:
       - name: Checkout code
         run: |
-          git clone https://git.krabe.lol/krabe-lol/brettchen.git .
+          git clone http://server:3000/krabe-lol/brettchen.git .
           git checkout ${{ github.ref_name }}
 
       - name: Build Docker image
