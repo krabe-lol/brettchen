@@ -1,4 +1,4 @@
-name: Build and Push to Gitea Registry
+name: Build and Push Docker
 
 on:
   workflow_dispatch:
@@ -6,64 +6,27 @@ on:
     branches:
       - main
       - master
-      - develop
-    paths:
-      - 'src/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'Dockerfile'
-      - '.gitea/workflows/build.yml'
-  pull_request:
-    branches:
-      - main
-      - master
-      - dev
-
-env:
-  REGISTRY: git.krabe.lol
-  IMAGE_NAME: brettchen
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         run: |
-          mkdir -p /workspace/${{ github.repository }}
-          cd /workspace/${{ github.repository }}
-          git clone http://server:3000/${{ github.repository }}.git .
-          git checkout ${{ github.ref }}
+          git clone http://server:3000/krabe-lol/brettchen.git .
+          git checkout ${{ github.ref_name }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Build Docker image
+        run: |
+          docker build -t git.krabe.lol/krabe-lol/brettchen:latest .
 
-      - name: Login to Gitea Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.REGISTRY_USER }}
-          password: ${{ secrets.REGISTRY_PASSWORD }}
+      - name: Login to Registry
+        run: |
+          docker login -u ${{ secrets.REGISTRY_USER }} -p ${{ secrets.REGISTRY_PASSWORD }} git.krabe.lol
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/krabe.lol/${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
+      - name: Push image
+        run: |
+          docker push git.krabe.lol/krabe-lol/brettchen:latest
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: /workspace/${{ github.repository }}
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/krabe.lol/${{ env.IMAGE_NAME }}:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/krabe.lol/${{ env.IMAGE_NAME }}:buildcache,mode=max
+      - name: Logout
+        run: docker logout git.krabe.lol || true
