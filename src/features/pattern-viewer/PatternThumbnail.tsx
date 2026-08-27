@@ -84,7 +84,15 @@ export function PatternThumbnail({ pattern, palette, weftColorSlotId, className 
       preserveAspectRatio="xMinYMid slice"
       className={className}
     >
-      <g transform={`translate(0, ${contentWidth}) rotate(-90)`}>
+      {/*
+        Shifted left by one row (STEP): without this, the row that lands
+        exactly on the crop edge (see preserveAspectRatio "slice" below)
+        has its diagonal parallelogram sliced mid-shape, looking like a
+        torn/irregular edge right where the thumbnail "starts" visually.
+        Shifting by one row pushes that torn row out of view and brings
+        the next, cleanly-bounded row to the edge instead.
+      */}
+      <g transform={`translate(${-STEP}, ${contentWidth}) rotate(-90)`}>
         <rect x={0} y={0} width={contentWidth} height={contentHeight} fill={weftHex} />
         {weaveGrid.map((row) =>
           row.map((cell) => {
