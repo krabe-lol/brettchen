@@ -5,6 +5,7 @@ import { useLanguage } from '@/features/i18n/LanguageContext'
 import { useToast } from '@/features/toast/ToastContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { errorMessage } from '@/lib/utils'
 
 interface BulkAddToCollectionButtonProps {
   collections: StrapiCollectionRecord[]
@@ -44,7 +45,7 @@ export function BulkAddToCollectionButton({ collections, patternIds, token, onCh
       setOpen(false)
       toast(t('toastAddedToCollection'))
     } catch (err) {
-      toast(err instanceof Error ? err.message : t('collectionSaveError'), { variant: 'error' })
+      toast(errorMessage(err, t('collectionSaveError')), { variant: 'error' })
     } finally {
       setIsSubmitting(false)
     }
@@ -62,7 +63,7 @@ export function BulkAddToCollectionButton({ collections, patternIds, token, onCh
       setOpen(false)
       toast(t('toastCollectionCreated'))
     } catch (err) {
-      toast(err instanceof Error ? err.message : t('collectionSaveError'), { variant: 'error' })
+      toast(errorMessage(err, t('collectionSaveError')), { variant: 'error' })
     } finally {
       setIsSubmitting(false)
     }

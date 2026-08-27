@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { errorMessage } from '@/lib/utils'
 
 interface CreateCollectionCardProps {
   token: string
@@ -33,7 +34,7 @@ export function CreateCollectionCard({ token, onCreated }: CreateCollectionCardP
       onCreated()
       toast(t('toastCollectionCreated'))
     } catch (err) {
-      toast(err instanceof Error ? err.message : t('collectionSaveError'), { variant: 'error' })
+      toast(errorMessage(err, t('collectionSaveError')), { variant: 'error' })
     } finally {
       setIsCreating(false)
     }

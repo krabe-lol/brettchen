@@ -5,6 +5,7 @@ import { useLanguage } from '@/features/i18n/LanguageContext'
 import { CollectionCard } from '@/features/library/CollectionCard'
 import { CreateCollectionCard } from '@/features/library/CreateCollectionCard'
 import { fetchMyCollections, fetchMySubscriptions, type StrapiCollectionRecord } from '@/lib/strapi/collections'
+import { errorMessage } from '@/lib/utils'
 
 /** Same as CollectionListPage ("all collections"), but only the user's own collections (including private) plus subscribed ones. */
 export function MyCollectionListPage() {
@@ -24,7 +25,7 @@ export function MyCollectionListPage() {
         setCollections(mine)
         setSubscriptions(subscribed)
       })
-      .catch((err) => setLoadError(err instanceof Error ? err.message : t('profileLoadError')))
+      .catch((err) => setLoadError(errorMessage(err, t('profileLoadError'))))
       .finally(() => setIsLoading(false))
   }, [token, t])
 

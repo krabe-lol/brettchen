@@ -4,6 +4,7 @@ import { subscribeToCollection, unsubscribeFromCollection } from '@/lib/strapi/c
 import { useLanguage } from '@/features/i18n/LanguageContext'
 import { useToast } from '@/features/toast/ToastContext'
 import { Button } from '@/components/ui/button'
+import { errorMessage } from '@/lib/utils'
 
 interface CollectionSubscribeButtonProps {
   collectionId: string
@@ -40,7 +41,7 @@ export function CollectionSubscribeButton({
       }
       onChanged()
     } catch (err) {
-      toast(err instanceof Error ? err.message : t('collectionSubscribeError'), { variant: 'error' })
+      toast(errorMessage(err, t('collectionSubscribeError')), { variant: 'error' })
     } finally {
       setIsSubmitting(false)
     }

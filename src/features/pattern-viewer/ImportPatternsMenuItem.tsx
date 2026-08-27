@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { errorMessage } from '@/lib/utils'
 
 /**
  * All the state/DOM for pattern import, meant to be rendered by Header
@@ -56,7 +57,7 @@ export function useImportPatterns(token: string, createdBy: string) {
       toast(t('patternImportSuccess', { count: String(created.length) }))
       navigate(created.length === 1 ? `/pattern/${created[0].slug}` : '/meine-muster')
     } catch (err) {
-      toast(err instanceof Error ? err.message : t('patternSaveError'), { variant: 'error' })
+      toast(errorMessage(err, t('patternSaveError')), { variant: 'error' })
     } finally {
       setIsImporting(false)
     }

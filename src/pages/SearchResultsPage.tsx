@@ -8,6 +8,7 @@ import { PatternCard } from '@/features/pattern-viewer/PatternCard'
 import { CollectionCard } from '@/features/library/CollectionCard'
 import { fetchPublishedPatterns, type StrapiPatternRecord } from '@/lib/strapi/patterns'
 import { fetchMyCollections, fetchPublicCollections, type StrapiCollectionRecord } from '@/lib/strapi/collections'
+import { errorMessage } from '@/lib/utils'
 
 /** Results page for the header search bar: searches pattern titles, collection titles, and style tags. */
 export function SearchResultsPage() {
@@ -40,7 +41,7 @@ export function SearchResultsPage() {
         setPublicCollections(collectionData)
       })
       .catch((err) => {
-        if (!cancelled) setLoadError(err instanceof Error ? err.message : t('profileLoadError'))
+        if (!cancelled) setLoadError(errorMessage(err, t('profileLoadError')))
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false)

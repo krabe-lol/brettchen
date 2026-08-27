@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { errorMessage } from '@/lib/utils'
 
 export function ForgotPasswordPage() {
   const { t } = useLanguage()
@@ -22,7 +23,7 @@ export function ForgotPasswordPage() {
       await forgotPassword(email.trim())
       setIsSent(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('forgotPasswordError'))
+      setError(errorMessage(err, t('forgotPasswordError')))
     } finally {
       setIsSubmitting(false)
     }

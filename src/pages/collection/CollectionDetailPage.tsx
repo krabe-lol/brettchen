@@ -23,6 +23,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { errorMessage } from '@/lib/utils'
 
 const DESCRIPTION_MAX_LENGTH = 500
 
@@ -61,7 +62,7 @@ export function CollectionDetailPage() {
         setVisibility(data.visibility)
       })
       .catch((err) => {
-        if (!cancelled) setLoadError(err instanceof Error ? err.message : t('collectionDetailNotFound'))
+        if (!cancelled) setLoadError(errorMessage(err, t('collectionDetailNotFound')))
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false)
@@ -158,7 +159,7 @@ export function CollectionDetailPage() {
       setIsEditing(false)
       toast(t('toastCollectionSaved'))
     } catch (err) {
-      toast(err instanceof Error ? err.message : t('collectionSaveError'), { variant: 'error' })
+      toast(errorMessage(err, t('collectionSaveError')), { variant: 'error' })
     } finally {
       setIsSaving(false)
     }
@@ -172,7 +173,7 @@ export function CollectionDetailPage() {
       toast(t('toastCollectionDeleted'))
       navigate('/profil')
     } catch (err) {
-      toast(err instanceof Error ? err.message : t('collectionSaveError'), { variant: 'error' })
+      toast(errorMessage(err, t('collectionSaveError')), { variant: 'error' })
     }
   }
 
@@ -186,7 +187,7 @@ export function CollectionDetailPage() {
       setCollection(updated)
       toast(isSubscribed ? t('toastCollectionUnsubscribed') : t('toastCollectionSubscribed'))
     } catch (err) {
-      toast(err instanceof Error ? err.message : t('collectionSubscribeError'), { variant: 'error' })
+      toast(errorMessage(err, t('collectionSubscribeError')), { variant: 'error' })
     } finally {
       setIsSubscribing(false)
     }
@@ -205,7 +206,7 @@ export function CollectionDetailPage() {
       setCollection(updated)
       loadMyCollections()
     } catch (err) {
-      toast(err instanceof Error ? err.message : t('collectionSaveError'), { variant: 'error' })
+      toast(errorMessage(err, t('collectionSaveError')), { variant: 'error' })
     }
   }
 

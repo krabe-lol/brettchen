@@ -7,6 +7,7 @@ import { createPattern } from '@/lib/strapi/patterns'
 import { PatternEditor } from '@/features/pattern-viewer/PatternEditor'
 import { createEmptyPattern } from '@/features/pattern-viewer/emptyPattern'
 import type { Pattern } from '@/features/pattern-viewer/types'
+import { errorMessage } from '@/lib/utils'
 
 export function PatternNewPage() {
   const { user, token, isLoading } = useAuth()
@@ -32,7 +33,7 @@ export function PatternNewPage() {
       toast(status === 'published' ? t('toastPatternPublished') : t('toastPatternSaved'))
       navigate('/profil')
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('patternSaveError'))
+      setError(errorMessage(err, t('patternSaveError')))
     } finally {
       setIsSaving(false)
     }

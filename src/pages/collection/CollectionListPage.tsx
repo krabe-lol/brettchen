@@ -3,6 +3,7 @@ import { useAuth } from '@/features/auth/AuthContext'
 import { useLanguage } from '@/features/i18n/LanguageContext'
 import { CollectionCard } from '@/features/library/CollectionCard'
 import { fetchPublicCollections, type StrapiCollectionRecord } from '@/lib/strapi/collections'
+import { errorMessage } from '@/lib/utils'
 
 /** Public collections from everyone, for browsing and subscribing. */
 export function CollectionListPage() {
@@ -17,7 +18,7 @@ export function CollectionListPage() {
     setLoadError(null)
     fetchPublicCollections()
       .then(setCollections)
-      .catch((err) => setLoadError(err instanceof Error ? err.message : t('profileLoadError')))
+      .catch((err) => setLoadError(errorMessage(err, t('profileLoadError'))))
       .finally(() => setIsLoading(false))
   }, [t])
 

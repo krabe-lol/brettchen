@@ -5,6 +5,7 @@ import { useToast } from '@/features/toast/ToastContext'
 import { useLanguage } from '@/features/i18n/LanguageContext'
 import { updateUserPreferences } from '@/lib/strapi/auth'
 import type { DisplaySettings } from './render/orientationDisplay'
+import { errorMessage } from '@/lib/utils'
 
 interface DisplaySettingsContextValue {
   settings: DisplaySettings
@@ -60,7 +61,7 @@ export function useSaveDisplaySettingsAsDefault() {
       await updateUserPreferences(token, { displaySettings: settings })
       toast(t('accountSettingsSaved'))
     } catch (err) {
-      toast(err instanceof Error ? err.message : t('accountSettingsError'), { variant: 'error' })
+      toast(errorMessage(err, t('accountSettingsError')), { variant: 'error' })
     } finally {
       setIsSaving(false)
     }

@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import { PasswordInput } from '@/components/ui/password-input'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
+import { errorMessage } from '@/lib/utils'
 
 /**
  * One form for username/email/password together (new password stays
@@ -85,7 +86,7 @@ export function AccountSettingsCard() {
       closeConfirmDialog(false)
       toast(t('accountSettingsSaved'))
     } catch (err) {
-      toast(err instanceof Error ? err.message : t('accountSettingsError'), { variant: 'error' })
+      toast(errorMessage(err, t('accountSettingsError')), { variant: 'error' })
     } finally {
       setIsSaving(false)
     }
@@ -108,7 +109,7 @@ export function AccountSettingsCard() {
       navigate('/')
       toast(t('toastAccountDeleted'))
     } catch (err) {
-      toast(err instanceof Error ? err.message : t('accountSettingsError'), { variant: 'error' })
+      toast(errorMessage(err, t('accountSettingsError')), { variant: 'error' })
       setIsDeleting(false)
     }
   }

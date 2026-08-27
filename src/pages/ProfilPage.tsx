@@ -7,6 +7,7 @@ import { CreateCollectionCard } from '@/features/library/CreateCollectionCard'
 import { PatternCard } from '@/features/pattern-viewer/PatternCard'
 import { fetchMyPatterns, type StrapiPatternRecord } from '@/lib/strapi/patterns'
 import { fetchMyCollections, fetchMySubscriptions, type StrapiCollectionRecord } from '@/lib/strapi/collections'
+import { errorMessage } from '@/lib/utils'
 
 export function ProfilPage() {
   const { user, token, isLoading } = useAuth()
@@ -28,7 +29,7 @@ export function ProfilPage() {
     setCollectionsError(null)
     fetchMyCollections(token)
       .then(setCollections)
-      .catch((err) => setCollectionsError(err instanceof Error ? err.message : t('profileLoadError')))
+      .catch((err) => setCollectionsError(errorMessage(err, t('profileLoadError'))))
       .finally(() => setIsLoadingCollections(false))
   }, [token, t])
 
@@ -49,7 +50,7 @@ export function ProfilPage() {
         if (!cancelled) setMyPatterns(patterns)
       })
       .catch((err) => {
-        if (!cancelled) setPatternsError(err instanceof Error ? err.message : t('profileLoadError'))
+        if (!cancelled) setPatternsError(errorMessage(err, t('profileLoadError')))
       })
       .finally(() => {
         if (!cancelled) setIsLoadingPatterns(false)

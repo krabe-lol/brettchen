@@ -10,7 +10,7 @@ import { useLanguage } from '@/features/i18n/LanguageContext'
 import { useToast } from '@/features/toast/ToastContext'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { cn } from '@/lib/utils'
+import { cn, errorMessage } from '@/lib/utils'
 
 interface CollectionBookmarkButtonProps {
   /** The logged-in user's own collections, loaded once by the calling page (not per card). */
@@ -62,7 +62,7 @@ export function CollectionBookmarkButton({
       onChanged()
       toast(t('toastAddedToCollection'))
     } catch (err) {
-      toast(err instanceof Error ? err.message : t('collectionSaveError'), { variant: 'error' })
+      toast(errorMessage(err, t('collectionSaveError')), { variant: 'error' })
     } finally {
       setIsSubmitting(false)
     }
@@ -75,7 +75,7 @@ export function CollectionBookmarkButton({
       onChanged()
       toast(t('toastRemovedFromCollection'))
     } catch (err) {
-      toast(err instanceof Error ? err.message : t('collectionSaveError'), { variant: 'error' })
+      toast(errorMessage(err, t('collectionSaveError')), { variant: 'error' })
     } finally {
       setIsSubmitting(false)
     }
@@ -92,7 +92,7 @@ export function CollectionBookmarkButton({
       onChanged()
       toast(t('toastCollectionCreated'))
     } catch (err) {
-      toast(err instanceof Error ? err.message : t('collectionSaveError'), { variant: 'error' })
+      toast(errorMessage(err, t('collectionSaveError')), { variant: 'error' })
     } finally {
       setIsSubmitting(false)
     }

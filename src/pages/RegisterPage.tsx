@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { PasswordInput } from '@/components/ui/password-input'
+import { errorMessage } from '@/lib/utils'
 
 type UsernameStatus = 'idle' | 'checking' | 'available' | 'taken'
 
@@ -55,7 +56,7 @@ export function RegisterPage() {
       setSession(result)
       navigate('/profil')
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('registerError'))
+      setError(errorMessage(err, t('registerError')))
     } finally {
       setIsSubmitting(false)
     }

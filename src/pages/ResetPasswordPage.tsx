@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { PasswordInput } from '@/components/ui/password-input'
+import { errorMessage } from '@/lib/utils'
 
 export function ResetPasswordPage() {
   const { setSession } = useAuth()
@@ -37,7 +38,7 @@ export function ResetPasswordPage() {
       setSession(result)
       navigate('/profil')
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('resetPasswordError'))
+      setError(errorMessage(err, t('resetPasswordError')))
     } finally {
       setIsSubmitting(false)
     }
