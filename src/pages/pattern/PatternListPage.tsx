@@ -89,7 +89,12 @@ export function PatternListPage() {
 
   return (
     <div className="py-12">
-      <h1 className="text-3xl font-semibold tracking-tight">{t('patternListHeading')}</h1>
+      <h1 className="text-3xl font-semibold tracking-tight">
+        {t('patternListHeading')}
+        {!isLoading && !loadError && (
+          <span className="ml-2 text-xl font-normal text-muted-foreground">({filters.filteredPatterns.length})</span>
+        )}
+      </h1>
 
       {/* From 1000px up: filter row directly below the title. Below 1000px: collapsed behind a button+overlay instead. */}
       <div className="mt-4 hidden min-[1000px]:block">{renderFilterBar('row')}</div>

@@ -39,7 +39,12 @@ export function MyCollectionListPage() {
 
   return (
     <div className="py-12">
-      <h1 className="text-3xl font-semibold tracking-tight">{t('myCollectionListHeading')}</h1>
+      <h1 className="text-3xl font-semibold tracking-tight">
+        {t('myCollectionListHeading')}
+        {!isLoading && !loadError && (
+          <span className="ml-2 text-xl font-normal text-muted-foreground">({allCollections.length})</span>
+        )}
+      </h1>
 
       {isLoading ? (
         <p className="mt-4 text-muted-foreground">{t('profileLoading')}</p>
