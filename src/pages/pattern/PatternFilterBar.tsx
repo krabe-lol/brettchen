@@ -60,6 +60,7 @@ export function PatternFilterBar({
       <ToggleGroup
         type="single"
         spacing="none"
+        size="sm"
         value={twistFilter}
         onValueChange={(value) => value && onTwistFilterChange(value as TwistFilter)}
       >
@@ -146,6 +147,7 @@ export function PatternFilterBar({
       <ToggleGroup
         type="single"
         spacing="none"
+        size="sm"
         value={difficultyFilter}
         onValueChange={(value) => value && onDifficultyFilterChange(value as DifficultyFilter)}
       >
