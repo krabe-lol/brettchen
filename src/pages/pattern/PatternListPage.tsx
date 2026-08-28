@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useLocation, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { Filter } from 'lucide-react'
 import { useAuth } from '@/features/auth/AuthContext'
 import { useLanguage } from '@/features/i18n/LanguageContext'
@@ -22,8 +22,6 @@ export function PatternListPage() {
   const [collections, setCollections] = useState<StrapiCollectionRecord[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
-  /** This component is also the "/" index route (see router.tsx) - only shows the welcome greeting there, not on the dedicated /pattern URL. */
-  const isHome = useLocation().pathname === '/'
   const [searchParams] = useSearchParams()
   const initialStyle = searchParams.get('style')
   const filters = usePatternFilters(patterns, initialStyle ? [initialStyle] : [])
@@ -90,23 +88,14 @@ export function PatternListPage() {
     )
   }
 
-  /** The welcome greeting takes over as page h1 on the home route - the pattern heading below steps down to h2 there so there's still only one h1. */
-  const PatternHeadingTag = isHome ? 'h2' : 'h1'
-
   return (
     <div className="py-12">
-      {isHome && (
-        <div className="mb-8">
-          <h1 className="text-4xl font-semibold tracking-tight">{t('homeWelcomeHeading')}</h1>
-          <p className="mt-2 text-muted-foreground">{t('homeWelcomeSubtitle')}</p>
-        </div>
-      )}
-      <PatternHeadingTag className="text-3xl font-semibold tracking-tight">
+      <h1 className="text-3xl font-semibold tracking-tight">
         {t('patternListHeading')}
         {!isLoading && !loadError && (
           <span className="ml-2 text-xl font-normal text-muted-foreground">({filters.filteredPatterns.length})</span>
         )}
-      </PatternHeadingTag>
+      </h1>
 
       {/* From 1000px up: filter row directly below the title. Below 1000px: collapsed behind a button+overlay instead. */}
       <div className="mt-4 hidden min-[1000px]:block">{renderFilterBar('row')}</div>

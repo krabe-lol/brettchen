@@ -12,10 +12,7 @@ export const router = createBrowserRouter([
     path: '/',
     element: <App />,
     children: [
-      {
-        index: true,
-        lazy: () => import('@/pages/pattern/PatternListPage').then((m) => ({ Component: m.PatternListPage })),
-      },
+      { index: true, lazy: () => import('@/pages/HomePage').then((m) => ({ Component: m.HomePage })) },
       { path: 'login', lazy: () => import('@/pages/LoginPage').then((m) => ({ Component: m.LoginPage })) },
       { path: 'register', lazy: () => import('@/pages/RegisterPage').then((m) => ({ Component: m.RegisterPage })) },
       {
