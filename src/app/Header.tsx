@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Check, Menu, Moon, Plus, Search, Sun, User, X } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/features/auth/AuthContext'
-import { useLanguage } from '@/features/i18n/LanguageContext'
+import { LANGUAGE_SWITCHING_ENABLED, useLanguage } from '@/features/i18n/LanguageContext'
 import { LanguageSwitcher } from '@/features/i18n/LanguageSwitcher'
 import { useTheme } from '@/features/theme/ThemeContext'
 import { ThemeToggle } from '@/features/theme/ThemeToggle'
@@ -51,14 +51,17 @@ export function Header() {
   }
 
   return (
-    <header className="flex items-center gap-2 border-b py-4 sm:gap-4">
+    <header className="flex items-center gap-2 border-b py-4 sm:gap-6">
       {!mobileSearchOpen && (
-        <Link to="/" className="shrink-0 font-semibold">
-          Brettchen
+        <Link to="/" className="shrink-0">
+          <img src="/favicon.svg" alt="Brettchen" className="size-7" />
         </Link>
       )}
 
-      <nav className="hidden items-center gap-4 md:flex">
+      <nav className="hidden items-center gap-6 md:flex">
+        <Link to="/wissen" className="text-sm text-muted-foreground hover:text-foreground">
+          {t('headerKnowledge')}
+        </Link>
         <Link to="/pattern" className="text-sm text-muted-foreground hover:text-foreground">
           {t('headerPatterns')}
         </Link>
@@ -82,6 +85,9 @@ export function Header() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
             <DropdownMenuItem asChild>
+              <Link to="/wissen">{t('headerKnowledge')}</Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
               <Link to="/pattern">{t('headerPatterns')}</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
@@ -93,16 +99,20 @@ export function Header() {
             </DropdownMenuItem>
             {!user && (
               <>
-                <DropdownMenuSeparator className="sm:hidden" />
-                <DropdownMenuLabel className="sm:hidden">{t('languageSwitcherLabel')}</DropdownMenuLabel>
-                <DropdownMenuItem onSelect={() => handleSelectLanguage('en')} className="justify-between sm:hidden">
-                  English
-                  {language === 'en' && <Check className="size-4" />}
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => handleSelectLanguage('de')} className="justify-between sm:hidden">
-                  Deutsch
-                  {language === 'de' && <Check className="size-4" />}
-                </DropdownMenuItem>
+                {LANGUAGE_SWITCHING_ENABLED && (
+                  <>
+                    <DropdownMenuSeparator className="sm:hidden" />
+                    <DropdownMenuLabel className="sm:hidden">{t('languageSwitcherLabel')}</DropdownMenuLabel>
+                    <DropdownMenuItem onSelect={() => handleSelectLanguage('en')} className="justify-between sm:hidden">
+                      English
+                      {language === 'en' && <Check className="size-4" />}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => handleSelectLanguage('de')} className="justify-between sm:hidden">
+                      Deutsch
+                      {language === 'de' && <Check className="size-4" />}
+                    </DropdownMenuItem>
+                  </>
+                )}
                 <DropdownMenuSeparator className="sm:hidden" />
                 <DropdownMenuItem onSelect={handleToggleTheme} className="sm:hidden">
                   {theme === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
@@ -114,7 +124,7 @@ export function Header() {
         </DropdownMenu>
       )}
 
-      <div className="flex min-w-0 flex-1 items-center justify-end gap-2 px-1 sm:px-4">
+      <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
         {mobileSearchOpen ? (
           <div className="flex w-full items-center gap-2 md:hidden">
             <SearchBar autoFocus onNavigate={() => setMobileSearchOpen(false)} />
@@ -172,16 +182,20 @@ export function Header() {
                 </DropdownMenuItem>
                 {token && <ImportPatternsMenuItem onSelect={openImportPicker} />}
 
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel>{t('languageSwitcherLabel')}</DropdownMenuLabel>
-                <DropdownMenuItem onSelect={() => handleSelectLanguage('en')} className="justify-between">
-                  English
-                  {language === 'en' && <Check className="size-4" />}
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => handleSelectLanguage('de')} className="justify-between">
-                  Deutsch
-                  {language === 'de' && <Check className="size-4" />}
-                </DropdownMenuItem>
+                {LANGUAGE_SWITCHING_ENABLED && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuLabel>{t('languageSwitcherLabel')}</DropdownMenuLabel>
+                    <DropdownMenuItem onSelect={() => handleSelectLanguage('en')} className="justify-between">
+                      English
+                      {language === 'en' && <Check className="size-4" />}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => handleSelectLanguage('de')} className="justify-between">
+                      Deutsch
+                      {language === 'de' && <Check className="size-4" />}
+                    </DropdownMenuItem>
+                  </>
+                )}
 
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onSelect={handleToggleTheme}>
@@ -199,7 +213,7 @@ export function Header() {
                 <Link to="/login">{t('headerLogin')}</Link>
               </Button>
               <div className="hidden items-center gap-3 sm:flex">
-                <LanguageSwitcher />
+                {LANGUAGE_SWITCHING_ENABLED && <LanguageSwitcher />}
                 <ThemeToggle />
               </div>
             </>

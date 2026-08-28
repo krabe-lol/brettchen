@@ -4,6 +4,15 @@ import { translations, type Language, type TranslationKey } from './translations
 const STORAGE_KEY = 'brettchen.language'
 const DEFAULT_LANGUAGE: Language = 'en'
 
+/**
+ * Temporary: the site is English-only for now. Flip back to `true` to
+ * restore switching - the `de` translations and all the plumbing below
+ * stay intact either way, this only gates whether anything can actually
+ * select German (stored preference, the header UI, PreferenceSync
+ * applying a user's saved languagePreference on login).
+ */
+export const LANGUAGE_SWITCHING_ENABLED = false
+
 interface LanguageContextValue {
   language: Language
   setLanguage: (language: Language) => void
@@ -17,6 +26,7 @@ function isLanguage(value: string | null): value is Language {
 }
 
 function readStoredLanguage(): Language {
+  if (!LANGUAGE_SWITCHING_ENABLED) return DEFAULT_LANGUAGE
   const raw = localStorage.getItem(STORAGE_KEY)
   return isLanguage(raw) ? raw : DEFAULT_LANGUAGE
 }
@@ -31,6 +41,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>(() => readStoredLanguage())
 
   function setLanguage(next: Language) {
+    if (!LANGUAGE_SWITCHING_ENABLED) return
     localStorage.setItem(STORAGE_KEY, next)
     setLanguageState(next)
   }
