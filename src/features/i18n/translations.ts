@@ -238,8 +238,9 @@ const de = {
 
   articleListHeading: 'Wissensdatenbank',
   articleListPlaceholder: 'Einträge kommen bald.',
-  articleDetailHeading: 'Artikel: {{slug}}',
-  articleDetailPlaceholder: 'Inhalt folgt.',
+  articleReadMore: 'Weiterlesen',
+  articleDetailNotFound: 'Artikel nicht gefunden.',
+  articleBackToList: 'Zurück zur Wissensdatenbank',
 
   editorSaveDraft: 'Speichern',
   editorSaving: 'Speichert…',
@@ -598,8 +599,9 @@ const en: Record<keyof typeof de, string> = {
 
   articleListHeading: 'Knowledge base',
   articleListPlaceholder: 'Articles are coming soon.',
-  articleDetailHeading: 'Article: {{slug}}',
-  articleDetailPlaceholder: 'Content coming soon.',
+  articleReadMore: 'Read more',
+  articleDetailNotFound: 'Article not found.',
+  articleBackToList: 'Back to the knowledge base',
 
   editorSaveDraft: 'Save',
   editorSaving: 'Saving…',

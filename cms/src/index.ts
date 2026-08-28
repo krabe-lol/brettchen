@@ -49,6 +49,8 @@ const PUBLIC_ACTIONS = [
   'api::pattern.pattern.findOne',
   'api::collection.collection.find',
   'api::collection.collection.findOne',
+  'api::article.article.find',
+  'api::article.article.findOne',
   'plugin::users-permissions.auth.forgotPassword',
   'plugin::users-permissions.auth.resetPassword',
 ];
@@ -165,6 +167,61 @@ async function backfillPatternDifficulty(strapi: Core.Strapi) {
   }
 }
 
+const SEED_ARTICLES = [
+  {
+    title: 'What Is Tablet Weaving?',
+    slug: 'what-is-tablet-weaving',
+    excerpt: "A short introduction to one of the world's oldest weaving techniques.",
+    content: `Tablet weaving (also called card weaving) is an ancient technique for weaving narrow, sturdy bands - used for belts, trims, straps, or decorative edges on clothing. Instead of a classic loom with shafts, it uses small, usually square tablets ("cards") with four holes near the corners.
+
+A warp thread runs through each hole of a tablet. Turning the tablets while weaving twists the warp threads together, forming the pattern. Depending on how the tablets are threaded and turned, you get stripes, diamonds, zigzags, or even lettering.
+
+The technique is archaeologically documented as far back as the Iron Age and was independently developed across many cultures - from Scandinavia to the Balkans to Central Asia. Many historical finds can still be rewoven today using the same basic principles this app is built around.`,
+  },
+  {
+    title: 'Getting Started: The Basics',
+    slug: 'getting-started-the-basics',
+    excerpt: 'What you actually need to start tablet weaving - and what can wait.',
+    content: `You need less equipment than you'd think to get started:
+
+Tablets: square cards with four holes, usually plastic, wood, or cardstock. 8-10 is plenty to start with.
+
+Thread: a smooth, sturdy thread like cotton or linen in a few colors. The less stretchy and the better it grips, the easier it is to weave.
+
+Something to tension the warp: this can be a small tablet-weaving frame, but a belt around your own waist and a fixed point (a door handle, a table leg) to tie the other end to works just as well.
+
+A weaving sword or comb to beat the weft into place is helpful, but not strictly necessary at first - your fingers work in a pinch.
+
+Once the basic technique feels natural, it's worth investing in a proper tablet-weaving frame or a larger set of tablets.`,
+  },
+  {
+    title: 'S and Z Threading Explained',
+    slug: 's-and-z-threading-explained',
+    excerpt: 'Why the direction a tablet is threaded shapes the look of the finished band.',
+    content: `Every tablet can be threaded one of two ways: S or Z. The difference is which direction the warp threads run through the four holes - front-left to back-right (S) or front-right to back-left (Z), looking at the tablet face-on.
+
+Threading direction doesn't determine which color shows up where - that's purely down to the turning sequence. What it does affect is how the two threads between neighboring tablets twist together: S- and Z-threaded tablets, turned the same way, twist in opposite directions.
+
+That's exactly what many classic patterns rely on: alternating the threading direction at certain points lets you build patterns that untwist themselves as you weave (so-called "twist-neutral" patterns) - handy, since you don't have to keep stopping to untwist the warp by hand.`,
+  },
+];
+
+/**
+ * Seeds three general-knowledge placeholder articles, but only the very
+ * first time (i.e. only while the table is still completely empty) - so
+ * it never resurrects articles someone deliberately deleted, unlike the
+ * other idempotent-by-condition seed/backfill functions above.
+ */
+async function seedPlaceholderArticles(strapi: Core.Strapi) {
+  const existingCount = await strapi.db.query('api::article.article').count();
+  if (existingCount > 0) return;
+
+  for (const article of SEED_ARTICLES) {
+    const entity = await strapi.documents('api::article.article').create({ data: article });
+    await strapi.documents('api::article.article').publish({ documentId: entity.documentId });
+  }
+}
+
 export default {
   /**
    * An asynchronous register function that runs before
@@ -188,5 +245,6 @@ export default {
     await ensureResetPasswordEmailSender(strapi);
     await renameDefaultCollections(strapi);
     await backfillPatternDifficulty(strapi);
+    await seedPlaceholderArticles(strapi);
   },
 };
