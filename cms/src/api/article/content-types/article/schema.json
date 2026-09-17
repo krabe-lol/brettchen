@@ -26,7 +26,25 @@
       "maxLength": 300
     },
     "content": {
-      "type": "text"
+      "type": "richtext"
+    },
+    "category": {
+      "type": "enumeration",
+      "enum": ["guide", "history", "technique", "material"],
+      "required": true,
+      "default": "guide"
+    },
+    "authorName": {
+      "type": "string"
+    },
+    "coverImage": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "imageCaption": {
+      "type": "string",
+      "maxLength": 80
     }
   }
 }

@@ -74,7 +74,7 @@ export function ThumbnailCard({
           {titleBadges}
         </div>
         {ownerUsername ? (
-          <Link to={`/profil/${ownerUsername}`} className="text-xs text-muted-foreground hover:underline">
+          <Link to={`/profile/${ownerUsername}`} className="text-xs text-muted-foreground hover:underline">
             {ownerUsername}
           </Link>
         ) : (

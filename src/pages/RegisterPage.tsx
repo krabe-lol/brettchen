@@ -54,7 +54,7 @@ export function RegisterPage() {
     try {
       const result = await registerUsernameOnly(username.trim(), password, email.trim() || undefined)
       setSession(result)
-      navigate('/profil')
+      navigate('/profile')
     } catch (err) {
       setError(errorMessage(err, t('registerError')))
     } finally {

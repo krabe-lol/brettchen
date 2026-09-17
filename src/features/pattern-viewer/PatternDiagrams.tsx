@@ -197,14 +197,14 @@ export function PatternDiagrams({
       </div>
 
       {(highlightSettings.highlightRow || highlightSettings.highlightTablet) && (
-        <div className="fixed right-4 bottom-4 z-40 flex gap-1 sm:hidden">
+        <div className="fixed right-4 bottom-4 z-40 flex gap-2 sm:hidden">
           {highlightSettings.highlightTablet && (
             <>
               <Button
                 type="button"
                 size="icon"
                 variant="secondary"
-                className="shadow-lg"
+                className="size-16 shadow-lg [&_svg]:size-8"
                 aria-label={t('patternNavigationTabletPrev')}
                 onClick={() => stepTablet(-1)}
               >
@@ -214,7 +214,7 @@ export function PatternDiagrams({
                 type="button"
                 size="icon"
                 variant="secondary"
-                className="shadow-lg"
+                className="size-16 shadow-lg [&_svg]:size-8"
                 aria-label={t('patternNavigationTabletNext')}
                 onClick={() => stepTablet(1)}
               >
@@ -228,7 +228,7 @@ export function PatternDiagrams({
                 type="button"
                 size="icon"
                 variant="secondary"
-                className="shadow-lg"
+                className="size-16 shadow-lg [&_svg]:size-8"
                 aria-label={t('patternNavigationRowNext')}
                 onClick={() => stepRow(1)}
               >
@@ -238,7 +238,7 @@ export function PatternDiagrams({
                 type="button"
                 size="icon"
                 variant="secondary"
-                className="shadow-lg"
+                className="size-16 shadow-lg [&_svg]:size-8"
                 aria-label={t('patternNavigationRowPrev')}
                 onClick={() => stepRow(-1)}
               >

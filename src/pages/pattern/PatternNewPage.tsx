@@ -31,7 +31,7 @@ export function PatternNewPage() {
     try {
       await createPattern(pattern, status, token)
       toast(status === 'published' ? t('toastPatternPublished') : t('toastPatternSaved'))
-      navigate('/profil')
+      navigate('/profile')
     } catch (err) {
       setError(errorMessage(err, t('patternSaveError')))
     } finally {

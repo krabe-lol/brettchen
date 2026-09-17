@@ -139,7 +139,7 @@ export function SearchBar({ autoFocus, onNavigate }: SearchBarProps) {
               {results.collections.map((collection) => (
                 <Link
                   key={collection.id}
-                  to={`/sammlung/${collection.documentId}`}
+                  to={`/collection/${collection.documentId}`}
                   onClick={closeAndClear}
                   className="block px-3 py-1.5 text-sm hover:bg-accent hover:text-accent-foreground"
                 >

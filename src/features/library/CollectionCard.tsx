@@ -22,7 +22,7 @@ export function CollectionCard({ collection, currentUserId, token, onChanged }: 
 
   return (
     <ThumbnailCard
-      href={`/sammlung/${collection.documentId}`}
+      href={`/collection/${collection.documentId}`}
       thumbnail={<CollectionThumbnail patterns={collection.patterns} className="aspect-[3/1] w-full" />}
       title={collection.name}
       isPrivate={collection.visibility === 'private'}

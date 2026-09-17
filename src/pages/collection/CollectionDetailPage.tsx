@@ -171,7 +171,7 @@ export function CollectionDetailPage() {
     try {
       await deleteCollection(collection.documentId, token)
       toast(t('toastCollectionDeleted'))
-      navigate('/profil')
+      navigate('/profile')
     } catch (err) {
       toast(errorMessage(err, t('collectionSaveError')), { variant: 'error' })
     }
@@ -289,7 +289,7 @@ export function CollectionDetailPage() {
               <p className="text-sm text-muted-foreground">
                 {t('infoCreator')}:{' '}
                 {collection.owner?.username ? (
-                  <Link to={`/profil/${collection.owner.username}`} className="text-primary underline">
+                  <Link to={`/profile/${collection.owner.username}`} className="text-primary underline">
                     {collection.owner.username}
                   </Link>
                 ) : (

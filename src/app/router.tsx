@@ -23,21 +23,21 @@ export const router = createBrowserRouter([
         path: 'reset-password',
         lazy: () => import('@/pages/ResetPasswordPage').then((m) => ({ Component: m.ResetPasswordPage })),
       },
-      { path: 'profil', lazy: () => import('@/pages/ProfilPage').then((m) => ({ Component: m.ProfilPage })) },
+      { path: 'profile', lazy: () => import('@/pages/ProfilPage').then((m) => ({ Component: m.ProfilPage })) },
       {
-        path: 'einstellungen',
+        path: 'settings',
         lazy: () => import('@/pages/SettingsPage').then((m) => ({ Component: m.SettingsPage })),
       },
       {
-        path: 'profil/:username',
+        path: 'profile/:username',
         lazy: () => import('@/pages/PublicProfilePage').then((m) => ({ Component: m.PublicProfilePage })),
       },
       {
-        path: 'wissen',
+        path: 'knowledge',
         lazy: () => import('@/pages/wissen/ArtikelListePage').then((m) => ({ Component: m.ArtikelListePage })),
       },
       {
-        path: 'wissen/:slug',
+        path: 'knowledge/:slug',
         lazy: () => import('@/pages/wissen/ArtikelDetailPage').then((m) => ({ Component: m.ArtikelDetailPage })),
       },
       {
@@ -45,7 +45,7 @@ export const router = createBrowserRouter([
         lazy: () => import('@/pages/pattern/PatternListPage').then((m) => ({ Component: m.PatternListPage })),
       },
       {
-        path: 'meine-muster',
+        path: 'my-patterns',
         lazy: () => import('@/pages/pattern/MyPatternListPage').then((m) => ({ Component: m.MyPatternListPage })),
       },
       {
@@ -57,20 +57,20 @@ export const router = createBrowserRouter([
         lazy: () => import('@/pages/pattern/PatternDetailPage').then((m) => ({ Component: m.PatternDetailPage })),
       },
       {
-        path: 'sammlungen',
+        path: 'collections',
         lazy: () => import('@/pages/collection/CollectionListPage').then((m) => ({ Component: m.CollectionListPage })),
       },
       {
-        path: 'meine-sammlungen',
+        path: 'my-collections',
         lazy: () =>
           import('@/pages/collection/MyCollectionListPage').then((m) => ({ Component: m.MyCollectionListPage })),
       },
       {
-        path: 'sammlung/:id',
+        path: 'collection/:id',
         lazy: () =>
           import('@/pages/collection/CollectionDetailPage').then((m) => ({ Component: m.CollectionDetailPage })),
       },
-      { path: 'suche', lazy: () => import('@/pages/SearchResultsPage').then((m) => ({ Component: m.SearchResultsPage })) },
+      { path: 'search', lazy: () => import('@/pages/SearchResultsPage').then((m) => ({ Component: m.SearchResultsPage })) },
       {
         path: 'terms',
         lazy: () =>

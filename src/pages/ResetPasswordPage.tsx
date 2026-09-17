@@ -36,7 +36,7 @@ export function ResetPasswordPage() {
     try {
       const result = await resetPassword(code, password, passwordConfirmation)
       setSession(result)
-      navigate('/profil')
+      navigate('/profile')
     } catch (err) {
       setError(errorMessage(err, t('resetPasswordError')))
     } finally {

@@ -92,7 +92,7 @@ export function PatternInfoSection({
       <div>
         <span className="block text-xs font-medium text-muted-foreground">{t('infoCreator')}</span>
         {createdBy ? (
-          <Link to={`/profil/${createdBy}`} className="text-primary underline">
+          <Link to={`/profile/${createdBy}`} className="text-primary underline">
             {createdBy}
           </Link>
         ) : (

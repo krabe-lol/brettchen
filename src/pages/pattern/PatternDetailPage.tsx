@@ -107,7 +107,7 @@ export function PatternDetailPage() {
     try {
       await deletePattern(record.documentId, token)
       toast(t('toastPatternDeleted'))
-      navigate('/profil')
+      navigate('/profile')
     } catch (err) {
       toast(errorMessage(err, t('patternDeleteError')), { variant: 'error' })
     } finally {

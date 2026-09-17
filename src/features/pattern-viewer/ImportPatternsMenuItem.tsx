@@ -55,7 +55,7 @@ export function useImportPatterns(token: string, createdBy: string) {
       }
       setPendingFiles(null)
       toast(t('patternImportSuccess', { count: String(created.length) }))
-      navigate(created.length === 1 ? `/pattern/${created[0].slug}` : '/meine-muster')
+      navigate(created.length === 1 ? `/pattern/${created[0].slug}` : '/my-patterns')
     } catch (err) {
       toast(errorMessage(err, t('patternSaveError')), { variant: 'error' })
     } finally {

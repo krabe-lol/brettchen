@@ -24,7 +24,7 @@ export function LoginPage() {
     setIsSubmitting(true)
     try {
       await login(username, password)
-      navigate('/profil')
+      navigate('/profile')
     } catch (err) {
       setError(errorMessage(err, t('loginError')))
     } finally {

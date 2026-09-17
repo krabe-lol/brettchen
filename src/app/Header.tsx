@@ -59,13 +59,13 @@ export function Header() {
       )}
 
       <nav className="hidden items-center gap-6 md:flex">
-        <Link to="/wissen" className="text-sm text-muted-foreground hover:text-foreground">
+        <Link to="/knowledge" className="text-sm text-muted-foreground hover:text-foreground">
           {t('headerKnowledge')}
         </Link>
         <Link to="/pattern" className="text-sm text-muted-foreground hover:text-foreground">
           {t('headerPatterns')}
         </Link>
-        <Link to="/sammlungen" className="text-sm text-muted-foreground hover:text-foreground">
+        <Link to="/collections" className="text-sm text-muted-foreground hover:text-foreground">
           {t('headerCollections')}
         </Link>
         <Button asChild size="sm">
@@ -85,13 +85,13 @@ export function Header() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
             <DropdownMenuItem asChild>
-              <Link to="/wissen">{t('headerKnowledge')}</Link>
+              <Link to="/knowledge">{t('headerKnowledge')}</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/pattern">{t('headerPatterns')}</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to="/sammlungen">{t('headerCollections')}</Link>
+              <Link to="/collections">{t('headerCollections')}</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
@@ -169,16 +169,16 @@ export function Header() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem asChild>
-                  <Link to="/profil">{t('headerProfile')}</Link>
+                  <Link to="/profile">{t('headerProfile')}</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/meine-muster">{t('myPatternListHeading')}</Link>
+                  <Link to="/my-patterns">{t('myPatternListHeading')}</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/meine-sammlungen">{t('myCollectionListHeading')}</Link>
+                  <Link to="/my-collections">{t('myCollectionListHeading')}</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/einstellungen">{t('headerSettings')}</Link>
+                  <Link to="/settings">{t('headerSettings')}</Link>
                 </DropdownMenuItem>
                 {token && <ImportPatternsMenuItem onSelect={openImportPicker} />}
 
