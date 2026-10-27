@@ -234,17 +234,12 @@ function parseTwtPatternFile(raw: Record<string, unknown>): PatternFile {
   }
 
   // -1 marks an unthreaded hole in Twisted Threads (see EMPTY_HOLE_COLOR in
-  // weavingUtils.js) - not representable by this app's palette, so it gets
-  // one synthetic slot instead of a dangling color reference.
-  const EMPTY_SLOT_ID = 'empty'
-  const usesEmptyHole = chartRows.some((row) => row.some((index) => typeof index !== 'number' || index < 0 || index >= palette.length))
-  const colorSlotIdFor = (index: unknown) =>
-    typeof index === 'number' && index >= 0 && index < palette.length ? `c${index}` : EMPTY_SLOT_ID
+  // weavingUtils.js). It maps to this app's empty colorSlotId ('', same as
+  // "Kein Faden" in the color editor), which the diagrams render as a diagonal.
+  const isValidIndex = (index: unknown): index is number => typeof index === 'number' && index >= 0 && index < palette.length
+  const colorSlotIdFor = (index: unknown) => (isValidIndex(index) ? `c${index}` : '')
 
   const defaultPalette: PaletteSlot[] = palette.map((hex, i) => ({ slotId: `c${i}`, name: `Farbe ${i + 1}`, hex, order: i }))
-  if (usesEmptyHole) {
-    defaultPalette.push({ slotId: EMPTY_SLOT_ID, name: 'Kein Faden', hex: '#ffffff', order: palette.length })
-  }
 
   const threading: TabletThreading[] = []
   for (let t = 0; t < numTablets; t++) {
@@ -259,7 +254,7 @@ function parseTwtPatternFile(raw: Record<string, unknown>): PatternFile {
     : []
 
   const weftColorIndex = raw['Weft colour']
-  const weftColorSlotId = typeof weftColorIndex === 'number' ? colorSlotIdFor(weftColorIndex) : null
+  const weftColorSlotId = isValidIndex(weftColorIndex) ? `c${weftColorIndex}` : null
 
   const notes = [raw.Description, raw['Threading notes'], raw['Weaving notes']]
     .filter((s): s is string => typeof s === 'string' && s.length > 0)

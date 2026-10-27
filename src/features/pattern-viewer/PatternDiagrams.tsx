@@ -23,6 +23,12 @@ interface PatternDiagramsProps {
   onMoveTablet?: (fromIndex: number, toIndex: number) => void
   /** If set, a small "x" appears below each threading chart column to delete that tablet. */
   onRemoveTablet?: (tabletIndex: number) => void
+  /** If set, a small "+" right of the threading chart's column numbers appends a tablet. */
+  onAddTablet?: () => void
+  /** If set, a small "+" in the turning diagram's top-left corner appends a row - only applies to the turning view, not the woven band. */
+  onAddRow?: () => void
+  /** If set, a small "x" at the end of each turning diagram row deletes that row - only applies to the turning view, not the woven band. */
+  onRemoveRow?: (rowIndex: number) => void
   /** If set, cells in the turning diagram become clickable (change turn direction) - only applies to the turning view, not the woven band. */
   onWeaveCellClick?: (rowIndex: number, tabletIndex: number) => void
   /** If set, a button at the end of each row inverts every tablet's turn from that row up - only applies to the turning view, not the woven band. */
@@ -73,6 +79,9 @@ export function PatternDiagrams({
   onOrientationClick,
   onMoveTablet,
   onRemoveTablet,
+  onAddTablet,
+  onAddRow,
+  onRemoveRow,
   onWeaveCellClick,
   onInvertRow,
   onMoveRow,
@@ -146,6 +155,7 @@ export function PatternDiagrams({
           onOrientationClick={onOrientationClick}
           onMoveTablet={onMoveTablet}
           onRemoveTablet={onRemoveTablet}
+          onAddTablet={onAddTablet}
           displaySettings={displaySettings}
           activeTablet={highlightSettings.highlightTablet ? highlightSettings.activeTablet - 1 : null}
         />
@@ -179,6 +189,8 @@ export function PatternDiagrams({
             onCellClick={highlightSettings.untwistMode ? undefined : onWeaveCellClick}
             onInvertRow={highlightSettings.untwistMode ? undefined : onInvertRow}
             onMoveRow={highlightSettings.untwistMode ? undefined : onMoveRow}
+            onAddRow={highlightSettings.untwistMode ? undefined : onAddRow}
+            onRemoveRow={highlightSettings.untwistMode ? undefined : onRemoveRow}
             onToggleTwistExempt={highlightSettings.untwistMode ? undefined : onToggleTwistExempt}
             displaySettings={displaySettings}
             activeRow={highlightSettings.highlightRow ? highlightSettings.activeRow - 1 : null}

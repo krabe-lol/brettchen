@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
-import { ArrowUpDown, GripVertical } from 'lucide-react'
+import { ArrowUpDown, GripVertical, Plus } from 'lucide-react'
 import { applyUntwistOrder, computeWeaveGrid } from './render/weaveGrid'
 import { computeTwistByTablet, hasDirectionChange } from './render/twist'
 import {
@@ -32,6 +32,10 @@ interface WeaveDiagramProps {
   onInvertRow?: (rowIndex: number) => void
   /** If set, a row can be dragged to another position via its row-label header, like tablets in the threading chart. */
   onMoveRow?: (fromIndex: number, toIndex: number) => void
+  /** If set, a small "+" in the top-left corner (above the topmost, i.e. last, row number) appends a row. */
+  onAddRow?: () => void
+  /** If set, a small "x" right of each row's invert button deletes that row, like the "x" below each threading chart column. */
+  onRemoveRow?: (rowIndex: number) => void
   /** If set, clicking a tablet's twist counter excludes/re-includes it from the twist-neutrality check - only possible for a tablet that never turns. */
   onToggleTwistExempt?: (tabletIndex: number) => void
   /** Display-only, never changes the saved value. See render/orientationDisplay.ts. */
@@ -51,7 +55,11 @@ const BACKWARD_BG = 'var(--foreground)'
 const INVERT_ROW_WIDTH = STEP_X
 const INVERT_ICON_SIZE = 14
 
+/** Reserved column at the far right for the per-row delete "x". */
+const REMOVE_ROW_WIDTH = STEP_X
+
 const GRIP_SIZE = 12
+const ADD_ICON_SIZE = 12
 
 /**
  * The drag-toggle (see handleCellPointerEnter) only reacts within this
@@ -113,6 +121,8 @@ export function WeaveDiagram({
   onCellClick,
   onInvertRow,
   onMoveRow,
+  onAddRow,
+  onRemoveRow,
   onToggleTwistExempt,
   displaySettings = DEFAULT_DISPLAY_SETTINGS,
   activeRow = null,
@@ -171,7 +181,8 @@ export function WeaveDiagram({
 
   const gridWidth = pattern.numTablets * STEP_X
   const gridHeight = pattern.numRows * STEP
-  const totalWidth = ROW_LABEL_WIDTH + gridWidth + (onInvertRow ? INVERT_ROW_WIDTH : 0)
+  const removeRowX = ROW_LABEL_WIDTH + gridWidth + (onInvertRow ? INVERT_ROW_WIDTH : 0)
+  const totalWidth = removeRowX + (onRemoveRow ? REMOVE_ROW_WIDTH : 0)
   const totalHeight = COL_LABEL_HEIGHT + gridHeight + COL_LABEL_HEIGHT
 
   /** Row 0 (woven first) at the bottom, higher rows further up. */
@@ -301,6 +312,21 @@ export function WeaveDiagram({
         )
       })}
 
+      {onAddRow && (
+        // Rows grow upward (see rowY), so the new row appears right below this corner.
+        <g className="cursor-pointer text-muted-foreground hover:text-foreground" onClick={onAddRow}>
+          <title>{t('weaveAddRowLabel')}</title>
+          <rect x={0} y={0} width={ROW_LABEL_WIDTH} height={COL_LABEL_HEIGHT} fill="transparent" />
+          <Plus
+            x={(ROW_LABEL_WIDTH - ADD_ICON_SIZE) / 2}
+            y={(COL_LABEL_HEIGHT - ADD_ICON_SIZE) / 2}
+            width={ADD_ICON_SIZE}
+            height={ADD_ICON_SIZE}
+            pointerEvents="none"
+          />
+        </g>
+      )}
+
       {pattern.threading.map((_, tabletIndex) => (
         <text
           key={`col-bottom-${tabletIndex}`}
@@ -380,6 +406,24 @@ export function WeaveDiagram({
                   height={INVERT_ICON_SIZE}
                   pointerEvents="none"
                 />
+              </g>
+            )}
+
+            {onRemoveRow && (
+              <g className="group/remove cursor-pointer" onClick={() => onRemoveRow(rowIndex)}>
+                <title>{t('weaveRemoveRowLabel', { number: String(rowIndex + 1) })}</title>
+                <rect x={removeRowX} y={rowY(rowIndex)} width={REMOVE_ROW_WIDTH} height={STEP} fill="transparent" />
+                <text
+                  x={removeRowX + REMOVE_ROW_WIDTH / 2}
+                  y={rowY(rowIndex) + CELL_HEIGHT / 2}
+                  textAnchor="middle"
+                  dominantBaseline="central"
+                  fontSize={LABEL_FONT_SIZE}
+                  className="fill-muted-foreground group-hover/remove:fill-destructive"
+                  pointerEvents="none"
+                >
+                  ×
+                </text>
               </g>
             )}
 

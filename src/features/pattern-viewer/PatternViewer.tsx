@@ -151,31 +151,7 @@ export function PatternViewer({
       </div>
 
       <div className="mt-6 flex flex-col items-stretch gap-6 lg:flex-row lg:items-start">
-        {/* From 'lg' (desktop) up: display options as a permanent sidebar again instead of an overlay. */}
-        <div className="hidden lg:flex lg:w-80 lg:shrink-0 lg:flex-col lg:gap-6">
-          <DisplaySettingsCard
-            settings={displaySettings}
-            onChange={setDisplaySettings}
-            onSaveAsDefault={onSaveAsDefault}
-            isSavingDefault={isSavingDisplayDefault}
-            canSaveAsDefault={canSaveDisplayDefault}
-            hasChangesToSave={hasDisplayChanges}
-          />
-          <PatternHighlightSettingsCard
-            settings={highlightSettings}
-            onChange={setHighlightSettings}
-            numRows={pattern.numRows}
-            numTablets={pattern.numTablets}
-          />
-        </div>
-
-        <PatternDiagrams
-          pattern={pattern}
-          palette={activePalette}
-          highlightSettings={highlightSettings}
-          onHighlightSettingsChange={setHighlightSettings}
-        />
-
+        {/* Colors on the left on desktop; on mobile above the diagrams, so they stay close to the threading chart. */}
         <div className="flex w-full flex-col gap-6 lg:w-56 lg:shrink-0">
           <PatternColorCard pattern={pattern} palette={activePalette} onSlotColorChange={setSlotColor} onReset={resetColors} />
           {/* From 'lg' (desktop) up: info below the colors again instead of below the title. */}
@@ -192,6 +168,31 @@ export function PatternViewer({
               difficulty={computeDifficulty(pattern)}
             />
           </div>
+        </div>
+
+        <PatternDiagrams
+          pattern={pattern}
+          palette={activePalette}
+          highlightSettings={highlightSettings}
+          onHighlightSettingsChange={setHighlightSettings}
+        />
+
+        {/* From 'lg' (desktop) up: display options as a permanent sidebar again instead of an overlay. */}
+        <div className="hidden lg:flex lg:w-80 lg:shrink-0 lg:flex-col lg:gap-6">
+          <DisplaySettingsCard
+            settings={displaySettings}
+            onChange={setDisplaySettings}
+            onSaveAsDefault={onSaveAsDefault}
+            isSavingDefault={isSavingDisplayDefault}
+            canSaveAsDefault={canSaveDisplayDefault}
+            hasChangesToSave={hasDisplayChanges}
+          />
+          <PatternHighlightSettingsCard
+            settings={highlightSettings}
+            onChange={setHighlightSettings}
+            numRows={pattern.numRows}
+            numTablets={pattern.numTablets}
+          />
         </div>
       </div>
     </div>

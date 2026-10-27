@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Ban, Plus, X } from 'lucide-react'
 import { BasicColorPicker } from './BasicColorPicker'
+import { ColorSwatchPicker } from './ColorSwatchPicker'
 import { computeThreadCounts } from './render/threadCounts'
 import { useLanguage } from '@/features/i18n/LanguageContext'
 import { Button } from '@/components/ui/button'
@@ -23,8 +24,8 @@ const EMPTY_SLOT_ID = ''
 
 /**
  * "Colors" column in the editor: clicking a color selects it as the active
- * paint color (to apply in the threading chart), the native color picker
- * next to it changes the hex value, the x button removes the color again
+ * paint color (to apply in the threading chart), the color swatch next to
+ * it changes the hex value (ColorSwatchPicker), the x button removes the color again
  * (affected cells in the pattern then show as empty/x). A fixed "no
  * thread" entry above the palette selects the same empty state directly,
  * for deliberately leaving a hole unthreaded without removing a whole
@@ -108,6 +109,8 @@ export function PatternColorEditorCard({
               tabIndex={0}
               onClick={() => onSelectActive(slot.slotId)}
               onKeyDown={(e) => {
+                // Only the row itself - Enter/Space on the swatch button (or in its popover) must keep opening/typing.
+                if (e.target !== e.currentTarget) return
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault()
                   onSelectActive(slot.slotId)
@@ -120,11 +123,10 @@ export function PatternColorEditorCard({
                   : 'border-transparent hover:bg-accent',
               )}
             >
-              <input
-                type="color"
+              <ColorSwatchPicker
                 value={slot.hex}
-                onChange={(e) => onColorHexChange(slot.slotId, e.target.value)}
-                className="size-6 shrink-0 cursor-pointer appearance-none rounded border p-0 [&::-moz-color-swatch]:rounded-[3px] [&::-moz-color-swatch]:border-none [&::-webkit-color-swatch]:rounded-[3px] [&::-webkit-color-swatch]:border-none [&::-webkit-color-swatch-wrapper]:p-0"
+                onChange={(hex) => onColorHexChange(slot.slotId, hex)}
+                label={t('colorsChange', { name: slot.name })}
               />
               <span
                 className={cn(

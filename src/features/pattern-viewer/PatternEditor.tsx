@@ -81,6 +81,7 @@ export function PatternEditor({
     moveTablet,
     moveRow,
     removeTabletAt,
+    removeRowAt,
     toggleOrientation,
     toggleTwistExempt,
     palette,
@@ -312,7 +313,8 @@ export function PatternEditor({
       </div>
 
       <div className="mt-6 flex flex-col items-stretch gap-6 lg:flex-row lg:items-start">
-        <div className="flex w-full flex-col gap-6 lg:w-80 lg:shrink-0">
+        {/* Pattern settings + colors on the left on desktop; on mobile simply stacked above the diagrams, so the colors stay close to the threading chart. */}
+        <div className="flex w-full flex-col gap-6 lg:w-56 lg:shrink-0">
           <Card>
             <CardHeader>
               <CardTitle>{t('editorSettingsHeading')}</CardTitle>
@@ -333,7 +335,10 @@ export function PatternEditor({
                 onChange={setRowCount}
               />
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="repeat-from-row">{t('editorRepeatFromRow')}</Label>
+                {/* Wraps to two lines in the narrow column - Label's default leading-none would squash them. */}
+                <Label htmlFor="repeat-from-row" className="leading-snug">
+                  {t('editorRepeatFromRow')}
+                </Label>
                 <Input
                   id="repeat-from-row"
                   type="number"
@@ -348,38 +353,6 @@ export function PatternEditor({
             </CardContent>
           </Card>
 
-          {/* From 'lg' (desktop) up: display options as a permanent sidebar again instead of an overlay. */}
-          <div className="hidden lg:block">
-            <DisplaySettingsCard
-              settings={displaySettings}
-              onChange={setDisplaySettings}
-              onSaveAsDefault={onSaveDisplaySettingsAsDefault}
-              isSavingDefault={isSavingDisplayDefault}
-              canSaveAsDefault={canSaveDisplayDefault}
-              hasChangesToSave={hasDisplayChanges}
-            />
-          </div>
-        </div>
-
-        <PatternDiagrams
-          pattern={pattern}
-          palette={palette}
-          onThreadingCellClick={
-            effectiveActiveSlotId !== null
-              ? (tabletIndex, holeIndex) => paintHole(tabletIndex, holeIndex, effectiveActiveSlotId)
-              : undefined
-          }
-          onOrientationClick={toggleOrientation}
-          onMoveTablet={moveTablet}
-          onRemoveTablet={removeTabletAt}
-          onWeaveCellClick={invertTurnsFrom}
-          onInvertRow={invertRow}
-          onMoveRow={moveRow}
-          onToggleTwistExempt={toggleTwistExempt}
-          onWeftColorChange={setWeftColorSlotId}
-        />
-
-        <div className="flex w-full flex-col gap-6 lg:w-56 lg:shrink-0">
           <PatternColorEditorCard
             pattern={pattern}
             palette={palette}
@@ -411,6 +384,39 @@ export function PatternEditor({
               onSourceUrlChange={setSourceUrl}
             />
           </div>
+        </div>
+
+        <PatternDiagrams
+          pattern={pattern}
+          palette={palette}
+          onThreadingCellClick={
+            effectiveActiveSlotId !== null
+              ? (tabletIndex, holeIndex) => paintHole(tabletIndex, holeIndex, effectiveActiveSlotId)
+              : undefined
+          }
+          onOrientationClick={toggleOrientation}
+          onMoveTablet={moveTablet}
+          onRemoveTablet={removeTabletAt}
+          onAddTablet={numTablets < maxTablets ? () => setTabletCount(numTablets + 1) : undefined}
+          onAddRow={numRows < maxRows ? () => setRowCount(numRows + 1) : undefined}
+          onWeaveCellClick={invertTurnsFrom}
+          onInvertRow={invertRow}
+          onMoveRow={moveRow}
+          onRemoveRow={removeRowAt}
+          onToggleTwistExempt={toggleTwistExempt}
+          onWeftColorChange={setWeftColorSlotId}
+        />
+
+        {/* From 'lg' (desktop) up: display options as a permanent sidebar again instead of an overlay. */}
+        <div className="hidden lg:flex lg:w-80 lg:shrink-0 lg:flex-col lg:gap-6">
+          <DisplaySettingsCard
+            settings={displaySettings}
+            onChange={setDisplaySettings}
+            onSaveAsDefault={onSaveDisplaySettingsAsDefault}
+            isSavingDefault={isSavingDisplayDefault}
+            canSaveAsDefault={canSaveDisplayDefault}
+            hasChangesToSave={hasDisplayChanges}
+          />
         </div>
       </div>
     </div>

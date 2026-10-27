@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
-import { GripHorizontal } from 'lucide-react'
+import { GripHorizontal, Plus } from 'lucide-react'
 import {
   angleForOrientation,
   CELL_HEIGHT,
@@ -33,6 +33,8 @@ interface ThreadingDiagramProps {
   onMoveTablet?: (fromIndex: number, toIndex: number) => void
   /** If set, a small "x" appears below each column to delete that tablet. */
   onRemoveTablet?: (tabletIndex: number) => void
+  /** If set, a small "+" right of the last column number appends a tablet. */
+  onAddTablet?: () => void
   /** Display-only, never changes the saved value. See render/orientationDisplay.ts. */
   displaySettings?: DisplaySettings
   /** If set (0-based), this tablet's column is highlighted and scrolled into view on change - see PatternDiagrams navigation. */
@@ -40,6 +42,7 @@ interface ThreadingDiagramProps {
 }
 
 const GRIP_SIZE = 12
+const ADD_ICON_SIZE = 12
 
 /**
  * Threading chart: shows how the tablets are threaded. Rows labeled
@@ -56,6 +59,7 @@ export function ThreadingDiagram({
   onOrientationClick,
   onMoveTablet,
   onRemoveTablet,
+  onAddTablet,
   displaySettings = DEFAULT_DISPLAY_SETTINGS,
   activeTablet = null,
 }: ThreadingDiagramProps) {
@@ -72,7 +76,8 @@ export function ThreadingDiagram({
 
   const gridWidth = pattern.numTablets * STEP_X
   const gridHeight = pattern.holesPerTablet * STEP
-  const totalWidth = ROW_LABEL_WIDTH + gridWidth
+  // Extra column at the right for the "+" next to the last column number.
+  const totalWidth = ROW_LABEL_WIDTH + gridWidth + (onAddTablet ? STEP_X : 0)
   const totalHeight = COL_LABEL_HEIGHT + gridHeight + ORIENTATION_ROW_HEIGHT + (onRemoveTablet ? SPACE_DELETE + DELETE_ROW_HEIGHT : 0)
 
   const svgRef = useRef<SVGSVGElement>(null)
@@ -231,11 +236,12 @@ export function ThreadingDiagram({
                   />
                   {isEmpty ? (
                     // No thread here - a corner-to-corner diagonal instead of a shape, same as WeaveDiagram.
+                    // Leans the same way the ellipse would (see angleForOrientation).
                     <line
                       x1={colX}
-                      y1={y}
+                      y1={angleForOrientation(tablet.orientation) < 0 ? y : y + CELL_HEIGHT}
                       x2={colX + CELL_WIDTH}
-                      y2={y + CELL_HEIGHT}
+                      y2={angleForOrientation(tablet.orientation) < 0 ? y + CELL_HEIGHT : y}
                       stroke="var(--foreground)"
                       strokeWidth={1.5}
                       pointerEvents="none"
@@ -307,6 +313,20 @@ export function ThreadingDiagram({
           </g>
         )
       })}
+
+      {onAddTablet && (
+        <g className="cursor-pointer text-muted-foreground hover:text-foreground" onClick={onAddTablet}>
+          <title>{t('threadingAddTabletLabel')}</title>
+          <rect x={ROW_LABEL_WIDTH + gridWidth} y={0} width={STEP_X} height={COL_LABEL_HEIGHT} fill="transparent" />
+          <Plus
+            x={ROW_LABEL_WIDTH + gridWidth + (STEP_X - ADD_ICON_SIZE) / 2}
+            y={(COL_LABEL_HEIGHT - ADD_ICON_SIZE) / 2}
+            width={ADD_ICON_SIZE}
+            height={ADD_ICON_SIZE}
+            pointerEvents="none"
+          />
+        </g>
+      )}
 
       {activeTablet != null && (
         <rect

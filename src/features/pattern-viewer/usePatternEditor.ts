@@ -97,6 +97,12 @@ export function usePatternEditor(initialPattern: Pattern) {
     setTurningSequence((prev) => prev.slice(0, -1))
   }
 
+  /** Removes exactly one row at any position (not just the end), see the "x" at the end of each row in the turning diagram. */
+  function removeRowAt(index: number) {
+    if (numRows <= MIN_ROWS) return
+    setTurningSequence((prev) => prev.filter((_, i) => i !== index))
+  }
+
   function setTabletCount(target: number) {
     const clamped = clamp(target, MIN_TABLETS, MAX_TABLETS)
     const delta = clamped - numTablets
@@ -293,6 +299,7 @@ export function usePatternEditor(initialPattern: Pattern) {
     moveTablet,
     moveRow,
     removeTabletAt,
+    removeRowAt,
     toggleOrientation,
     toggleTwistExempt,
     palette,

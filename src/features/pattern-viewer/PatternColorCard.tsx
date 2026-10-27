@@ -1,5 +1,6 @@
 import { useLanguage } from '@/features/i18n/LanguageContext'
 import { computeThreadCounts } from './render/threadCounts'
+import { ColorSwatchPicker } from './ColorSwatchPicker'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -29,11 +30,10 @@ export function PatternColorCard({ pattern, palette, onSlotColorChange, onReset 
       <CardContent className="flex flex-col gap-3">
         {palette.map((slot) => (
           <Label key={slot.slotId} className="justify-start gap-2 font-normal">
-            <input
-              type="color"
+            <ColorSwatchPicker
               value={slot.hex}
-              onChange={(e) => onSlotColorChange(slot.slotId, e.target.value)}
-              className="size-6 shrink-0 cursor-pointer appearance-none rounded border p-0 [&::-moz-color-swatch]:rounded-[3px] [&::-moz-color-swatch]:border-none [&::-webkit-color-swatch]:rounded-[3px] [&::-webkit-color-swatch]:border-none [&::-webkit-color-swatch-wrapper]:p-0"
+              onChange={(hex) => onSlotColorChange(slot.slotId, hex)}
+              label={t('colorsChange', { name: slot.name })}
             />
             <span className="flex flex-1 flex-col truncate">
               <span className="truncate">{slot.name}</span>
